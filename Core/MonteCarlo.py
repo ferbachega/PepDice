@@ -136,10 +136,12 @@ def monte_carlo(molecule      = None        ,
                                   temperature = temperature    ):
                                            
                         save_XYZ_to_file (molecule, trajectory)
+                        print accepted_fragment, energy
                         previous_energy      = energy
                         previous_coordinates = molecule.get_coordinates_from_system()
                         accepted_fragment += 1
-                        print 'fragment: ',fragment_index, energy, len(fragment), sorted(fragment.keys())
+                        
+                        #print 'fragment: ',fragment_index, energy, len(fragment), sorted(fragment.keys())
                     
                     else:
                         molecule.import_coordinates_to_system (previous_coordinates)
@@ -149,7 +151,7 @@ def monte_carlo(molecule      = None        ,
                     molecule.import_coordinates_to_system (previous_coordinates)
                    
                 #print 'fragment: ',fragment_index,  len(fragment), fragment.keys()
-                save_XYZ_to_file (molecule, trajectory)
+                #save_XYZ_to_file (molecule, trajectory)
     
         #print 'temp: = ', temperature, 'energy = ', previous_energy, 'acceptance ratio (phi) =', (accepted_fragment / attempted_fragment)
 
