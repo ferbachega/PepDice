@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                      "http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd">
+<html lang="en">
+
+<head>
+  
+<meta name="description" content="This page is the HTML version of the README.rotamers forXtalView.txt file">
+<meta name="Author" content="Simon C. Lovell, Bryan Arendall">
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<meta name="created" content="17-Nov-2001">
+
+<style type="text/css">
+	a:hover { color: #F00; text-decoration: underline }
+	p, dd  { line-height: 1.3em }
+</style>
+
+<!-- [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] -->
+<!--                                                                                          -->
+<title>						Richardson Lab: Xtalview rotamer files					</title>
+<!--                                                                                          -->
+<!-- [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] -->
+
+</head>
+
+<!-- ========================== BEGIN BODY TEXT ========================== -->
+<body bgcolor="#FFFFFF" link="#0000cc" vlink="#990000" style="margin: 2em; color: #000">
+
+<table width="98%" align="center" border="0" rules="none" style="background: #CCCC99 none">
+	<tr>
+		<td align="left"><font color="#330099"><b>Xtalview rotamer files</b></font></td>
+		<td align="center"><font color="#330099"><b><u><a href="http://kinemage.biochem.duke.edu/">Home Page: Richardsons' Laboratory</a></u></b></font></td>
+		<td align="right"><font color="#330099"><b>Updated 11/2001</b></font></td>
+	</tr>
+</table>
+
+<br clear="all">
+<br clear="all">
+
+
+<p>
+All-atom contact analysis shows that all published rotamer libraries contain serious van der Waals overlaps <a href="#cite">[1]</a>.  This should not occur as rotamers, being the more common conformations, should have the lower energy states.  Using a select database of 240 high resolution, low-clash score <a href="#cite">[2]</a>, low R<sub>cryst</sub> structures and then filtering it by B-factor and clash score, we have composed a rotamer library, consisting of 153 conformers, which we think is more faithful to the rotamer concept and will improve accuracy of new structures. The library is available as an O database, and this document discussed the use of that database.</p>
+
+
+<br><br>
+
+
+
+<h3 style="margin-bottom: 0">To Use</h3>
+<hr align="left" width="65%">
+<ol>
+	<li><b>Download the tar file from our web or ftp site.</b>
+		<div style="margin-left: 30px">
+		The rotamer libraries are in a tar'ed Zipped file named  rotsForXView.tar.Z.  The tar file can be downloaded via your browser from either the <a href="http://kinemage.biochem.duke.edu/databases/rotamer.html">web site</a> - rotamer section or by maneuvering through the <a href="ftp://kinemage.biochem.duke.edu/">FTP site</a> hierarchy:  pub/datasets/rotamers.<br>
+		Or, if you prefer, use "anonymous" login to the FTP site.</div><br><br></li>
+
+	<li><b>Extract the files from the tar file.</b>
+		<div style="margin-left: 30px">
+		These commands will work:<br><br>
+			uncompress rotsForXView.tar.Z<br>
+			tar -xvf  rotsForXView.tar<br>
+			cd rotsForXView</div><br><br></li>
+ 
+ 	<li><b>Copy the database to the XtalView data directory.</b>
+ 		<div style="margin-left: 30px">
+ 		First create a backup copy of the current rotamer libraries, dict.noh.pdb and dict.allh.pdb.  Then, copy/move the two new rotamer dictionaries, into the XtalView data directory (typically /usr/local/XtalView/data/  ).</div><br><br></li>
+
+	<li><b>You can now select either of these dictionaries from the "Models" pane of Xfit.</b><br><br></li>
+</ol>
+
+
+<br><br>
+
+
+
+<h3 style="margin-bottom: 0">Comments</h3>
+<hr align="left" width="65%">
+
+<p>
+	The rotamer dictionary was made from a database of 240 structures at 1.7&Aring; resolution or better. Care was taken to remove side chains which had uncertain positions (eg high B-factors) or systematically misfit conformations. The citation below <a href="#cite">[1]</a> describes our methodology, and the advantages of this library over others previously published.<br></p>
+
+<p>
+The approach taken in preparing this file differs from that of the standard rotamer file.</p>
+	 <div style="margin-left: 30px">
+<p>
+Firstly, although the most common rotamer comes first, subsequent rotamers are arranged so that neighbours have similar conformations. This allows you to narrow down your choice to a few rotamers which will be next to each other as you turn the dial.<br></p>
+<p>
+Secondly, it contains many more rotamers. We examined all rotamers and distributions to avoid (we hope) artifacts.  Thus there are some rare-but-real conformations.  This means that non-rotameric conformations should be viewed with even more suspicion than before.<br></p>
+
+<p>
+Thirdly, it contains some non-rotamers! These are sample points in allowed, well populated, relaxed conformations.  They are not, however, local energy minima and thus, strictly, not rotamers. For example, Glu chi3 has a very flat distribution which is populated throughout, so we have included the rotamer at chi3=0 and two sample points at chi3=60 and chi3=-60. There are sample points only for Glu, Gln, Asp, Asn, Phe and Tyr. They all have their frequency listed as 0%.<br></p></div>
+
+<p>
+KNOWN BUGS:<br> Histidine can have several protonation states.  The allh file only allows for one (doubly protonated).  This behaviour is the same as the original files provided with XtalView.</p>
+
+<h3 style="margin-bottom: 0">More Information</h3>
+<hr align="left" width="65%">
+
+<p><a name="cite"></a>
+[1] <cite>SC Lovell, JM Word, JS Richardson and DC Richardson (2000) "The Penultimate Rotamer Library", Proteins: Structure, Function and Genetics, <b>40</b>: 389-408</cite><br>
+   
+[2]	<cite>Word, et. al. (1999) "Visualizing and Quantifying Molecular Goodness-of-fit: Small-probe Contact Dots with Explicit Hydrogen Atoms", J. Mol. Biol. <b>285</b>: 1711-1733</cite></p>
+
+
+<p>
+Please send questions and comments to us rather than Duncan McRee.</p>
+ 
+<p>
+	e-mail: <br>
+	<a href="mailto:arendall@duke.edu">Bryan Arendall</a> or <br>
+	<a href="mailto:dcr@kinemage.biochem.duke.edu">David C. Richardson</a><br>
+	URL: <a href="http://kinemage.biochem.duke.edu">http://kinemage.biochem.duke.edu</a><br>
+	Biochemistry Department<br>
+	Duke University<br>
+	Durham, NC USA 27710<br></p>
+
+</body>
+</html>

@@ -1,0 +1,5 @@
+source leaprc.ff03ua
+sys = loadpdb 1gab.pdb
+
+saveamberparm sys 1gab_amber03ua.prmtop 1gab_amber03ua.inpcrd
+savepdb sys 1gab_amber03ua.pdb

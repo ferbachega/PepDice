@@ -1,0 +1,11 @@
+ATOM      1  C   ARG     1       0.551  -1.198  -0.766  1.00  9.00      auto
+ATOM      2  N   ARG     1      -1.458   0.000   0.000  1.00  9.00      auto
+ATOM      3  O   ARG     1       0.024  -2.306  -0.667  1.00  9.00      auto
+ATOM      4  CA  ARG     1       0.000   0.000   0.000  1.00  9.00      auto
+ATOM      5  CB  ARG     1       0.536   0.000   1.433  1.00  9.00      auto
+ATOM      6  CD  ARG     1       0.805   1.209   3.616  1.00  9.00      auto
+ATOM      7  NE  ARG     1       0.534   2.428   4.371  1.00  9.00      auto
+ATOM      8  CG  ARG     1       0.246   1.277   2.204  1.00  9.00      auto
+ATOM      9  NH1 ARG     1       1.584   1.684   6.277  1.00  9.00      auto
+ATOM     10  NH2 ARG     1       0.624   3.770   6.236  1.00  9.00      auto
+ATOM     11  CZ  ARG     1       0.915   2.628   5.629  1.00  9.00      auto
