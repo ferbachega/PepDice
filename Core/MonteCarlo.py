@@ -64,18 +64,20 @@ def rotate_backbone_attempt (molecule = None,
 
     energy = molecule.energy()
     
-    if MC_test_energy (energy = energy         , 
-             previous_energy = previous_energy ,
-                 temperature = 273.15          ,
-                          Kb = 0.0083144621    ):    
-        return energy
+    if energy:
+        if MC_test_energy (energy = energy         , 
+                 previous_energy = previous_energy ,
+                     temperature = 273.15          ,
+                              Kb = 0.0083144621    ):    
+            return energy
 
+        else:
+            return False
     else:
         return False
 
 
-
-def insert_fragment (molecule = None, fragment = None):
+def insert_fragment (molecule = None, fragment = None, sidechain = False):
     """ Function doc """
     for key in fragment:
         #PSI = fragment[key]['PSI']
@@ -86,18 +88,26 @@ def insert_fragment (molecule = None, fragment = None):
                                       resi = key     , 
                                       bond = bond    , 
                                       angle = fragment[key][bond])
+        
+            
+        if sidechain:
+            for bond in ['CHI1','CHI2','CHI3','CHI4','CHI5']:
+                if fragment[key][bond]:
+                    set_chi_dihedral (molecule  = molecule, 
+                                          resi  = key, 
+                                          bond  = bond, 
+                                          angle = fragment[key][bond])
 
 
-
-
-def monte_carlo(molecule      = None        ,
-               temperature    = 1000        ,
-               Kb             = 0.0083144621,
-               angle_range    = 1           ,
-               nSteps         = 10000       ,
-               fragment_rate  = 1.0         , #between 0  and 1
-               
-               trajectory  = 'MonteCarlo_trajectory.xyz'):
+def monte_carlo(molecule          = None        ,
+                temperature        = 1000        ,
+                Kb                 = 0.0083144621,
+                angle_range        = 1           ,
+                nSteps             = 10000       ,
+                fragment_rate      = 1.0         , #between 0  and 1
+                fragment_sidechain = False      ,
+                PhiPsi_rate        = 1.0         ,
+                trajectory  = 'MonteCarlo_trajectory.xyz'):
 
 
     n = 0
@@ -105,18 +115,27 @@ def monte_carlo(molecule      = None        ,
     previous_coordinates = molecule.get_coordinates_from_system()
     previous_fragment    = None
     
-    attempted_fragment = 0.0
-    accepted_fragment  = 0.0
-    
     for i in range(0, nSteps):
+        #--------------------------------#
+        #       attempted_accepted       #
+        #--------------------------------#
+        attempted_fragment = 0.0         #
+        accepted_fragment  = 0.0         #
+                                         #
+        attempted_phi = 0.0              #
+        accepted_phi  = 0.0              #
+                                         #
+        attempted_psi = 0.0              #
+        accepted_psi  = 0.0              #
+        #--------------------------------#
+        
+        
         fragment_acceptance = random.uniform(0, 1)
-       
         #----------------------------------------------#
         #                  FRAGMENTS                   #
         #----------------------------------------------#
         # se o numero for menor ou igual a chance, entao um novo fragmento eh atribuido a estrutura
         if fragment_acceptance <= fragment_rate:
-
             attempted_fragment += 1
             fragment_index = random.randint(0, len(molecule.fragments)-1)            
             fragment = molecule.fragments[fragment_index]
@@ -124,87 +143,120 @@ def monte_carlo(molecule      = None        ,
             if fragment != previous_fragment:
                 previous_fragment = fragment
                 
-                insert_fragment (molecule = molecule, 
-                                 fragment = fragment)
+                insert_fragment (molecule   = molecule, 
+                                 fragment   = fragment,
+                                 sidechain  = fragment_sidechain)
+                                 
                 #save_XYZ_to_file (molecule, trajectory)
                 energy = molecule.energy()
                 #print 'fragment: ',energy, number,  len(fragment), fragment.keys()
-                
                 if energy:
                     if MC_test_energy (energy = energy         , 
                                previous_energy = previous_energy ,
                                   temperature = temperature    ):
                                            
                         save_XYZ_to_file (molecule, trajectory)
-                        print accepted_fragment, energy
+                        #print accepted_fragment, energy
                         previous_energy      = energy
                         previous_coordinates = molecule.get_coordinates_from_system()
                         accepted_fragment += 1
-                        
-                        #print 'fragment: ',fragment_index, energy, len(fragment), sorted(fragment.keys())
-                    
+                        print 'fragment: ',fragment_index, energy, len(fragment), sorted(fragment.keys())
                     else:
                         molecule.import_coordinates_to_system (previous_coordinates)
-                        
                         #print 'fragment: ',fragment_index, energy, len(fragment), 'failed'
                 else:
                     molecule.import_coordinates_to_system (previous_coordinates)
-                   
                 #print 'fragment: ',fragment_index,  len(fragment), fragment.keys()
                 #save_XYZ_to_file (molecule, trajectory)
-    
         #print 'temp: = ', temperature, 'energy = ', previous_energy, 'acceptance ratio (phi) =', (accepted_fragment / attempted_fragment)
 
        
-        ##----------------------------------------------#
-        ##               PHI/PSI sampling               #
-        ##----------------------------------------------#
-        #attempted_phi = 0.0
-        #accepted_phi  = 0.0
-        #attempted_psi = 0.0
-        #accepted_psi  = 0.0
-        #for resi in range(0,len(molecule.residues)):
-        #    if resi in molecule.fixed_residues:
-        #        pass
-        #    else:
-        #        for bond in ['PSI','PHI']:
-        #            
-        #            if bond == 'PSI':
-        #                attempted_phi += 1
-        #            if bond == 'PHI':
-        #                attempted_psi += 1
-        #            
-        #            attempted_psi += 1
-        #            theta  = random.uniform(-1 * angle_range, angle_range)
-        #            theta = theta * 0.017444445
-        #            
-        #            #------------------------------------------#
-        #            #         rotate_backbone_attempt          #
-        #            #------------------------------------------#
-        #            
-        #            energy = rotate_backbone_attempt (molecule = molecule    , 
-        #                                                resi = resi          , 
-        #                                                bond = bond          ,
-        #                                               theta = theta         ,  
-        #                                      previous_energy = previous_energy,
-        #                                         temperature = temperature   )
+        #----------------------------------------------#
+        #               PHI/PSI sampling               #
+        #----------------------------------------------#
+        PhiPsi_acceptance = random.uniform(0, 1)
+        if PhiPsi_acceptance <= PhiPsi_rate:
+            resi = random.randint(0, len(molecule.residues)-1)
+            
+            if resi in molecule.fixed_residues:
+                pass
+            else:
+                #print resi
+                for bond in ['PSI','PHI']:
+                    
+                    if bond == 'PSI':
+                        attempted_phi += 1
+                    if bond == 'PHI':
+                        attempted_psi += 1
+                    
+                    #attempted_psi += 1
+                    theta  = random.uniform(-1 * angle_range, angle_range)
+                    theta = theta * 0.017444445
+                    
+                    #------------------------------------------#
+                    #         rotate_backbone_attempt          #
+                    #------------------------------------------#
+                    
+                    energy = rotate_backbone_attempt (molecule = molecule      , 
+                                                        resi = resi            , 
+                                                        bond = bond            ,
+                                                       theta = theta           ,  
+                                              previous_energy = previous_energy,
+                                                 temperature = temperature     )
+        
+                    if energy:
+                        save_XYZ_to_file (molecule, trajectory)
+                        previous_energy      = energy
+                        previous_coordinates = molecule.get_coordinates_from_system()
+                        
+                        if bond == 'PSI':
+                            accepted_psi += 1
+                        if bond == 'PHI':
+                            accepted_phi += 1
+                        print '%5i %4i %10.4f %10.4f %3i' % (i, resi, theta*57.324, energy, temperature) #, previous_energy )  
+                    else:
+                        molecule.import_coordinates_to_system (previous_coordinates)
+        
+                    
+                    
+        
+        
+        #try:
+        #    acceptance_fragment = accepted_fragment / attempted_fragment
+        #except:
+        #    acceptance_fragment = None
         #
-        #            if energy:
-        #                save_XYZ_to_file (molecule, trajectory)
-        #                previous_energy      = energy
-        #                previous_coordinates = molecule.get_coordinates_from_system()
-        #                
-        #                if bond == 'PSI':
-        #                    accepted_psi += 1
-        #                if bond == 'PHI':
-        #                    accepted_phi += 1
-        #            else:
-        #                molecule.import_coordinates_to_system (previous_coordinates)
+        #try:
+        #    acceptance_ratio_phi = accepted_phi / attempted_phi
+        #except:
+        #    acceptance_ratio_phi = None
+        #    
+        #try:
+        #    acceptance_ratio_psi = accepted_psi / attempted_psi
+        #except:
+        #    acceptance_ratio_psi = None
         #
-        #            #print '%10i %4i %10.4f %10.4f %3i' % (i, resi, theta*57.324, energy, temperature) #, previous_energy )  
-        #            
+        #print 'temp: = ', temperature, 'energy = ', previous_energy, 'acceptance ratio (phi) =',acceptance_ratio_phi, 'acceptance ratio (psi) =', acceptance_ratio_psi,'acceptance_fragment =', acceptance_fragment
+
+
+
+
+
+
+
+def MC_replica_exchange (
+                         molecule           = None , 
+                         replicas           = []
+                         ):
     
-        #print 'temp: = ', temperature, 'energy = ', previous_energy, 'acceptance ratio (phi) =', (accepted_phi / attempted_phi), 'acceptance ratio (psi) =', (accepted_psi / attempted_psi), 'attempted_phi = ', attempted_phi
+    
+    pool    = Pool(processes = 8)
+    
+    results = [pool.apply(monte_carlo, args=(x,)) for key in replicas: replicas[key]]
+    
+    print(results)
+
+
 
 
 
@@ -231,10 +283,6 @@ def monte_carlo_side_chain (molecule  = None,
     print 'gamma = ', gamma
 
     for i in range(0, nSteps):
-        #attempted_phi = 0.0
-        #accepted_phi  = 0.0
-        #attempted_psi = 0.0
-        #accepted_psi  = 0.0
         
         for i in range(0, len(molecule.residues)):
             name         = system.residues[i].name

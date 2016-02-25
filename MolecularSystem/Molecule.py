@@ -301,7 +301,7 @@ class Molecule(Atom   ,
         """ Function doc """
 
         #-------------------importing from porter------------------------------
-        n = 1
+        n = 0
         for aa in fixed:
             if aa != '0':
                 self.fixed_residues.append(n)

@@ -1,4 +1,8 @@
 SinglePoint*
+mdinfo
+leap.log
+restrt
+torsions
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

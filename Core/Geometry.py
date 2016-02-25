@@ -288,8 +288,31 @@ def set_side_chain_rotamer (molecule=None, resi=1, rotamer=None, log = False):
 
 
 
-   
-   
+
+
+
+
+def import_SS_from_string (molecule = None, ss =''):
+    """ Function doc """
+    resi = 0 
+    for aa in ss:
+        if aa == 'H':
+            set_phi_psi_dihedral (molecule=molecule, resi=resi, bond='PHI', angle = -60.0 )
+            set_phi_psi_dihedral (molecule=molecule, resi=resi, bond='PSI', angle = -40.0 )
+        if aa == 'C':
+            set_phi_psi_dihedral (molecule=molecule, resi=resi, bond='PHI', angle = 180.0 )
+            set_phi_psi_dihedral (molecule=molecule, resi=resi, bond='PSI', angle = 180.0 )
+        if aa == 'E':
+            set_phi_psi_dihedral (molecule=molecule, resi=resi, bond='PHI', angle = -135.0 )
+            set_phi_psi_dihedral (molecule=molecule, resi=resi, bond='PSI', angle =  135.0 )
+        
+        phi_final_angle = computePhiPsi (molecule=molecule, resi=resi, bond='PHI')
+        psi_final_angle = computePhiPsi (molecule=molecule, resi=resi, bond='PSI')
+        ome_final_angle = computePhiPsi (molecule=molecule, resi=resi, bond='OMEGA')
+        
+        print aa, resi, molecule.residues[resi].name, phi_final_angle, psi_final_angle
+        resi += 1
+  # return molecule
 
 def rotate_Calpha_dihedral(molecule, axis, theta, window):
     """ Function doc """

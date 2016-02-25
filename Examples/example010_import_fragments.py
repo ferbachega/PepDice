@@ -126,45 +126,56 @@ pdbs          = [
                  os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0020.pdb')]
 
 #
-##pdbs          = [os.path.join(PEPDICE_EXAMPLES ,'outputs/1gab_amber_example04_ff03ua_extended.pdb')]
+#pdbs          = [os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0001.pdb')]
 #
 #
 
 system.fragments = []
-frag_size        = 7
+frag_size        = 3
 
 for pdb in pdbs:
     molecule_temp.load_PDB_to_system(filename = pdb)  
     for i in range(0,100):
         resi     = random.randint(0, len(system.residues)-frag_size)
-        #print resi
         fragment = import_fragments_from_pdb (molecule = molecule_temp, 
                                               residues = range(resi, resi+frag_size), 
                                              sidechain = True)
-        #pprint (fragment)
         system.fragments.append(fragment)
 #pprint(system.fragments)
-#print len(system.fragments)
+print len(system.fragments)
 
+'''
+seq  = TIDQWLLKNAKEDAIAELKKAGITSDFYFNAINKAKTVEEVNALKNEILKAHA
+pred = CCHHHHHHHHHHHHHHHHHHCCCCCHHHHHHHHHCCCHHHHHHHHHHHHHHCC
+rest = 00123456789987654321000001234543210001234567876543210
+'''
 
-
-
-
-#for i in range(0,100):
-#    resi     = random.randint(0, len(system.residues)-frag_size)
-#    fragment = import_fragments_from_pdb (molecule = system, 
-#                                          residues = range(resi,resi+frag_size), 
-#                                         sidechain = True)
-#    #pprint (fragment)
-#    system.fragments.append(fragment)
-##pprint(system.fragments)
-#
-#
+#system.load_PDB_to_system (filename = os.path.join(PEPDICE_EXAMPLES , 'outputs/1gab_amber_example10_ff03ua_SS.coor'))
 system.load_PDB_to_system (filename = os.path.join(PEPDICE_EXAMPLES , 'outputs/1gab_amber_example04_ff03ua_extended.pdb'))
-monte_carlo(molecule   = system      ,
-           temperature = 300         ,
-           Kb          = 0.0083144621,
-           angle_range = 45          ,
-           nSteps      = 1000        ,
-           trajectory  = TRAJECTORY)
+
+system.bond      = 1.0
+system.angle     = 1.0
+system.dihed     = 1.0
+system.imprp     = 1.0
+system.elect     = 1.0
+system.vdw       = 1.0
+system.boundary  = 1.0
+system.esurf     = 1.0
+system.egb       = 1.0
+
+#system.import_fixed_from_string(fixed='00123456789987654321000001234543210001234567876543210')
+#import_SS_from_string(molecule = system , ss = 'CCHHHHHHHHHHHHHHHHHHCCCCCHHHHHHHHHCCCHHHHHHHHHHHHHHCC')
+#save_PDB_to_file(system,  os.path.join(PEPDICE_EXAMPLES , 'outputs/1gab_amber_example10_ff03ua_SS2.pdb'))
+#system.import_fixed_from_string(fixed='00003456789987654000000000004543210001234567876543000')
+#print system.fixed_residues
+#
+monte_carlo(molecule           = system      ,
+            temperature        = 500         ,
+            Kb                 = 0.0083144621,
+            angle_range        = 45          ,
+            nSteps             = 10000       ,
+            fragment_rate      = 1.0         , #between 0  and 1
+            fragment_sidechain = True        ,
+            PhiPsi_rate        = 0.0         ,
+            trajectory         = TRAJECTORY  )
 
