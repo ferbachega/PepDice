@@ -187,6 +187,7 @@ def monte_carlo(molecule           = None        ,
                     molecule.import_coordinates_to_system (previous_coordinates)
                 #print 'fragment: ',fragment_index,  len(fragment), fragment.keys()
                 #save_XYZ_to_file (molecule, trajectory)
+        
         #print 'temp: = ', temperature, 'energy = ', previous_energy, 'acceptance ratio (phi) =', (accepted_fragment / attempted_fragment)
 
        
@@ -235,19 +236,42 @@ def monte_carlo(molecule           = None        ,
                         print '%5i %4i %10.4f %10.4f %3i' % (i, resi, theta*57.324, energy, temperature) #, previous_energy )  
                     else:
                         molecule.import_coordinates_to_system (previous_coordinates)
-    return [pn, previous_energy, previous_coordinates]
-
+    #return [pn, previous_energy, previous_coordinates]
+    return {'pn':pn, 'energy': previous_energy, 'coords': previous_coordinates, 'temperature': temperature }
 
 def MC_replica_exchange (replicas = [], cpus = 8):
     from multiprocessing import Pool
     p = Pool(cpus)
     results = p.map(monte_carlo_dic, replicas)
     
-    for result in results:
-        print 'replica: %3i energy: %10.7f' %(result[0], result[1])#, len(result[2])
-
     
-
+    #--------------------------- Exchange ---------------------------#
+    REPLICAS = {} 
+    for result in results:
+        print 'replica: %3i energy: %10.7f' %(result['pn'], result['energy'])#, len(result[2])
+        REPLICAS[result['pn']] = {
+                               'energy'     : result['energy'],
+                               'coords'     : result['coords'],
+                               'temperature': result['temperature']
+                               }
+    #----------------------------------------------------------------#
+    
+    Kb = 0.0083144621
+    for i in REPLICAS:
+        for j in REPLICAS:
+            
+            if j == i:
+                pass
+            else:
+                deltaG = REPLICAS[j]['energy'] - REPLICAS[i]['energy']
+                div    = ((1/Kb *REPLICAS[j]['temperature']) - (1/Kb *REPLICAS[i]['temperature'])) 
+                #print i, j , 'div', div * deltaG, (REPLICAS[i]['energy'] - REPLICAS[j]['energy']) *((1/Kb *REPLICAS[i]['temperature']) - (1/Kb *REPLICAS[j]['temperature'])) 
+                #p      = math.exp(deltaG * div)
+                #print i , j, deltaG, p
+                
+                
+    
+    #pprint(REPLICAS)
 
 
 

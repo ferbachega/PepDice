@@ -130,12 +130,13 @@ pdbs          = [
 #
 #
 
-system.fragments = []
-frag_size        = 3
+system.fragments    = []
+frag_size           = 3
+number_of_fragments = 10
 
 for pdb in pdbs:
     molecule_temp.load_PDB_to_system(filename = pdb)  
-    for i in range(0,100):
+    for i in range(0,number_of_fragments):
         resi     = random.randint(0, len(system.residues)-frag_size)
         fragment = import_fragments_from_pdb (molecule = molecule_temp, 
                                               residues = range(resi, resi+frag_size), 
@@ -160,7 +161,7 @@ system.imprp     = 1.0
 system.elect     = 1.0
 system.vdw       = 1.0
 system.boundary  = 1.0
-system.esurf     = 100.0
+system.esurf     = 10.0
 system.egb       = 1.0
 
 #system.import_fixed_from_string(fixed='00123456789987654321000001234543210001234567876543210')
@@ -171,17 +172,17 @@ system.egb       = 1.0
 #
 
 replicas   = []
-for i in range(1,5):
+for i in range(1,9):
     try:
         os.remove(TRAJECTORY +str(i)+'.xyz' )
     except:
         pass
     parameters = {} 
     parameters['molecule'          ] = system      
-    parameters['temperature'       ] = i*100         
+    parameters['temperature'       ] = i*50        
     parameters['Kb'                ] = 0.0083144621
     parameters['angle_range'       ] = 45          
-    parameters['nSteps'            ] = 1000      
+    parameters['nSteps'            ] = 10      
     parameters['fragment_rate'     ] = 1.0         
     parameters['fragment_sidechain'] = True        
     parameters['PhiPsi_rate'       ] = 0.0         
