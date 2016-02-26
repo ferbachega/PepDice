@@ -99,19 +99,37 @@ def insert_fragment (molecule = None, fragment = None, sidechain = False):
                                           angle = fragment[key][bond])
 
 
-def monte_carlo(molecule          = None        ,
+def monte_carlo_dic (parameters):
+    """ Function doc """
+    results = monte_carlo(
+                          molecule           = parameters['molecule'          ],
+                          temperature        = parameters['temperature'       ],
+                          Kb                 = parameters['Kb'                ],
+                          angle_range        = parameters['angle_range'       ],
+                          nSteps             = parameters['nSteps'            ],
+                          fragment_rate      = parameters['fragment_rate'     ],
+                          fragment_sidechain = parameters['fragment_sidechain'],
+                          PhiPsi_rate        = parameters['PhiPsi_rate'       ],
+                          trajectory         = parameters['trajectory'        ],
+                          pn                 = parameters['pn'                ],
+                          )
+    return results
+
+
+def monte_carlo(molecule           = None        ,
                 temperature        = 1000        ,
                 Kb                 = 0.0083144621,
                 angle_range        = 1           ,
                 nSteps             = 10000       ,
                 fragment_rate      = 1.0         , #between 0  and 1
-                fragment_sidechain = False      ,
+                fragment_sidechain = False       ,
                 PhiPsi_rate        = 1.0         ,
-                trajectory  = 'MonteCarlo_trajectory.xyz'):
+                trajectory         = 'MonteCarlo_trajectory.xyz',
+                pn                 = 1 ):
 
 
     n = 0
-    previous_energy      = molecule.energy()
+    previous_energy      = molecule.energy(pn = pn)
     previous_coordinates = molecule.get_coordinates_from_system()
     previous_fragment    = None
     
@@ -148,7 +166,7 @@ def monte_carlo(molecule          = None        ,
                                  sidechain  = fragment_sidechain)
                                  
                 #save_XYZ_to_file (molecule, trajectory)
-                energy = molecule.energy()
+                energy = molecule.energy(pn = pn)
                 #print 'fragment: ',energy, number,  len(fragment), fragment.keys()
                 if energy:
                     if MC_test_energy (energy = energy         , 
@@ -160,7 +178,8 @@ def monte_carlo(molecule          = None        ,
                         previous_energy      = energy
                         previous_coordinates = molecule.get_coordinates_from_system()
                         accepted_fragment += 1
-                        print 'fragment: ',fragment_index, energy, len(fragment), sorted(fragment.keys())
+                        print "pn: {:<3d} step: {:5d} energy: {:<20.7f}fragment: {:<3d}".format(pn, i, energy , fragment_index)
+                        #print 'pn: %3i    step: %i    energy: %10.11f    fragment: %i ' %(pn, i, energy , fragment_index)
                     else:
                         molecule.import_coordinates_to_system (previous_coordinates)
                         #print 'fragment: ',fragment_index, energy, len(fragment), 'failed'
@@ -216,47 +235,18 @@ def monte_carlo(molecule          = None        ,
                         print '%5i %4i %10.4f %10.4f %3i' % (i, resi, theta*57.324, energy, temperature) #, previous_energy )  
                     else:
                         molecule.import_coordinates_to_system (previous_coordinates)
-        
-                    
-                    
-        
-        
-        #try:
-        #    acceptance_fragment = accepted_fragment / attempted_fragment
-        #except:
-        #    acceptance_fragment = None
-        #
-        #try:
-        #    acceptance_ratio_phi = accepted_phi / attempted_phi
-        #except:
-        #    acceptance_ratio_phi = None
-        #    
-        #try:
-        #    acceptance_ratio_psi = accepted_psi / attempted_psi
-        #except:
-        #    acceptance_ratio_psi = None
-        #
-        #print 'temp: = ', temperature, 'energy = ', previous_energy, 'acceptance ratio (phi) =',acceptance_ratio_phi, 'acceptance ratio (psi) =', acceptance_ratio_psi,'acceptance_fragment =', acceptance_fragment
+    return [pn, previous_energy, previous_coordinates]
 
 
-
-
-
-
-
-def MC_replica_exchange (
-                         molecule           = None , 
-                         replicas           = []
-                         ):
+def MC_replica_exchange (replicas = [], cpus = 8):
+    from multiprocessing import Pool
+    p = Pool(cpus)
+    results = p.map(monte_carlo_dic, replicas)
     
-    
-    pool    = Pool(processes = 8)
-    
-    results = [pool.apply(monte_carlo, args=(x,)) for key in replicas: replicas[key]]
-    
-    print(results)
+    for result in results:
+        print 'replica: %3i energy: %10.7f' %(result[0], result[1])#, len(result[2])
 
-
+    
 
 
 
