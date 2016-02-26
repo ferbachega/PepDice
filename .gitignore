@@ -1,7 +1,7 @@
 SinglePoint*
-mdinfo
 leap.log
-restrt
+*restrt
+*mdinfo
 torsions
 
 # Byte-compiled / optimized / DLL files
