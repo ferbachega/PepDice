@@ -18,4 +18,4 @@ PEPDICE_SCRATCH=$PEPDICE_ROOT/scratch                                         ; 
 #PEPDICE_STYLE=$PEPDICE_PARAMETERS/ccsStyleSheets/defaultStyle.css ; export PEPDICE_STYLE     
 
 # . The python path.
-PYTHONPATH=:$PEPDICE_ROOT/Babel:$PEPDICE_ROOT/Core:$PEPDICE_ROOT/MolecularSystem ; export PYTHONPATH
+PYTHONPATH=$PYTHONPATH:$PEPDICE_ROOT/Babel:$PEPDICE_ROOT/Core:$PEPDICE_ROOT/MolecularSystem ; export PYTHONPATH
