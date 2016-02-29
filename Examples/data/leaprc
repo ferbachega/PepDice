@@ -1,8 +1,0 @@
-source leaprc.ff03ua
-system  =  sequence {NTHR ILE ASP GLN TRP LEU LEU LYS ASN ALA LYS GLU ASP ALA ILE ALA GLU LEU LYS LYS ALA GLY ILE THR SER ASP PHE TYR PHE ASN ALA ILE ASN LYS ALA LYS THR VAL GLU GLU VAL ASN ALA LEU LYS ASN GLU ILE LEU LYS ALA HIS CALA }
-
-
-
-saveamberparm system 1gab_ff03ua_AMBER_extended.prmtop 1gab_ff03ua_AMBER_extended.inpcrd 
-savepdb system 1gab_ff03ua_AMBER_extended.pdb
-quit

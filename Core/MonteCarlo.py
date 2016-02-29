@@ -39,7 +39,7 @@ from XYZFiles import save_XYZ_to_file
 def MC_test_energy (energy = None        , 
            previous_energy = None        ,
                temperature = 273.15      ,
-                        Kb = 0.0083144621):
+                        Kb = 0.0019872041):
     """ Function doc """
     if energy < previous_energy:
         return True
@@ -69,7 +69,7 @@ def rotate_backbone_attempt (molecule = None,
         if MC_test_energy (energy = energy         , 
                  previous_energy = previous_energy ,
                      temperature = 273.15          ,
-                              Kb = 0.0083144621    ):    
+                              Kb = 0.0019872041    ):    
             return energy
 
         else:
@@ -121,7 +121,7 @@ def monte_carlo_dic (parameters):
 
 def monte_carlo(molecule           = None                       ,
                 temperature        = 1000                       ,
-                Kb                 = 0.0083144621               ,
+                Kb                 = 0.0019872041               , # 0.0083144621               ,
                 angle_range        = 1                          ,
                 nSteps             = 10000                      ,
                 fragment_rate      = 1.0                        , #between 0  and 1
@@ -237,7 +237,7 @@ def monte_carlo(molecule           = None                       ,
     return {'pn':pn, 'energy': previous_energy, 'coords': previous_coordinates, 'temperature': temperature }
 
 
-def MC_replica_exchange (replicas = [], cpus = 8, Kb = 0.0083144621):
+def MC_replica_exchange (replicas = [], cpus = 8, Kb = 0.0019872041): #0.0083144621):
     from multiprocessing import Pool
     p = Pool(cpus)
     results = p.map(monte_carlo_dic, replicas)
@@ -278,7 +278,7 @@ def run_MC_replica_exchange (
                             PhiPsi_rate        = 0.1          , 
                             max_angle_range    = 5            ,
                             trajectory         = 'MC_replica_',      
-                            Kb                 = 0.0083144621 ,
+                            Kb                 = 0.0019872041 , #0.0083144621 ,
                             nSteps             = 1000         ,
                             fragment_rate      = 0.5          ,
                             fragment_sidechain = True         ,
@@ -330,7 +330,7 @@ def monte_carlo_side_chain (molecule  = None,
                            nSteps     = 1000,
                            trajectory='MonteCarlo_trajectory.xyz'):
     
-    Kb              = 0.0083144621
+    Kb              = 0.0019872041 #, #0.0083144621
     temp            = initial_T
     gamma           = -1 * (math.log(float(final_T) / float(initial_T))) / nSteps
     tau_angle_range = (float(angle_range) / nSteps) * -1
