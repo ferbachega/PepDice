@@ -55,14 +55,15 @@ def rotate_backbone_attempt (molecule = None,
                                  bond = None,
                                 theta = None,  
                       previous_energy = None,
-                          temperature = None):
+                          temperature = None,
+                                   pn = None):
     
     rotate_backbone(molecule = molecule, 
                         resi = resi    ,
                         bond = bond    , 
                        theta = theta   )
 
-    energy = molecule.energy()
+    energy = molecule.energy(pn =pn)
     
     if energy:
         if MC_test_energy (energy = energy         , 
@@ -91,13 +92,15 @@ def insert_fragment (molecule = None, fragment = None, sidechain = False):
         
             
         if sidechain:
-            for bond in ['CHI1','CHI2','CHI3','CHI4','CHI5']:
-                if fragment[key][bond]:
-                    set_chi_dihedral (molecule  = molecule, 
-                                          resi  = key, 
-                                          bond  = bond, 
-                                          angle = fragment[key][bond])
-
+            try:
+                for bond in ['CHI1','CHI2','CHI3','CHI4','CHI5']:
+                    if fragment[key][bond]:
+                        set_chi_dihedral (molecule  = molecule, 
+                                              resi  = key, 
+                                              bond  = bond, 
+                                              angle = fragment[key][bond])
+            except:
+                print 'failed sidechain'
 
 def monte_carlo_dic (parameters):
     """ Function doc """
@@ -116,16 +119,16 @@ def monte_carlo_dic (parameters):
     return results
 
 
-def monte_carlo(molecule           = None        ,
-                temperature        = 1000        ,
-                Kb                 = 0.0083144621,
-                angle_range        = 1           ,
-                nSteps             = 10000       ,
-                fragment_rate      = 1.0         , #between 0  and 1
-                fragment_sidechain = False       ,
-                PhiPsi_rate        = 1.0         ,
+def monte_carlo(molecule           = None                       ,
+                temperature        = 1000                       ,
+                Kb                 = 0.0083144621               ,
+                angle_range        = 1                          ,
+                nSteps             = 10000                      ,
+                fragment_rate      = 1.0                        , #between 0  and 1
+                fragment_sidechain = False                      ,
+                PhiPsi_rate        = 1.0                        ,
                 trajectory         = 'MonteCarlo_trajectory.xyz',
-                pn                 = 1 ):
+                pn                 = 1                          ):
 
 
     n = 0
@@ -165,29 +168,22 @@ def monte_carlo(molecule           = None        ,
                                  fragment   = fragment,
                                  sidechain  = fragment_sidechain)
                                  
-                #save_XYZ_to_file (molecule, trajectory)
                 energy = molecule.energy(pn = pn)
-                #print 'fragment: ',energy, number,  len(fragment), fragment.keys()
                 if energy:
                     if MC_test_energy (energy = energy         , 
                                previous_energy = previous_energy ,
                                   temperature = temperature    ):
                                            
                         save_XYZ_to_file (molecule, trajectory)
-                        #print accepted_fragment, energy
                         previous_energy      = energy
                         previous_coordinates = molecule.get_coordinates_from_system()
                         accepted_fragment += 1
                         print "pn: {:<3d} step: {:5d} energy: {:<20.7f}fragment: {:<3d}".format(pn, i, energy , fragment_index)
-                        #print 'pn: %3i    step: %i    energy: %10.11f    fragment: %i ' %(pn, i, energy , fragment_index)
                     else:
                         molecule.import_coordinates_to_system (previous_coordinates)
                         #print 'fragment: ',fragment_index, energy, len(fragment), 'failed'
                 else:
                     molecule.import_coordinates_to_system (previous_coordinates)
-                #print 'fragment: ',fragment_index,  len(fragment), fragment.keys()
-                #save_XYZ_to_file (molecule, trajectory)
-        
         #print 'temp: = ', temperature, 'energy = ', previous_energy, 'acceptance ratio (phi) =', (accepted_fragment / attempted_fragment)
 
        
@@ -222,7 +218,8 @@ def monte_carlo(molecule           = None        ,
                                                         bond = bond            ,
                                                        theta = theta           ,  
                                               previous_energy = previous_energy,
-                                                 temperature = temperature     )
+                                                 temperature = temperature     ,
+                                                          pn = pn)
         
                     if energy:
                         save_XYZ_to_file (molecule, trajectory)
@@ -233,13 +230,14 @@ def monte_carlo(molecule           = None        ,
                             accepted_psi += 1
                         if bond == 'PHI':
                             accepted_phi += 1
-                        print '%5i %4i %10.4f %10.4f %3i' % (i, resi, theta*57.324, energy, temperature) #, previous_energy )  
+                        print "pn: {:<3d} step: {:5d} energy: {:<20.7f}rotate_backbone theta: {:<6.3f}".format(pn, i, energy , theta*57.324)
+                        #print '%5i %4i %10.4f %10.4f %3i' % (i, resi, theta*57.324, energy, temperature) #, previous_energy )  
                     else:
                         molecule.import_coordinates_to_system (previous_coordinates)
-    #return [pn, previous_energy, previous_coordinates]
     return {'pn':pn, 'energy': previous_energy, 'coords': previous_coordinates, 'temperature': temperature }
 
-def MC_replica_exchange (replicas = [], cpus = 8):
+
+def MC_replica_exchange (replicas = [], cpus = 8, Kb = 0.0083144621):
     from multiprocessing import Pool
     p = Pool(cpus)
     results = p.map(monte_carlo_dic, replicas)
@@ -255,8 +253,7 @@ def MC_replica_exchange (replicas = [], cpus = 8):
                                'temperature': result['temperature']
                                }
     #----------------------------------------------------------------#
-    
-    Kb = 0.0083144621
+
     for i in REPLICAS:
         for j in REPLICAS:
             
@@ -272,6 +269,53 @@ def MC_replica_exchange (replicas = [], cpus = 8):
                 
     
     #pprint(REPLICAS)
+
+def run_MC_replica_exchange (
+                            molecule           = None         ,
+                            N_replicas         = 1            , # >= number of CPUs
+                            min_temp           = 50           ,
+                            max_temp           = 250          ,
+                            PhiPsi_rate        = 0.1          , 
+                            max_angle_range    = 5            ,
+                            trajectory         = 'MC_replica_',      
+                            Kb                 = 0.0083144621 ,
+                            nSteps             = 1000         ,
+                            fragment_rate      = 0.5          ,
+                            fragment_sidechain = True         ,
+                            ):
+    """ Function doc """
+    
+    temperature_factor = (max_temp-min_temp)/N_replicas
+    
+    
+    replicas   = []
+    for i in range(1, N_replicas + 1):
+        try:
+            os.remove(TRAJECTORY +str(i)+'.xyz' )
+        except:
+            pass
+        parameters = {} 
+        parameters['molecule'          ] = molecule      
+        parameters['temperature'       ] = min_temp       
+        parameters['Kb'                ] = Kb
+        parameters['nSteps'            ] = nSteps     
+        parameters['fragment_rate'     ] = fragment_rate        
+        parameters['fragment_sidechain'] = fragment_sidechain        
+        parameters['PhiPsi_rate'       ] = PhiPsi_rate       
+        parameters['angle_range'       ] = max_angle_range          
+        parameters['trajectory'        ] = trajectory +str(i)+'.xyz' 
+        parameters['pn'                ] = i
+        replicas.append(parameters)
+        
+        min_temp += temperature_factor
+        
+    print 'number of residues: ' , len(molecule.residues)
+    print 'number of fragments:' , len(molecule.fragments)
+    print 'number of replicas: ' , len(replicas)
+    #monte_carlo_dic(replicas[0])
+    MC_replica_exchange(replicas= replicas, cpus = N_replicas)
+
+
 
 
 

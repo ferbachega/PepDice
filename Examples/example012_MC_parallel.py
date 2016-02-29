@@ -22,29 +22,27 @@
 #  
 #  
 
-
-
-#--------------------------------------------------------------------------#
-import os                                                                  #
-from pprint      import pprint                                             #
-from Molecule    import Molecule                                           #
-from Geometry    import *                                                  #
-from MonteCarlo  import monte_carlo,  monte_carlo_dic, MC_replica_exchange #
-from XYZFiles    import save_XYZ_to_file                                   #
-from CRDFiles    import load_CRD_from_file                                 #
-from AATorsions  import ROTAMER_LIST                                       #
-                                                                           #
-from RMSD import compute_RMSD                                              #
-                                                                           #
-from Test        import *                                                  #
-                                                                           #
-from GeometryOptimization import minimize                                  #
-                                                                           #
-from random import randint                                                 #
-                                                                           #
-from Energy import save_PDB_to_file                                        #
-                                                                           #
-#--------------------------------------------------------------------------#
+#---------------------------------------------------------------------------------------------------#
+import os                                                                                           #
+from pprint      import pprint                                                                      #
+from Molecule    import Molecule                                                                    #
+from Geometry    import *                                                                           #
+from MonteCarlo  import monte_carlo,  monte_carlo_dic, MC_replica_exchange, run_MC_replica_exchange #
+from XYZFiles    import save_XYZ_to_file                                                            #
+from CRDFiles    import load_CRD_from_file                                                          #
+from AATorsions  import ROTAMER_LIST                                                                #
+                                                                                                    #
+from RMSD import compute_RMSD                                                                       #
+                                                                                                    #
+from Test        import *                                                                           #
+                                                                                                    #
+from GeometryOptimization import minimize                                                           #
+                                                                                                    #
+from random import randint                                                                          #
+                                                                                                    #
+from Energy import save_PDB_to_file                                                                 #
+                                                                                                    #
+#---------------------------------------------------------------------------------------------------#
 from SideChainRefine import optimize_side_chain
 #----------------------------------------------------#
 
@@ -54,11 +52,12 @@ PEPDICE_EXAMPLES = os.path.join(PEPDICE, 'Examples')
 PEPDICE_PARAMETER= os.path.join(PEPDICE, 'Parameters')
 #-------------------------------------------------------------------------------
 #/home/farminf/Programas/PepDice/Examples/outputs/1gab_amber_example04_extended.pdb
-
+#/home/fernando/programs/pepdice/Examples/data/beta/1YWJ/1ywj_ff03ua.prmtop
+#/home/fernando/programs/pepdice/Examples/data/beta/1YWJ/1ywj_ff03ua.pdb
 #---------------------------------------------------------------------------------------------------------
 system = Molecule() 
-system.load_PDB_to_system      (filename = os.path.join(PEPDICE_EXAMPLES , 'data/1gab_amber03ua.pdb'   )   )  
-system.import_AMBER_parameters(top       = os.path.join(PEPDICE_EXAMPLES , 'data/1gab_amber03ua.prmtop')   ,   
+system.load_PDB_to_system      (filename = os.path.join(PEPDICE_EXAMPLES , 'data/beta/1YWJ/1ywj_ff03ua.pdb'   )   )  
+system.import_AMBER_parameters(top       = os.path.join(PEPDICE_EXAMPLES , 'data/beta/1YWJ/1ywj_ff03ua.prmtop')   ,   
                                 torsions = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )   
 
 TRAJECTORY  = os.path.join(PEPDICE_EXAMPLES , 'outputs/1gab_amber_example12_esurf_')
@@ -91,68 +90,95 @@ def import_fragments_from_pdb (molecule = None, residues = [], mainchain =True, 
     return fragment 
 
 
+def build_fragment_library_from_pdbs (
+                                     molecule             = None ,
+                                     frag_size            = 3    ,
+                                     number_of_fragments  = 100  ,
+                                     pdblist              = []   ,
+                                     ):
+    """ Function doc """
+    for pdb in pdblist:
+        molecule.load_PDB_to_system(filename = pdb)  
+        for i in range(0,number_of_fragments):
+            resi     = random.randint(0, len(molecule.residues)-frag_size)
+            fragment = import_fragments_from_pdb (molecule = molecule, 
+                                                  residues = range(resi, resi+frag_size), 
+                                                 sidechain = True)
+            molecule.fragments.append(fragment)
+    return molecule
 
 
 
-molecule_temp = Molecule()
-molecule_temp.load_PDB_to_system(filename = os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0001.pdb'))
-molecule_temp.import_AMBER_parameters(top   = os.path.join(PEPDICE_EXAMPLES , 'data/1gab_amber03ua.prmtop')   ,   
-                                   torsions = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') ) 
-
-print os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0001.pdb')
-print len(molecule_temp.residues)
-
-
-pdbs          = [
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0001.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0002.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0003.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0004.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0005.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0006.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0007.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0008.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0009.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0010.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0011.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0012.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0013.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0014.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0015.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0016.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0017.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0018.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0019.pdb'),
-                 os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0020.pdb')]
-
-#
-#pdbs          = [os.path.join(PEPDICE_EXAMPLES ,'data/1gab_files/1gab_0001.pdb')]
-#
-#
-
-system.fragments    = []
-frag_size           = 3
-number_of_fragments = 10
-
-for pdb in pdbs:
-    molecule_temp.load_PDB_to_system(filename = pdb)  
-    for i in range(0,number_of_fragments):
-        resi     = random.randint(0, len(system.residues)-frag_size)
-        fragment = import_fragments_from_pdb (molecule = molecule_temp, 
-                                              residues = range(resi, resi+frag_size), 
-                                             sidechain = True)
-        system.fragments.append(fragment)
-#pprint(system.fragments)
-print len(system.fragments)
 
 '''
 seq  = TIDQWLLKNAKEDAIAELKKAGITSDFYFNAINKAKTVEEVNALKNEILKAHA
 pred = CCHHHHHHHHHHHHHHHHHHCCCCCHHHHHHHHHCCCHHHHHHHHHHHHHHCC
 rest = 00123456789987654321000001234543210001234567876543210
-'''
+
 
 #system.load_PDB_to_system (filename = os.path.join(PEPDICE_EXAMPLES , 'outputs/1gab_amber_example10_ff03ua_SS.coor'))
-system.load_PDB_to_system (filename = os.path.join(PEPDICE_EXAMPLES , 'outputs/1gab_amber_example04_ff03ua_extended.pdb'))
+#system.import_fixed_from_string(fixed='00123456789987654321000001234543210001234567876543210')
+#import_SS_from_string(molecule = system , ss = 'CCHHHHHHHHHHHHHHHHHHCCCCCHHHHHHHHHCCCHHHHHHHHHHHHHHCC')
+#save_PDB_to_file(system,  os.path.join(PEPDICE_EXAMPLES , 'outputs/1gab_amber_example10_ff03ua_SS2.pdb'))
+#system.import_fixed_from_string(fixed='00003456789987654000000000004543210001234567876543000')
+'''
+
+
+
+pdbs = [
+        os.path.join(PEPDICE_EXAMPLES ,'data/beta/1YWJ/1YWJ_0001.pdb'),
+        os.path.join(PEPDICE_EXAMPLES ,'data/beta/1YWJ/1YWJ_0002.pdb'),
+        os.path.join(PEPDICE_EXAMPLES ,'data/beta/1YWJ/1YWJ_0003.pdb'),
+        os.path.join(PEPDICE_EXAMPLES ,'data/beta/1YWJ/1YWJ_0004.pdb'),
+        #os.path.join(PEPDICE_EXAMPLES ,'data/beta/1YWJ/1YWJ_0005.pdb'),
+        #os.path.join(PEPDICE_EXAMPLES ,'data/beta/1YWJ/1YWJ_0006.pdb'),
+        #os.path.join(PEPDICE_EXAMPLES ,'data/beta/1YWJ/1YWJ_0007.pdb'),
+        #os.path.join(PEPDICE_EXAMPLES ,'data/beta/1YWJ/1YWJ_0008.pdb'),
+        #os.path.join(PEPDICE_EXAMPLES ,'data/beta/1YWJ/1YWJ_0009.pdb'),
+        #os.path.join(PEPDICE_EXAMPLES ,'data/beta/1YWJ/1YWJ_0010.pdb'),
+        #os.path.join(PEPDICE_EXAMPLES ,'data/beta/1YWJ/1YWJ_0011.pdb'),
+        #os.path.join(PEPDICE_EXAMPLES ,'data/beta/1YWJ/1YWJ_0012.pdb'),
+        #os.path.join(PEPDICE_EXAMPLES ,'data/beta/1YWJ/1YWJ_0013.pdb'),
+        #os.path.join(PEPDICE_EXAMPLES ,'data/beta/1YWJ/1YWJ_0014.pdb'),
+        #os.path.join(PEPDICE_EXAMPLES ,'data/beta/1YWJ/1YWJ_0015.pdb')
+        
+        #os.path.join(PEPDICE_EXAMPLES ,'data/alpha/1GAB/1gab_0001.pdb'),
+        #os.path.join(PEPDICE_EXAMPLES ,'data/alpha/1GAB/1gab_0002.pdb'),
+        #os.path.join(PEPDICE_EXAMPLES ,'data/alpha/1GAB/1gab_0003.pdb'),
+        #os.path.join(PEPDICE_EXAMPLES ,'data/alpha/1GAB/1gab_0004.pdb'),
+        #os.path.join(PEPDICE_EXAMPLES ,'data/alpha/1GAB/1gab_0005.pdb'),
+        #os.path.join(PEPDICE_EXAMPLES ,'data/alpha/1GAB/1gab_0006.pdb'),
+        ]
+'''
+
+/home/fernando/programs/pepdice/Examples/data/alpha/1GAB/1gab_0001.pdb
+/home/fernando/programs/pepdice/Examples/data/alpha/1GAB/1gab_0002.pdb
+/home/fernando/programs/pepdice/Examples/data/alpha/1GAB/1gab_0003.pdb
+/home/fernando/programs/pepdice/Examples/data/alpha/1GAB/1gab_0004.pdb
+/home/fernando/programs/pepdice/Examples/data/alpha/1GAB/1gab_0005.pdb
+/home/fernando/programs/pepdice/Examples/data/alpha/1GAB/1gab_0006.pdb
+/home/fernando/programs/pepdice/Examples/data/alpha/1GAB/1gab_0007.pdb
+
+'''
+
+
+
+
+system  = build_fragment_library_from_pdbs (
+                                            molecule             = system ,
+                                            frag_size            = 5      ,
+                                            number_of_fragments  = 200    ,
+                                            pdblist              = pdbs   ,
+                                            )
+
+#system.load_PDB_to_system (filename = os.path.join(PEPDICE_EXAMPLES , 'data/1gab_ff03ua_AMBER_extended.pdb'))
+system.load_PDB_to_system (filename = os.path.join(PEPDICE_EXAMPLES , 'data/beta/1YWJ/1ywj_ff03ua.pdb'))
+for i in range (0,len(system.residues)):
+    phi_final_angle = set_phi_psi_dihedral( molecule=system, resi=i, bond='PHI',  angle = 180)
+    psi_final_angle = set_phi_psi_dihedral( molecule=system, resi=i, bond='PSI',  angle = 180)
+    ome_final_angle = set_phi_psi_dihedral( molecule=system, resi=i, bond='OMEGA',angle = 180)
+
+
 
 system.bond      = 1.0
 system.angle     = 1.0
@@ -161,36 +187,48 @@ system.imprp     = 1.0
 system.elect     = 1.0
 system.vdw       = 1.0
 system.boundary  = 1.0
-system.esurf     = 10.0
+system.esurf     = 1.0
 system.egb       = 1.0
 
-#system.import_fixed_from_string(fixed='00123456789987654321000001234543210001234567876543210')
-#import_SS_from_string(molecule = system , ss = 'CCHHHHHHHHHHHHHHHHHHCCCCCHHHHHHHHHCCCHHHHHHHHHHHHHHCC')
-#save_PDB_to_file(system,  os.path.join(PEPDICE_EXAMPLES , 'outputs/1gab_amber_example10_ff03ua_SS2.pdb'))
-#system.import_fixed_from_string(fixed='00003456789987654000000000004543210001234567876543000')
-#print system.fixed_residues
-#
 
-replicas   = []
-for i in range(1,9):
-    try:
-        os.remove(TRAJECTORY +str(i)+'.xyz' )
-    except:
-        pass
-    parameters = {} 
-    parameters['molecule'          ] = system      
-    parameters['temperature'       ] = i*50        
-    parameters['Kb'                ] = 0.0083144621
-    parameters['angle_range'       ] = 45          
-    parameters['nSteps'            ] = 10      
-    parameters['fragment_rate'     ] = 1.0         
-    parameters['fragment_sidechain'] = True        
-    parameters['PhiPsi_rate'       ] = 0.0         
-    parameters['trajectory'        ] = TRAJECTORY +str(i)+'.xyz' 
-    parameters['pn'                ] = i
-    replicas.append(parameters)
-    
-pprint (parameters)
-    
-MC_replica_exchange(replicas= replicas, cpus =8)
 
+monte_carlo(molecule           = system                  ,
+            temperature        = 1000                    ,
+            Kb                 = 0.0083144621            ,
+            angle_range        = 1                       ,
+            nSteps             = 1000                    ,
+            fragment_rate      = 1.0                     ,
+            fragment_sidechain = True                    ,
+            PhiPsi_rate        = 0.0                     ,
+            trajectory         = 'MonteCarlo_12_1YWJ.xyz',
+            pn                 = 1                       )
+
+
+monte_carlo(molecule           = system                  ,
+            temperature        = 1000                    ,
+            Kb                 = 0.0083144621            ,
+            angle_range        = 1                       ,
+            nSteps             = 1000                    ,
+            fragment_rate      = 0.0                     ,
+            fragment_sidechain = True                    ,
+            PhiPsi_rate        = 1.0                     ,
+            trajectory         = 'MonteCarlo_12_1YWJ.xyz',
+            pn                 = 1                       )
+
+
+
+'''
+run_MC_replica_exchange (
+                        molecule           = system         ,
+                        N_replicas         = 1              , # >= number of CPUs
+                        min_temp           = 500            ,
+                        max_temp           = 1000           ,
+                        PhiPsi_rate        = 0.0            , 
+                        max_angle_range    = 5              ,
+                        trajectory         = 'MC_replica12_',      
+                        Kb                 = 0.0083144621   ,
+                        nSteps             = 1000           ,
+                        fragment_rate      = 1.0            ,
+                        #fragment_sidechain = True           ,
+                        )
+'''
