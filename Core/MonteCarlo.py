@@ -239,36 +239,66 @@ def monte_carlo(molecule           = None                       ,
 
 def MC_replica_exchange (replicas = [], cpus = 8, Kb = 0.0019872041): #0.0083144621):
     from multiprocessing import Pool
-    p = Pool(cpus)
-    results = p.map(monte_carlo_dic, replicas)
+    
+    for i in range(0,5):
+        p = Pool(cpus)
+        results = p.map(monte_carlo_dic, replicas)
+        
+        
+        #--------------------------- Exchange ---------------------------#
+        REPLICAS = {} 
+        for result in results:
+            print 'replica: %3i energy: %10.7f' %(result['pn'], result['energy'])#, len(result[2])
+            REPLICAS[result['pn']] = {
+                                'energy'     : result['energy'],
+                                'coords'     : result['coords'],
+                                'temperature': result['temperature']
+                                }
+        #----------------------------------------------------------------#
+        test = random.randint(1,2)
+        print 'test = ', test
+        if test  == 1:
+            for i in range (1,len(REPLICAS)+1,2):
+                if i == len(REPLICAS):
+                    pass
+                else:
+                    print i, i+1 , REPLICAS[i]['energy'], REPLICAS[i+1]['energy']
     
     
-    #--------------------------- Exchange ---------------------------#
-    REPLICAS = {} 
-    for result in results:
-        print 'replica: %3i energy: %10.7f' %(result['pn'], result['energy'])#, len(result[2])
-        REPLICAS[result['pn']] = {
-                               'energy'     : result['energy'],
-                               'coords'     : result['coords'],
-                               'temperature': result['temperature']
-                               }
-    #----------------------------------------------------------------#
-
-    for i in REPLICAS:
-        for j in REPLICAS:
+        else:
+            for i in range (2,len(REPLICAS)+1,2):
+                if i == len(REPLICAS):
+                    print 1, len(REPLICAS),REPLICAS[i]['energy'], REPLICAS[1]['energy']
+                else:
+                    print i, i+1 , REPLICAS[i]['energy'], REPLICAS[i+ 1]['energy']
+        
+        
+        
             
-            if j == i:
-                pass
-            else:
-                deltaG = REPLICAS[j]['energy'] - REPLICAS[i]['energy']
-                div    = ((1/Kb *REPLICAS[j]['temperature']) - (1/Kb *REPLICAS[i]['temperature'])) 
-                #print i, j , 'div', div * deltaG, (REPLICAS[i]['energy'] - REPLICAS[j]['energy']) *((1/Kb *REPLICAS[i]['temperature']) - (1/Kb *REPLICAS[j]['temperature'])) 
-                #p      = math.exp(deltaG * div)
-                #print i , j, deltaG, p
-                
-                
-    
-    #pprint(REPLICAS)
+        
+        
+ #      deltaG = REPLICAS[j]['energy'] - REPLICAS[i]['energy']
+ #      div    = ((1/Kb *REPLICAS[j]['temperature']) - (1/Kb *REPLICAS[i]['temperature'])) 
+ #  
+ #  
+ #  
+ #  
+ #  
+ #  for i in REPLICAS:
+ #      for j in REPLICAS:
+ #          
+ #          if j == i:
+ #              pass
+ #          else:
+ #              deltaG = REPLICAS[j]['energy'] - REPLICAS[i]['energy']
+ #              div    = ((1/Kb *REPLICAS[j]['temperature']) - (1/Kb *REPLICAS[i]['temperature'])) 
+ #              #print i, j , 'div', div * deltaG, (REPLICAS[i]['energy'] - REPLICAS[j]['energy']) *((1/Kb *REPLICAS[i]['temperature']) - (1/Kb *REPLICAS[j]['temperature'])) 
+ #              #p      = math.exp(deltaG * div)
+ #              #print i , j, deltaG, p
+ #              
+ #              
+ #  
+ #  #pprint(REPLICAS)
 
 def run_MC_replica_exchange (
                             molecule           = None         ,
