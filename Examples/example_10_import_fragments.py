@@ -22,8 +22,6 @@
 #  
 #  
 
-
-
 #----------------------------------------------------#
 import os                                            #
 from pprint      import pprint                       #
@@ -39,9 +37,6 @@ from RMSD import compute_RMSD                        #
 from Test        import *                            #
                                                      #
 from GeometryOptimization import minimize            #
-                                                     #
-from random import randint                           #
-                                                     #
 from Energy import save_PDB_to_file                  #
                                                      #
 #----------------------------------------------------#
@@ -109,16 +104,23 @@ system.boundary  = 1.0
 system.esurf     = 1.0
 system.egb       = 1.0
 
+
+
 run_MC_replica_exchange (
                         molecule           = system              ,
                         N_replicas         = 8                   , # >= number of CPUs
+                        CPUs               = 4                   ,
                         min_temp           = 100                 ,
-                        max_temp           = 100                 ,
+                        max_temp           = 500                 ,
                         PhiPsi_rate        = 0.0                 , 
                         max_angle_range    = 5                   ,
                         trajectory         = 'MC_1GAB_replica_'  ,      
                         Kb                 = 0.0019872041        ,
+                        
                         nSteps             = 10                  ,
+                        nExchanges         = 5                   ,
+                        
                         fragment_rate      = 1.0                 ,
-                        #fragment_sidechain = True              ,
+                        log                = False               ,
+                        #fragment_sidechain = True               ,
                         )

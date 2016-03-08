@@ -54,7 +54,6 @@ from Bio.PDB import PDBParser
 #from force_field import ForceField
 from pprint import pprint
 
-import random
 import numpy as np
 import math
 from Vectors import *

@@ -25,15 +25,14 @@ from pprint import pprint
 import time
 
 import random
+random.seed(10)
 import numpy as np
 import math
 import os
 from Geometry import *
 from XYZFiles import save_XYZ_to_file
-
-
-
-
+from multiprocessing import Pool
+    
 
 
 def MC_test_energy (energy = None        , 
@@ -102,21 +101,11 @@ def insert_fragment (molecule = None, fragment = None, sidechain = False):
             except:
                 print 'failed sidechain'
 
+
 def monte_carlo_dic (parameters):
     """ Function doc """
-    results = monte_carlo(
-                          molecule           = parameters['molecule'          ],
-                          temperature        = parameters['temperature'       ],
-                          Kb                 = parameters['Kb'                ],
-                          angle_range        = parameters['angle_range'       ],
-                          nSteps             = parameters['nSteps'            ],
-                          fragment_rate      = parameters['fragment_rate'     ],
-                          fragment_sidechain = parameters['fragment_sidechain'],
-                          PhiPsi_rate        = parameters['PhiPsi_rate'       ],
-                          trajectory         = parameters['trajectory'        ],
-                          pn                 = parameters['pn'                ],
-                          )
-    return results
+    random.seed(parameters['pn'])
+    return  monte_carlo(**parameters)
 
 
 def monte_carlo(molecule           = None                       ,
@@ -237,15 +226,22 @@ def monte_carlo(molecule           = None                       ,
     return {'pn':pn, 'energy': previous_energy, 'coords': previous_coordinates, 'temperature': temperature }
 
 
-def MC_replica_exchange (replicas = [], cpus = 8, Kb = 0.0019872041): #0.0083144621):
-    from multiprocessing import Pool
+def MC_replica_exchange (replicas   = [], 
+                         CPUs       = 1 , 
+                         N_replicas = 1 , 
+                         nExchanges = 1 ):
     
-    for i in range(0,5):
-        p = Pool(cpus)
-        results = p.map(monte_carlo_dic, replicas)
+    
+    for i in range(0, nExchanges):
         
+        #--------------------------------------------#
+        #                MONTE CARLO                 #
+        #--------------------------------------------#
+        p = Pool(CPUs)                               #
+        results = p.map(monte_carlo_dic, replicas)   #
+        #--------------------------------------------#
         
-        #--------------------------- Exchange ---------------------------#
+        #------------------------------------- Exchange -----------------------------------------#
         REPLICAS = {} 
         for result in results:
             print 'replica: %3i energy: %10.7f' %(result['pn'], result['energy'])#, len(result[2])
@@ -254,29 +250,32 @@ def MC_replica_exchange (replicas = [], cpus = 8, Kb = 0.0019872041): #0.0083144
                                 'coords'     : result['coords'],
                                 'temperature': result['temperature']
                                 }
-        #----------------------------------------------------------------#
-        test = random.randint(1,2)
-        print 'test = ', test
-        if test  == 1:
-            for i in range (1,len(REPLICAS)+1,2):
-                if i == len(REPLICAS):
-                    pass
-                else:
-                    print i, i+1 , REPLICAS[i]['energy'], REPLICAS[i+1]['energy']
+        #----------------------------------------------------------------------------------------#
+        
+        
+        # teste feito para verificar quais sao os pares de replicas que serao trocados
+        #--------------------------------------------------------------------------------------------------------------#
+        test = random.randint(1,2)                                                                                     #
+        print 'test = ', test                                                                                          #
+                                                                                                                       #
+        # partindo de repĺica 1   1-2 3-4 5-6 ...                                                                      #
+        if test  == 1:                                                                                                 #
+            for i in range (1,len(REPLICAS)+1,2):                                                                      #
+                if i == len(REPLICAS):                                                                                 #
+                    pass                                                                                               #
+                else:                                                                                                  #
+                    print i, i+1 , REPLICAS[i]['energy'], REPLICAS[i+1]['energy']                                      #
+                                                                                                                       #
+        # partindo de repĺica 2   2-3 4-5 6-7 ... 1-n                                                                  #
+        else:                                                                                                          #
+            for i in range (2,len(REPLICAS)+1,2):                                                                      #
+                if i == len(REPLICAS):                                                                                 #
+                    print 1, len(REPLICAS),REPLICAS[i]['energy'], REPLICAS[1]['energy'] # replica n com a replica 1    #
+                else:                                                                                                  #
+                    print i, i+1 , REPLICAS[i]['energy'], REPLICAS[i+ 1]['energy']                                     #
+        #--------------------------------------------------------------------------------------------------------------#
     
     
-        else:
-            for i in range (2,len(REPLICAS)+1,2):
-                if i == len(REPLICAS):
-                    print 1, len(REPLICAS),REPLICAS[i]['energy'], REPLICAS[1]['energy']
-                else:
-                    print i, i+1 , REPLICAS[i]['energy'], REPLICAS[i+ 1]['energy']
-        
-        
-        
-            
-        
-        
  #      deltaG = REPLICAS[j]['energy'] - REPLICAS[i]['energy']
  #      div    = ((1/Kb *REPLICAS[j]['temperature']) - (1/Kb *REPLICAS[i]['temperature'])) 
  #  
@@ -302,48 +301,68 @@ def MC_replica_exchange (replicas = [], cpus = 8, Kb = 0.0019872041): #0.0083144
 
 def run_MC_replica_exchange (
                             molecule           = None         ,
+                            
                             N_replicas         = 1            , # >= number of CPUs
+                            CPUs               = 1            , # Number os CPUs
+                            
                             min_temp           = 50           ,
                             max_temp           = 250          ,
                             PhiPsi_rate        = 0.1          , 
                             max_angle_range    = 5            ,
                             trajectory         = 'MC_replica_',      
                             Kb                 = 0.0019872041 , #0.0083144621 ,
-                            nSteps             = 1000         ,
+                            
+                            nSteps             = 1000         , # (bloco de sim) numero de passos na simulacao de MC 
+                            nExchanges         = 5            , # numero de eventos de troca  ->  total de simulacao eh dado pelo  nExchanges x nSteps
+                            
                             fragment_rate      = 0.5          ,
                             fragment_sidechain = True         ,
+                            log                = False        ,
                             ):
+    
     """ Function doc """
     
+    
+    
     temperature_factor = (max_temp-min_temp)/N_replicas
+    #--------------------montagen das replicas-------------------------#
+    replicas   = []  # lista, onde os elementos sao dicionarios        #
+    for i in range(1, N_replicas + 1):                                 #
+        try:                                                           #
+            os.remove(TRAJECTORY +str(i)+'.xyz' )                      #
+        except:                                                        #
+            pass                                                       #
+        parameters = {}                                                #
+        parameters['molecule'          ] = molecule                    #
+        parameters['temperature'       ] = min_temp                    #
+        parameters['Kb'                ] = Kb                          #
+        parameters['nSteps'            ] = nSteps                      #
+        parameters['fragment_rate'     ] = fragment_rate               #
+        parameters['fragment_sidechain'] = fragment_sidechain          #
+        parameters['PhiPsi_rate'       ] = PhiPsi_rate                 #
+        parameters['angle_range'       ] = max_angle_range             #
+        parameters['trajectory'        ] = trajectory +str(i)+'.xyz'   #
+        parameters['pn'                ] = i                           #
+        replicas.append(parameters)                                    #
+                                                                       #
+        min_temp += temperature_factor                                 #
+    #------------------------------------------------------------------#
     
-    
-    replicas   = []
-    for i in range(1, N_replicas + 1):
-        try:
-            os.remove(TRAJECTORY +str(i)+'.xyz' )
-        except:
-            pass
-        parameters = {} 
-        parameters['molecule'          ] = molecule      
-        parameters['temperature'       ] = min_temp       
-        parameters['Kb'                ] = Kb
-        parameters['nSteps'            ] = nSteps     
-        parameters['fragment_rate'     ] = fragment_rate        
-        parameters['fragment_sidechain'] = fragment_sidechain        
-        parameters['PhiPsi_rate'       ] = PhiPsi_rate       
-        parameters['angle_range'       ] = max_angle_range          
-        parameters['trajectory'        ] = trajectory +str(i)+'.xyz' 
-        parameters['pn'                ] = i
-        replicas.append(parameters)
-        
-        min_temp += temperature_factor
-        
+    print '----------------------------------------'
     print 'number of residues: ' , len(molecule.residues)
     print 'number of fragments:' , len(molecule.fragments)
     print 'number of replicas: ' , len(replicas)
+    print 'number of CPUs:     ' , CPUs
+    print 'temperature factor: ' , temperature_factor
+    print '----------------------------------------'
+
+    
     #monte_carlo_dic(replicas[0])
-    MC_replica_exchange(replicas= replicas, cpus = N_replicas)
+    
+    MC_replica_exchange(replicas   = replicas, 
+                        CPUs       = CPUs, 
+                        N_replicas = N_replicas, 
+                        nExchanges = nExchanges)
 
 
 
@@ -403,124 +422,3 @@ def monte_carlo_side_chain (molecule  = None,
                     print 'Clash!'
         print 'temp: = ', temp, 'energy = ', initial_energy
         temp = float(initial_T) * math.exp(-1 * gamma * i)
-
-'''
-def monte_carlo(molecule   = None,
-               initial_T   = 1000,
-               final_T     = 1   ,
-               angle_range = 20  ,
-               nSteps      = 1000,
-               trajectory='MonteCarlo_trajectory.xyz'):
-    """ Function doc """
-    #
-    Kb = 0.0083144621
-    temp = initial_T
-
-    gamma = -1 * (math.log(float(final_T) / float(initial_T))) / nSteps
-    tau_angle_range = (float(angle_range) / nSteps) * -1
-
-    n = 0
-    initial_energy = molecule.energy()
-    initial_coordinates = molecule.get_coordinates_from_system()
-    print 'gamma = ', gamma
-
-    
-    for i in range(0, nSteps):
-        attempted_phi = 0.0
-        accepted_phi  = 0.0
-        attempted_psi = 0.0
-        accepted_psi  = 0.0
-        for k in range(0, 10):
-            for residue_i in range(0,len(molecule.residues)):
-                
-                if molecule.fixed_residues[residue_i] != 0:
-                    # se nao houver 
-                    pass
-                
-                else:
-                    j = residue_i
-                    
-                    if j == 1:
-                        j = 2
-
-                    if j in molecule.fixed_residues:
-                        pass
-
-                    else:
-                        #--------------------------------------#
-                        #                P S I                 #
-                        #--------------------------------------#
-
-                        attempted_psi += 1
-
-                        theta = random.uniform(-1 * angle_range, angle_range)
-                        rotate_backbone(molecule = molecule, 
-                                            resi = j,
-                                            bond = 'PSI', 
-                                           theta = theta,
-                                           steps = 1)
-                                           
-
-                        energy = molecule.energy()
-                        if energy <= initial_energy:
-                            save_XYZ_to_file(molecule, trajectory)
-                            initial_energy = energy
-                            initial_coordinates = molecule.get_coordinates_from_system()
-                            accepted_psi += 1
-
-                        else:
-                            DG = (energy - initial_energy)
-                            Px = math.exp(-1 * DG / (Kb * temp))
-                            X = random.uniform(0, 1)
-                            if X <= Px:
-                                save_XYZ_to_file(molecule, trajectory)
-                                initial_energy = energy
-                                initial_coordinates = molecule.get_coordinates_from_system()
-                                accepted_psi += 1
-
-                            else:
-                                molecule.import_coordinates_to_system(
-                                    initial_coordinates)
-                        
-                        #--------------------------------------#
-                        #                P H I                 #
-                        #--------------------------------------#
-                        theta = random.uniform(-1 * angle_range, angle_range)
-                        rotate_backbone(molecule  = molecule, 
-                                            resi  = j       ,
-                                            bond  = 'PHI'   , 
-                                            theta = theta   , 
-                                            steps = 1)
-                                            
-                        energy = molecule.energy()
-
-                        attempted_phi += 1
-
-                        if energy <= initial_energy:
-                            save_XYZ_to_file(molecule, trajectory)
-                            initial_energy = energy
-                            initial_coordinates = molecule.get_coordinates_from_system()
-                            accepted_phi += 1
-                        else:
-                            DG = (energy - initial_energy)
-                            Px = math.exp(-1 * DG / (Kb * temp))
-                            X = random.uniform(0, 1)
-
-                            if X <= Px:
-                                save_XYZ_to_file(molecule, trajectory)
-                                initial_energy = energy
-                                initial_coordinates = molecule.get_coordinates_from_system()
-                                accepted_phi += 1
-                                # print 'ACCEPTED','temp:', temp,
-                                # 'energy',energy,'Px',Px,'X',X
-                            else:
-                                # print 'Rejected'
-                                # print  initial_coordinates
-                                molecule.import_coordinates_to_system(
-                                    initial_coordinates)
-                                # print 'REJECTED','temp:', temp, 'energy',energy,'Px',Px,'X',X
-                        #n = n +1
-
-        print 'temp: = ', temp, 'energy = ', initial_energy, 'acceptance ratio (phi) =', (accepted_phi / attempted_phi), 'acceptance ratio (psi) =', (accepted_psi / attempted_psi), 'attempted_phi = ', attempted_phi
-        temp = float(initial_T) * math.exp(-1 * gamma * i)
-'''

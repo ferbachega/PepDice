@@ -41,7 +41,6 @@ from Energy import save_PDB_to_file                                             
 
 
 
-
 def import_fragments_from_pdb (molecule = None, residues = [], mainchain =True, sidechain = True):
     """ Function doc """
     fragment = {}
