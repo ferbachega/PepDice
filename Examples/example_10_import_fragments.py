@@ -70,6 +70,23 @@ except:                                                                         
 import pickle
 system.fragments = pickle.load( open( "1gab_fragments.p", "rb" ) )
 
+fragments = system.fragments
+
+print len(fragments)
+print len(fragments[0])
+n = 0 
+for resi in fragments:
+    k = 0
+    if resi == []:
+        print n, resi
+    for frag in resi: 
+        print 'Position: ',n , 'fragment index: ',k, 'Number of fragments : ',len(resi), 'fragment size : ', len(frag)
+        k += 1
+    n += 1
+
+
+
+
 '''
 for i in range(1,11):
     system.bond      = 1.0
@@ -124,3 +141,16 @@ run_MC_replica_exchange (
                         log                = False               ,
                         #fragment_sidechain = True               ,
                         )
+'''
+
+monte_carlo(    molecule           = system                     ,
+                temperature        = 1000                       ,
+                Kb                 = 0.0019872041               , # 0.0083144621               ,
+                angle_range        = 1                          ,
+                nSteps             = 10000                      ,
+                fragment_rate      = 1.0                        , #between 0  and 1
+                fragment_sidechain = False                      ,
+                PhiPsi_rate        = 0.0                        ,
+                trajectory         = 'MonteCarlo_trajectory.xyz',
+                pn                 = 1                          )
+'''

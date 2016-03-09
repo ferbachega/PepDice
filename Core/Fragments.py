@@ -37,8 +37,8 @@ from random import randint                                                      
 from Energy import save_PDB_to_file                                                                 #
                                                                                                     #
 #---------------------------------------------------------------------------------------------------#
-
-
+import pprint
+import random
 
 
 def import_fragments_from_pdb (molecule = None, residues = [], mainchain =True, sidechain = True):
@@ -66,14 +66,64 @@ def build_fragment_library_from_pdbs (
                                      pdblist              = []   ,
                                      ):
     """ Function doc """
+    
+    
+    
+    fragments =  []
+    '''
+    fragments =  [
+                  [     -> lista  indica a posicao  na sequencia alvo
+                   
+                   {},  -> dada uma posicao, exista N possiveis fragmentos {}
+                   {}, ...
+                  
+                  ],
+                  
+                  [],
+                  
+                  [],
+                 ]
+    '''
+
+
+    # lista  (posicoes  =  index do residuo), 
+    # cade elemento eh uma lista com N fragmentos 
+    # possiveis.
+    for resi in range(len(molecule.residues)-frag_size): 
+        fragments.append([])
+    
+    
+    
+
     for pdb in pdblist:
+        #para os pdbs na lista, importar fragmentos
         molecule.load_PDB_to_system(filename = pdb)  
-        for i in range(0,number_of_fragments):
-            resi     = random.randint(0, len(molecule.residues)-frag_size)
+        
+        
+        for i in range(0, number_of_fragments):
+            
+            # sortear uma posicao na sequencia target
+            resi     = random.randint(0, len(molecule.residues)-frag_size -1)
+            
+            # importar o fragment  resi+frag_size - normalmente entre 3-9
             fragment = import_fragments_from_pdb (molecule = molecule, 
                                                   residues = range(resi, resi+frag_size), 
                                                  sidechain = True)
-            molecule.fragments.append(fragment)
+            
+            # adicionar o fragment na lista (resi = posicao do alinhamento) 
+            fragments[resi].append(fragment)
+            molecule.fragments = fragments
+    
+    print len(fragments)
+    print len(fragments[0])
+    n = 0 
+    for resi in fragments:
+        k = 0
+        for frag in resi: 
+            print 'Position: ',n , 'fragment index: ',k, 'Number of fragments : ',len(resi), 'fragment size : ', len(frag)
+            k += 1
+        n += 1
+    
     return molecule
 
 

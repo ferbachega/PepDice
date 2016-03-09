@@ -33,8 +33,20 @@ from Geometry import *
 from XYZFiles import save_XYZ_to_file
 from multiprocessing import Pool
     
+#                                 parei aqui
+#---------------------------------------------------------------------------------------
+def RE_acceptance_test (Ei = 0, Ej = 0, Kb = 0.0019872041, Ti = 1, Tj = 1 ):
+    """ Function doc """
+    acceptance_test = (Ei - Ej)*(1/(Kb*Ti) - 1/(Kb*Tj))
+    return acceptance_test
+    
+
+print RE_acceptance_test(Ei = 24, Ej = 23, Kb = 0.0019872041, Ti = 275, Tj = 300 )
+#---------------------------------------------------------------------------------------
 
 
+
+    
 def MC_test_energy (energy = None        , 
            previous_energy = None        ,
                temperature = 273.15      ,
@@ -139,16 +151,28 @@ def monte_carlo(molecule           = None                       ,
         accepted_psi  = 0.0              #
         #--------------------------------#
         
-        
+        # parametros controla a taxa de tentativas com que novos fragmentos sao testatos
         fragment_acceptance = random.uniform(0, 1)
+        
         #----------------------------------------------#
         #                  FRAGMENTS                   #
         #----------------------------------------------#
         # se o numero for menor ou igual a chance, entao um novo fragmento eh atribuido a estrutura
         if fragment_acceptance <= fragment_rate:
             attempted_fragment += 1
-            fragment_index = random.randint(0, len(molecule.fragments)-1)            
-            fragment = molecule.fragments[fragment_index]
+            
+            
+                   
+            #sorteia uma posicao do alinhamento
+            resi = random.randint(0, len(molecule.fragments)-1)
+            # enquando nao haver fragmentos para esta posicao (ou seja, lista vazia) sortear novas posicoes
+            while molecule.fragments[resi] == []:
+                resi = random.randint(0, len(molecule.fragments)-1) #(-1) -> nao pegar aultima posicao 
+               
+            fragment_index = random.randint(0, len(molecule.fragments[resi])-1)
+            fragment       = molecule.fragments[resi][fragment_index]
+            #print resi, len(molecule.fragments[resi]), fragment_index, molecule.fragments[resi][fragment_index].keys()
+            
             
             if fragment != previous_fragment:
                 previous_fragment = fragment
@@ -220,10 +244,14 @@ def monte_carlo(molecule           = None                       ,
                         if bond == 'PHI':
                             accepted_phi += 1
                         print "pn: {:<3d} step: {:5d} energy: {:<20.7f}rotate_backbone theta: {:<6.3f}".format(pn, i, energy , theta*57.324)
-                        #print '%5i %4i %10.4f %10.4f %3i' % (i, resi, theta*57.324, energy, temperature) #, previous_energy )  
+                        ##print '%5i %4i %10.4f %10.4f %3i' % (i, resi, theta*57.324, energy, temperature) #, previous_energy )  
                     else:
                         molecule.import_coordinates_to_system (previous_coordinates)
     return {'pn':pn, 'energy': previous_energy, 'coords': previous_coordinates, 'temperature': temperature }
+
+
+
+
 
 
 def MC_replica_exchange (replicas   = [], 
@@ -274,7 +302,8 @@ def MC_replica_exchange (replicas   = [],
                 else:                                                                                                  #
                     print i, i+1 , REPLICAS[i]['energy'], REPLICAS[i+ 1]['energy']                                     #
         #--------------------------------------------------------------------------------------------------------------#
-    
+                                # adicionar o criterio de troca entre as replicas aqui !!!
+        #--------------------------------------------------------------------------------------------------------------#
     
  #      deltaG = REPLICAS[j]['energy'] - REPLICAS[i]['energy']
  #      div    = ((1/Kb *REPLICAS[j]['temperature']) - (1/Kb *REPLICAS[i]['temperature'])) 

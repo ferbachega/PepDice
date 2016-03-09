@@ -95,7 +95,7 @@ pdbs          = [
 
 system  = build_fragment_library_from_pdbs (
                                             molecule             = system ,
-                                            frag_size            = 5      ,
+                                            frag_size            = 3      ,
                                             number_of_fragments  = 100    ,
                                             pdblist              = pdbs   ,
                                             )
