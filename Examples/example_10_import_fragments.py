@@ -128,13 +128,13 @@ run_MC_replica_exchange (
                         N_replicas         = 8                   , # >= number of CPUs
                         CPUs               = 4                   ,
                         min_temp           = 100                 ,
-                        max_temp           = 500                 ,
-                        PhiPsi_rate        = 0.0                 , 
+                        max_temp           = 300                 ,
+                        PhiPsi_rate        = 1.0                 , 
                         max_angle_range    = 5                   ,
                         trajectory         = 'MC_1GAB_replica_'  ,      
                         Kb                 = 0.0019872041        ,
                         
-                        nSteps             = 10                  ,
+                        nSteps             = 1000                ,
                         nExchanges         = 5                   ,
                         
                         fragment_rate      = 1.0                 ,
