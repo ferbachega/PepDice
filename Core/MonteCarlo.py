@@ -32,9 +32,24 @@ import os
 from Geometry import *
 from XYZFiles import save_XYZ_to_file
 from multiprocessing import Pool
+
+
+
+class TextLofFileWriter():
+    """ Class doc """
     
-#                                 parei aqui
-#---------------------------------------------------------------------------------------
+    def __init__ (self):
+        """ Class initialiser """
+        pass
+
+
+
+'''
+--------------------------------------------------------------
+               METROPOLIS / EXCHANGE ACCEPTANCE
+--------------------------------------------------------------
+'''
+
 def exchange_acceptance_test (Ei = 0, Ej = 0, Kb = 0.0019872041, Ti = 1, Tj = 1, log = False):
     """ Function doc 
     Y. Sugita, Y. Okamotor Chemical Physics Letters 314 ( 1999 ) 141–151
@@ -85,10 +100,7 @@ def exchange_acceptance_test (Ei = 0, Ej = 0, Kb = 0.0019872041, Ti = 1, Tj = 1,
         return X <= Px
     #-------------------------------------------------#
 
-
-
-    
-def MC_test_energy (energy = None        , 
+def metropolis_acceptance_test (energy = None        , 
            previous_energy = None        ,
                temperature = 273.15      ,
                         Kb = 0.0019872041):
@@ -102,6 +114,11 @@ def MC_test_energy (energy = None        ,
         return X <= Px
             
 
+'''
+--------------------------------------------------------------
+                       GEOMETRY ATTEMPT
+--------------------------------------------------------------
+'''
 def rotate_backbone_attempt (molecule = None, 
                                  resi = None, 
                                  bond = None,
@@ -118,7 +135,7 @@ def rotate_backbone_attempt (molecule = None,
     energy = molecule.energy(pn =pn)
     
     if energy:
-        if MC_test_energy (energy = energy         , 
+        if metropolis_acceptance_test (energy = energy         , 
                  previous_energy = previous_energy ,
                      temperature = 273.15          ,
                               Kb = 0.0019872041    ):    
@@ -130,7 +147,7 @@ def rotate_backbone_attempt (molecule = None,
         return False
 
 
-def insert_fragment (molecule = None, fragment = None, sidechain = False):
+def insert_fragment_attempt (molecule = None, fragment = None, sidechain = False):
     """ Function doc """
     for key in fragment:
         #PSI = fragment[key]['PSI']
@@ -155,8 +172,19 @@ def insert_fragment (molecule = None, fragment = None, sidechain = False):
                 print 'failed sidechain'
 
 
+
+'''
+--------------------------------------------------------------
+                        MONTE CARLO 
+--------------------------------------------------------------
+'''
 def monte_carlo_dic (parameters):
-    """ Function doc """
+    """ 
+            Function doc 
+    Esta funcao existe para que a funcao monte_carlo, usada no metodo pool, tenha apenas
+    uma variavel como entrada -> necessaria para a paralelizacao. 
+    
+    """
     random.seed(parameters['pn'])
     return  monte_carlo(**parameters)
 
@@ -168,16 +196,27 @@ def monte_carlo(molecule           = None                       ,
                 nSteps             = 10000                      ,
                 fragment_rate      = 1.0                        , #between 0  and 1
                 fragment_sidechain = False                      ,
+                log_frequence      = 10                         ,
                 PhiPsi_rate        = 1.0                        ,
                 trajectory         = 'MonteCarlo_trajectory.xyz',
                 pn                 = 1                          ):
 
+    
+    #LOGFILE    = trajectory+'.log'
+    logfilename = trajectory+'.log'
+    logfile     = open(logfilename, 'a')
+    trajectory  = trajectory+'.xyz'
 
-    n = 0
+
+    
     previous_energy      = molecule.energy(pn = pn)
     previous_coordinates = molecule.get_coordinates_from_system()
     previous_fragment    = None
     
+    
+    logfile_counter = 1
+    text = []
+    n = 0
     for i in range(0, nSteps):
         #--------------------------------#
         #       attempted_accepted       #
@@ -195,6 +234,11 @@ def monte_carlo(molecule           = None                       ,
         # parametros controla a taxa de tentativas com que novos fragmentos sao testatos
         fragment_acceptance = random.uniform(0, 1)
         
+        
+        
+        FRAGMENTS = False
+        PHIPSI    = False
+        
         #----------------------------------------------#
         #                  FRAGMENTS                   #
         #----------------------------------------------#
@@ -202,10 +246,9 @@ def monte_carlo(molecule           = None                       ,
         if fragment_acceptance <= fragment_rate:
             attempted_fragment += 1
             
-            
-                   
             #sorteia uma posicao do alinhamento
             resi = random.randint(0, len(molecule.fragments)-1)
+
             # enquando nao haver fragmentos para esta posicao (ou seja, lista vazia) sortear novas posicoes
             while molecule.fragments[resi] == []:
                 resi = random.randint(0, len(molecule.fragments)-1) #(-1) -> nao pegar aultima posicao 
@@ -218,21 +261,23 @@ def monte_carlo(molecule           = None                       ,
             if fragment != previous_fragment:
                 previous_fragment = fragment
                 
-                insert_fragment (molecule   = molecule, 
+                insert_fragment_attempt (molecule   = molecule, 
                                  fragment   = fragment,
                                  sidechain  = fragment_sidechain)
                                  
                 energy = molecule.energy(pn = pn)
                 if energy:
-                    if MC_test_energy (energy = energy         , 
-                               previous_energy = previous_energy ,
-                                  temperature = temperature    ):
+                    if metropolis_acceptance_test (energy = energy         , 
+                                          previous_energy = previous_energy,
+                                              temperature = temperature    ):
                                            
                         save_XYZ_to_file (molecule, trajectory)
                         previous_energy      = energy
                         previous_coordinates = molecule.get_coordinates_from_system()
                         accepted_fragment += 1
-                        print "pn: {:<3d} step: {:5d} energy: {:<20.7f}fragment: {:<3d}".format(pn, i, energy , fragment_index)
+                        FRAGMENTS = True
+                        #text.append("pn: {:<3d} step: {:5d} energy: {:<20.7f}fragment: {:<3d}\n".format(pn, i, energy , fragment_index))
+                        #print "pn: {:<3d} step: {:5d} energy: {:<20.7f}fragment: {:<3d}".format(pn, i, energy , fragment_index)
                     else:
                         molecule.import_coordinates_to_system (previous_coordinates)
                         #print 'fragment: ',fragment_index, energy, len(fragment), 'failed'
@@ -284,16 +329,99 @@ def monte_carlo(molecule           = None                       ,
                             accepted_psi += 1
                         if bond == 'PHI':
                             accepted_phi += 1
-                        print "pn: {:<3d} step: {:5d} energy: {:<20.7f}rotate_backbone theta: {:<6.3f}".format(pn, i, energy , theta*57.324)
-                        ##print '%5i %4i %10.4f %10.4f %3i' % (i, resi, theta*57.324, energy, temperature) #, previous_energy )  
+                        PHIPSI = True
+                        #text.append("pn: {:<3d} step: {:5d} energy: {:<20.7f}rotate_backbone theta: {:<6.3f}\n".format(pn, i, energy , theta*57.324))
+                        #print "pn: {:<3d} step: {:5d} energy: {:<20.7f}rotate_backbone theta: {:<6.3f}".format(pn, i, energy , theta*57.324)
                     else:
                         molecule.import_coordinates_to_system (previous_coordinates)
+    
+        if energy:
+            if energy <= previous_energy:
+                if FRAGMENTS:
+                    frag   = "fragment: {:<4d}  ".format(fragment_index)
+                else:
+                    frag   = 'fragment: -     ';format('-')
+                if PHIPSI:
+                    phipsi = "rotate_backbone: {:<6.3f}".format(theta*57.324)
+                else:
+                    phipsi = 'rotate_backbone: None'
+                text.append("pn: {:<3d} step: {:5d} energy: {:<20.10f}".format(pn, i, energy) + frag + phipsi+'\n')
+        
+        #---------------------------------------------#
+        #                LOGFILEWRITE                 #
+        #---------------------------------------------#
+        logfile_counter += logfile_counter
+        if logfile_counter >= log_frequence:
+            logfile.writelines(text)
+            logfile.close()
+            text    = [] 
+            logfile = open(logfilename, 'a')
+            logfile_counter = 1
+        #----------------------------------------------
+            
     return {'pn':pn, 'energy': previous_energy, 'coords': previous_coordinates, 'temperature': temperature }
 
 
+def monte_carlo_side_chain (molecule  = None,
+                           initial_T  = 1000,
+                           final_T    = 1   ,
+                           angle_range= 20  ,
+                           nSteps     = 1000,
+                           trajectory='MonteCarlo_trajectory.xyz'):
+    
+    Kb              = 0.0019872041 #, #0.0083144621
+    temp            = initial_T
+    gamma           = -1 * (math.log(float(final_T) / float(initial_T))) / nSteps
+    tau_angle_range = (float(angle_range) / nSteps) * -1
+    n = 0
+    
+    initial_energy = molecule.energy()
+    initial_coordinates = molecule.get_coordinates_from_system()
+    print 'gamma = ', gamma
+
+    for i in range(0, nSteps):
+        
+        for i in range(0, len(molecule.residues)):
+            name         = system.residues[i].name
+            res          = system.residues[i]
+            if name in ['HSD', 'HSE', 'HDP', 'HIE', 'HID']:
+                name = 'HIS'
+            res_rotamers =  ROTAMER_LIST[name]
+            
+            for key in res_rotamers:
+                set_side_chain_rotamer(molecule=system, resi=i, rotamer=res_rotamers[key])
+                
+                energy = system.energy()
+                if energy:   
+                    if energy <= initial_energy:
+                        save_XYZ_to_file(molecule, trajectory)
+                        initial_energy = energy
+                        initial_coordinates = molecule.get_coordinates_from_system()
+                    else:
+                        DG = (energy - initial_energy)
+                        Px = math.exp(-1 * DG / (Kb * temp))
+                        X = random.uniform(0, 1)
+                        if X <= Px:
+                            save_XYZ_to_file(molecule, trajectory)
+                            initial_energy = energy
+                            initial_coordinates = molecule.get_coordinates_from_system()
+                        else:
+                            molecule.import_coordinates_to_system(
+                                initial_coordinates)
+                else:
+                    print 'Clash!'
+        print 'temp: = ', temp, 'energy = ', initial_energy
+        temp = float(initial_T) * math.exp(-1 * gamma * i)
 
 
 
+
+
+'''
+--------------------------------------------------------------
+                       REPLICA EXCHANGE
+--------------------------------------------------------------
+'''
 
 def MC_replica_exchange (replicas   = [], 
                          CPUs       = 1 , 
@@ -313,7 +441,9 @@ def MC_replica_exchange (replicas   = [],
         #------------------------------------- Exchange -----------------------------------------#
         REPLICAS = {} 
         for result in results:
-            print 'replica: %3i energy: %10.7f temp: %i' %(result['pn'], result['energy'], result['temperature'])#, len(result[2])
+            #print 'replica: %3i energy: %10.7f temp: %i' %(result['pn']        , 
+            #                                               result['energy']    , 
+            #                                               result['temperature'])#, len(result[2])
             REPLICAS[result['pn']] = {
                                 'energy'     : result['energy'],
                                 'coords'     : result['coords'],
@@ -322,6 +452,43 @@ def MC_replica_exchange (replicas   = [],
         #----------------------------------------------------------------------------------------#
         
         
+        print '\n\n'
+        # teste feito para verificar quais sao os pares de replicas que serao trocados       
+        for i in range (1,len(REPLICAS)):                                                                    
+            Ei = REPLICAS[i]  ['energy']                                                                       #
+            Ej = REPLICAS[i+1]['energy']                                                                       #
+
+            Ti = REPLICAS[i]  ['temperature']                                                                  #
+            Tj = REPLICAS[i+1]['temperature']                                                                  #
+
+            COORDi = REPLICAS[i]  ['coords']                                                                   #
+            COORDj = REPLICAS[i+1]['coords']                                                                   #
+            
+            
+            Kb = 0.0019872041
+            Bi = 1/(Kb*Ti)                                                   # (1)
+            Bj = 1/(Kb*Tj)                                                   
+            Delta = (Bj - Bi)*(Ei - Ej)                                      # (2)
+            
+            # exchange acceptance test - teste de aceitacao de troca das replicas
+            if exchange_acceptance_test(Ei=Ei, Ej=Ej , Kb = 0.0019872041, Ti=Ti, Tj=Tj ):  
+                replicas[i]  ['molecule'].import_coordinates_to_system (COORDi)          
+                replicas[i-1]['molecule'].import_coordinates_to_system (COORDj)          
+                print 'replica ',i+1, ' ----> ', i    , 'Delta = ', Delta, 'accepted'           
+                print 'replica ',i, ' ----> '  , i+1  , 'Delta = ', Delta, 'accepted'           
+                                                                                        
+            # caso contrario nao ha troca de coordenadas entre as replicar                 
+            else:                                                                          
+                replicas[i-1]['molecule'].import_coordinates_to_system (COORDi)          
+                replicas[i]  ['molecule'].import_coordinates_to_system (COORDj)          
+                #print 'replica ',i,   '----> coord', i       , 'dE = ', (Ei - Ej)  '       
+                #print 'replica ',i+1, '----> coord', i+1     , 'dE = ', (Ei - Ej)  '       
+                print 'replica ',i+1, ' ----> ', i    , 'Delta = ', Delta, 'rejected'           
+                print 'replica ',i, ' ----> '  , i+1  , 'Delta = ', Delta, 'rejected' 
+        
+        
+        
+        '''
         # teste feito para verificar quais sao os pares de replicas que serao trocados
         #--------------------------------------------------------------------------------------------------------------#
         test = random.randint(1,2)                                                                                     #
@@ -410,10 +577,9 @@ def MC_replica_exchange (replicas   = [],
                         print 'replica ',i+1 ,'----> coord', i+1 , 'dE = ', (Ei - Ej)                                  #
                                                                                                                        #
         #--------------------------------------------------------------------------------------------------------------#
-
-
-
-
+        '''
+   
+        
 def run_MC_replica_exchange (
                             molecule           = None         ,
                             
@@ -425,6 +591,8 @@ def run_MC_replica_exchange (
                             PhiPsi_rate        = 0.1          , 
                             max_angle_range    = 5            ,
                             trajectory         = 'MC_replica_',      
+                            log_frequence      = 100          , 
+                            
                             Kb                 = 0.0019872041 , #0.0083144621 ,
                             
                             nSteps             = 1000         , # (bloco de sim) numero de passos na simulacao de MC 
@@ -433,6 +601,7 @@ def run_MC_replica_exchange (
                             fragment_rate      = 0.5          ,
                             fragment_sidechain = True         ,
                             log                = False        ,
+                            overwrite          = True         ,
                             ):
     
     """ Function doc """
@@ -443,10 +612,6 @@ def run_MC_replica_exchange (
     #--------------------montagen das replicas-------------------------#
     replicas   = []  # lista, onde os elementos sao dicionarios        #
     for i in range(1, N_replicas + 1):                                 #
-        try:                                                           #
-            os.remove(TRAJECTORY +str(i)+'.xyz' )                      #
-        except:                                                        #
-            pass                                                       #
         parameters = {}                                                #
         parameters['molecule'          ] = molecule                    #
         parameters['temperature'       ] = min_temp                    #
@@ -454,13 +619,26 @@ def run_MC_replica_exchange (
         parameters['nSteps'            ] = nSteps                      #
         parameters['fragment_rate'     ] = fragment_rate               #
         parameters['fragment_sidechain'] = fragment_sidechain          #
+        parameters['log_frequence'     ] = log_frequence               #
         parameters['PhiPsi_rate'       ] = PhiPsi_rate                 #
         parameters['angle_range'       ] = max_angle_range             #
-        parameters['trajectory'        ] = trajectory +str(i)+'.xyz'   #
+        parameters['trajectory'        ] = trajectory +str(i)          #
         parameters['pn'                ] = i                           #
         replicas.append(parameters)                                    #
                                                                        #
         min_temp += temperature_factor                                 #
+                                                                       #
+                                                                       #
+        if overwrite:                                                  #
+            try:                                                       #
+                os.remove (trajectory +str(i)+'.log')                  #
+            except:                                                    #
+                pass                                                   #
+                                                                       #
+            try:                                                       #
+                os.remove (trajectory +str(i)+'.xyz')                  #
+            except:                                                    #
+                pass                                                   #
     #------------------------------------------------------------------#
     
     print '----------------------------------------'
@@ -474,65 +652,10 @@ def run_MC_replica_exchange (
     
     #monte_carlo_dic(replicas[0])
     
-    MC_replica_exchange(replicas   = replicas, 
-                        CPUs       = CPUs, 
+    MC_replica_exchange(replicas   = replicas  , 
+                        CPUs       = CPUs      , 
                         N_replicas = N_replicas, 
                         nExchanges = nExchanges)
-
-
-
-
-def monte_carlo_side_chain (molecule  = None,
-                           initial_T  = 1000,
-                           final_T    = 1   ,
-                           angle_range= 20  ,
-                           nSteps     = 1000,
-                           trajectory='MonteCarlo_trajectory.xyz'):
-    
-    Kb              = 0.0019872041 #, #0.0083144621
-    temp            = initial_T
-    gamma           = -1 * (math.log(float(final_T) / float(initial_T))) / nSteps
-    tau_angle_range = (float(angle_range) / nSteps) * -1
-    n = 0
-    
-    initial_energy = molecule.energy()
-    initial_coordinates = molecule.get_coordinates_from_system()
-    print 'gamma = ', gamma
-
-    for i in range(0, nSteps):
-        
-        for i in range(0, len(molecule.residues)):
-            name         = system.residues[i].name
-            res          = system.residues[i]
-            if name in ['HSD', 'HSE', 'HDP', 'HIE', 'HID']:
-                name = 'HIS'
-            res_rotamers =  ROTAMER_LIST[name]
-            
-            for key in res_rotamers:
-                set_side_chain_rotamer(molecule=system, resi=i, rotamer=res_rotamers[key])
-                
-                energy = system.energy()
-                if energy:   
-                    if energy <= initial_energy:
-                        save_XYZ_to_file(molecule, trajectory)
-                        initial_energy = energy
-                        initial_coordinates = molecule.get_coordinates_from_system()
-                    else:
-                        DG = (energy - initial_energy)
-                        Px = math.exp(-1 * DG / (Kb * temp))
-                        X = random.uniform(0, 1)
-                        if X <= Px:
-                            save_XYZ_to_file(molecule, trajectory)
-                            initial_energy = energy
-                            initial_coordinates = molecule.get_coordinates_from_system()
-                        else:
-                            molecule.import_coordinates_to_system(
-                                initial_coordinates)
-                else:
-                    print 'Clash!'
-        print 'temp: = ', temp, 'energy = ', initial_energy
-        temp = float(initial_T) * math.exp(-1 * gamma * i)
-
 
 
 
