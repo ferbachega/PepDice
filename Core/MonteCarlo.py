@@ -108,8 +108,12 @@ def metropolis_acceptance_test (energy = None        ,
     if energy < previous_energy:
         return True
     else:
+        
         dE = (energy - previous_energy)
-        Px = math.exp(-1 * dE / (Kb * temperature))
+        #Px = math.exp(-1 * dE / (Kb * temperature))
+        Px = math.exp(-1 * dE / (temperature))
+        if temperature >= 800:
+            print temperature,dE, Px, Kb
         X  = random.uniform(0, 1)
         return X <= Px
             
@@ -626,7 +630,9 @@ def run_MC_replica_exchange (
         parameters['pn'                ] = i                           #
         replicas.append(parameters)                                    #
                                                                        #
+        print min_temp
         min_temp += temperature_factor                                 #
+        #print min_temp
                                                                        #
                                                                        #
         if overwrite:                                                  #
