@@ -5,6 +5,7 @@
 
 # . The root of the program.
 PEPDICE_ROOT=$HOME/Programas/pepdice ; export PEPDICE_ROOT
+export PEPDICE=$PEPDICE_ROOT
 
 # . Package paths.
 PEPDICE_BABEL=$PEPDICE_ROOT/Babel                     ; export PEPDICE_BABEL           
