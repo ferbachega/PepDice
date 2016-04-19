@@ -23,6 +23,7 @@
 #
 from pprint import pprint
 import time
+import logging
 
 import random
 random.seed(10)
@@ -32,7 +33,9 @@ import os
 from Geometry import *
 from XYZFiles import save_XYZ_to_file
 from multiprocessing import Pool
+from Bio.PDB.Polypeptide import three_to_one
 
+logger = logging.getLogger(__name__)
 
 
 class TextLofFileWriter():
@@ -153,6 +156,8 @@ def rotate_backbone_attempt (molecule = None,
 
 def insert_fragment_attempt (molecule = None, fragment = None, sidechain = False):
     """ Function doc """
+    if fragment is None:
+        return
     for key in fragment:
         #PSI = fragment[key]['PSI']
         #PHI = fragment[key]['PHI']
@@ -172,8 +177,16 @@ def insert_fragment_attempt (molecule = None, fragment = None, sidechain = False
                                               resi  = key,
                                               bond  = bond,
                                               angle = fragment[key][bond])
-            except:
-                print 'failed sidechain'
+            except KeyError as error:
+                logger.debug(error.message)
+                logger.debug("Target: " + "".join([
+                    three_to_one(molecule.residues[i].name)
+                        if molecule.residues[i].name != 'HIE' else 'H'
+                        for i in fragment
+                ]))
+                logger.debug("Fragment: " + "".join([
+                    three_to_one(a['NAME']) for a in fragment.values()
+                ]))
 
 
 
