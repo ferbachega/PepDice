@@ -174,8 +174,10 @@ def computeCHI (molecule=None, resi=1, bond='CHI1'):
                             a4.pos)
 
         return math.degrees(angle)
-    except:
-        pass
+    except KeyError as error:
+        raise KeyError("{} does not have a {}.".format(
+            residue.name, error.message))
+
 
 def rotate_side_chain (molecule=None, resi=1, bond='CHI1', theta=math.radians(1), steps=1):
     """
@@ -482,16 +484,21 @@ def computePhiPsi (molecule=None, resi=1, bond='PSI'):
 
 
     # obtaining the CA N C positions residue n
-    residue = molecule.residues[resi]
-    for atom in residue.atoms:
-        if atom.name == 'CA':
-            CA2 = atom
+    try:
+        residue = molecule.residues[resi]
+        for atom in residue.atoms:
+            if atom.name == 'CA':
+                CA2 = atom
 
-        if atom.name == 'N':
-            N2 = atom
+            if atom.name == 'N':
+                N2 = atom
 
-        if atom.name == 'C':
-            C2 = atom
+            if atom.name == 'C':
+                C2 = atom
+    except IndexError as error:
+        print error
+        print resi
+
     #print 'CA', CA2, 'N2', N2, 'C2', C2
 
     #----------------------------------------------
