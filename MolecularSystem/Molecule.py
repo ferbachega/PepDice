@@ -2,25 +2,25 @@
 # -*- coding: utf-8 -*-
 #
 #  Atom.py
-#  
+#
 #  Copyright 2016 farminf <farminf@farminf-3>
-#  
+#
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation; either version 2 of the License, or
 #  (at your option) any later version.
-#  
+#
 #  This program is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
-#  
-#  
+#
+#
 import os
 from Atom import Atom
 from Coordinates import Coordinates
@@ -38,15 +38,15 @@ from Bio.PDB import PDBParser
 PEPDICE_ROOT=/home/farminf/Programas/PepDice ; export PEPDICE_ROOT
 
 # . Package paths.
-PEPDICE_BABEL=$PEPDICE_ROOT/Babel                     ; export PEPDICE_BABEL           
-PEPDICE_CORE=$PEPDICE_ROOT/Core                       ; export PEPDICE_CORE            
-PEPDICE_MOLECULE=$PEPDICE_ROOT/MolecularSystem        ; export PEPDICE_MOLECULE       
-#PEPDICE_MOLECULESCRIPTS=$PEPDICE_ROOT/pMoleculeScripts-1.9.0 ; export PEPDICE_PMOLECULESCRIPTS 
+PEPDICE_BABEL=$PEPDICE_ROOT/Babel                     ; export PEPDICE_BABEL
+PEPDICE_CORE=$PEPDICE_ROOT/Core                       ; export PEPDICE_CORE
+PEPDICE_MOLECULE=$PEPDICE_ROOT/MolecularSystem        ; export PEPDICE_MOLECULE
+#PEPDICE_MOLECULESCRIPTS=$PEPDICE_ROOT/pMoleculeScripts-1.9.0 ; export PEPDICE_PMOLECULESCRIPTS
 
 # . Additional paths.
 PEPDICE_PARAMETERS=$PEPDICE_ROOT/Parameters                                   ; export PEPDICE_PARAMETERS
-PEPDICE_SCRATCH=$PEPDICE_ROOT/scratch                                         ; export PEPDICE_SCRATCH   
-#PEPDICE_STYLE=$PEPDICE_PARAMETERS/ccsStyleSheets/defaultStyle.css ; export PEPDICE_STYLE     
+PEPDICE_SCRATCH=$PEPDICE_ROOT/scratch                                         ; export PEPDICE_SCRATCH
+#PEPDICE_STYLE=$PEPDICE_PARAMETERS/ccsStyleSheets/defaultStyle.css ; export PEPDICE_STYLE
 
 # . The python path.
 PYTHONPATH=:$PEPDICE_ROOT/Babel:$PEPDICE_ROOT/Core:$PEPDICE_ROOT/MolecularSystem ; export PYTHONPATH
@@ -54,11 +54,11 @@ PYTHONPATH=:$PEPDICE_ROOT/Babel:$PEPDICE_ROOT/Core:$PEPDICE_ROOT/MolecularSystem
 
 from AATorsions import load_torsion_from_file
 
-class Molecule(Atom   , 
-               Residue, 
+class Molecule(Atom   ,
+               Residue,
                Coordinates,
                Energy
-               
+
                ):
     """ class to store info about a molecule"""
 
@@ -80,15 +80,15 @@ class Molecule(Atom   ,
                             'dihedral': [],
                             'improper': [],
                            }
-        
-        self.torsions       = None 
+
+        self.torsions       = None
         self.FIX_atoms_CHI  = None
         # Parameters
         self.fixed_residues = []
         self.fragments      = []
 
-        
-        #self.pn      
+
+        #self.pn
         self.bond      = 1.0
         self.angle     = 1.0
         self.dihed     = 1.0
@@ -101,21 +101,21 @@ class Molecule(Atom   ,
 
 
     def load_PDB_to_system(self, filename = None):
-        parser    = PDBParser()
+        parser    = PDBParser(QUIET=True)
         structure = parser.get_structure('X', filename)
         self.residues = []
-        
+
         for model in structure:
-        
+
             c = 1
             for chain in model:
-                
+
                 self.id   = 1
                 self.name = "protein"
-                
+
                 n = 1
                 r = 1
-                
+
                 for pdb_residue in chain:
                     residue = Residue(id=r,  name=pdb_residue.resname)
                     for pdb_atom in pdb_residue:
@@ -129,32 +129,32 @@ class Molecule(Atom   ,
                     self.residues.append(residue)
                     r += 1
 
-    
+
     def import_CHARMM_parameters (self, psf = None, param = None, torsions = None):
         """ Function doc """
         self.psf          = psf
         self.param        = param
         self.ff_type      = 'charmm'
         self.torsions     = load_torsion_from_file (torsions)
-        
+
         sef.FIX_atoms_CHI ={
                                 'CHI1' : ['OT1','OT2','CA','N','H', 'HT1', 'HT2', 'HT3', 'HN','C', 'O','HA'  ],
-                                
+
                                 'CHI2' : ['OT1','OT2','CA','N','H', 'HT1', 'HT2', 'HT3', 'HN','C', 'O','HA',
                                           'HB','HB1','HB2','CG2', 'HG21', 'HG22', 'HG23'         ],
-                                
+
                                 'CHI3' : ['OT1','OT2','CA','N','H', 'HT1', 'HT2', 'HT3', 'HN','C', 'O','HA',
                                           'HB','HB1','HB2', 'CB', 'HG1', 'HG2'                   ],
-                                
+
                                 'CHI4' : ['OT1','OT2','CA','N','H', 'HT1', 'HT2', 'HT3', 'HN','C', 'O','HA',
                                           'HB','HB1','HB2', 'CB', 'HG1', 'HG2', 'CG', 'HD1','HD2'],
-                                 
+
                                 'CHI5' : ['OT1','OT2','CA','N','H', 'HT1', 'HT2', 'HT3', 'HN','C', 'O','HA',
                                           'HB','HB1','HB2', 'CB', 'HG1', 'HG2', 'CG', 'HD1','HD2',
                                           'HE' ,'HE1', 'HE2', 'CD'                               ],
                                }
-    
-    
+
+
     def import_AMBER_parameters (self, top = None, torsions = None):
         """ Function doc """
         self.top          = top
@@ -162,33 +162,33 @@ class Molecule(Atom   ,
         self.torsions     = load_torsion_from_file (torsions)
         self.FIX_atoms_CHI ={
                                 'CHI1' : ['OT1','OT2','CA','N','H', 'H1', 'H2', 'H3', 'HN','C', 'O','HA'  ],
-                                
+
                                 'CHI2' : ['OT1','OT2','CA','N','H', 'H1', 'H2', 'H3', 'HN','C', 'O','HA',
                                           'CB','HB', 'HB2', 'HB3', 'CG2', 'HG21', 'HG22', 'HG23',
                                          ],
-                                         
+
                                          # 'HB','HB1','HB2','HB3', 'CG2', 'HG21', 'HG22','HG23','HG3'      ],
-                                
+
                                 'CHI3' : ['OT1','OT2','CA'  ,'N'  ,'H'  ,'H1'  ,'H2'  ,'H3'  ,'HN','C','O','HA',
-                                          'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23', 
-                                          'CG' ,'HG2', 'HG3', 
+                                          'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23',
+                                          'CG' ,'HG2', 'HG3',
                                           ],
-                                
+
                                 'CHI4' : ['OT1','OT2','CA','N','H', 'H1', 'H2', 'H3', 'HN','C', 'O','HA' ,
-                                          'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23', 
-                                          'CG' ,'HD1','HG2','HG3',                                          
+                                          'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23',
+                                          'CG' ,'HD1','HG2','HG3',
                                           'CD', 'HD1','HD2','HD3'
                                           ],
-                                 
+
                                 'CHI5' : ['OT1','OT2','CA','N','H', 'H1', 'H2', 'H3', 'HN','C', 'O','HA' ,
-                                         'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23', 
-                                          'CG' ,'HG1','HG2','HG3',                                          
+                                         'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23',
+                                          'CG' ,'HG1','HG2','HG3',
                                           'CD', 'HD1','HD2','HD3',
                                           'HE' ,'HE1','HE2','HE3'
                                           ],
                                }
 
-    
+
     def import_Calpha_model_parameters (self, top = None, torsions = None):
         """ Function doc """
         #self.top          = top
@@ -270,33 +270,33 @@ class Molecule(Atom   ,
         #self.torsions     = load_torsion_from_file (torsions)
         self.FIX_atoms_CHI ={
                                 'CHI1' : ['OT1','OT2','CA','N','H', 'H1', 'H2', 'H3', 'HN','C', 'O','HA'  ],
-                                
+
                                 'CHI2' : ['OT1','OT2','CA','N','H', 'H1', 'H2', 'H3', 'HN','C', 'O','HA',
                                           'CB','HB', 'HB2', 'HB3', 'CG2', 'HG21', 'HG22', 'HG23',
                                          ],
-                                         
+
                                          # 'HB','HB1','HB2','HB3', 'CG2', 'HG21', 'HG22','HG23','HG3'      ],
-                                
+
                                 'CHI3' : ['OT1','OT2','CA'  ,'N'  ,'H'  ,'H1'  ,'H2'  ,'H3'  ,'HN','C','O','HA',
-                                          'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23', 
-                                          'CG' ,'HG2', 'HG3', 
+                                          'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23',
+                                          'CG' ,'HG2', 'HG3',
                                           ],
-                                
+
                                 'CHI4' : ['OT1','OT2','CA','N','H', 'H1', 'H2', 'H3', 'HN','C', 'O','HA' ,
-                                          'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23', 
-                                          'CG' ,'HD1','HG2','HG3',                                          
+                                          'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23',
+                                          'CG' ,'HD1','HG2','HG3',
                                           'CD', 'HD1','HD2','HD3'
                                           ],
-                                 
+
                                 'CHI5' : ['OT1','OT2','CA','N','H', 'H1', 'H2', 'H3', 'HN','C', 'O','HA' ,
-                                         'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23', 
-                                          'CG' ,'HG1','HG2','HG3',                                          
+                                         'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23',
+                                          'CG' ,'HG1','HG2','HG3',
                                           'CD', 'HD1','HD2','HD3',
                                           'HE' ,'HE1','HE2','HE3'
                                           ],
                                }
 
-    
+
     def import_fixed_from_string(self, fixed=None):
         """ Function doc """
 
@@ -307,34 +307,34 @@ class Molecule(Atom   ,
                 self.fixed_residues.append(n)
             n += 1
         #----------------------------------------------------------------------
-    
+
     def PrintStatus (self, parameters = True, coordinates = True ):
         """ Function doc """
-        print 'Bond_Stretching  = ', self.Bond_Stretching      
-        print 'Angle_Bending    = ', self.Angle_Bending          
-        print 'Improper_Torsion = ', self.Improper_Torsion    
-        print 'Torsional_Angle  = ', self.Torsional_Angle      
-        print 'Van_der_Waals    = ', self.Van_der_Waals          
-        print 'Charge_Charge    = ', self.Charge_Charge          
-        print 'Total_Energy     = ', self.Total_Energy        
-        
+        print 'Bond_Stretching  = ', self.Bond_Stretching
+        print 'Angle_Bending    = ', self.Angle_Bending
+        print 'Improper_Torsion = ', self.Improper_Torsion
+        print 'Torsional_Angle  = ', self.Torsional_Angle
+        print 'Van_der_Waals    = ', self.Van_der_Waals
+        print 'Charge_Charge    = ', self.Charge_Charge
+        print 'Total_Energy     = ', self.Total_Energy
+
         print 'Fixed_residues   = ', self.fixed_residues
-        
+
         for res in self.residues:
             for atom in res.atoms:
                 print atom.name, atom.pos
-        
-    
+
+
     def import_restraints_from_porter (self, filein= None):
         """ Function doc """
         text = open(filein, 'r')
         text =  text.readlines()
-        
+
         for line in text:
             line2 =  line.split()
             if line2[0] == 'rest':
                 fixed_residues = line2[2]
-        
+
         for resi in fixed_residues:
             try:
                 self.fixed_residues.append(int(resi))
