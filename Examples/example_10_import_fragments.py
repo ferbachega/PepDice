@@ -60,15 +60,16 @@ system.load_PDB_to_system      (filename = os.path.join(PEPDICE_EXAMPLES , 'data
 system.import_AMBER_parameters(top       = os.path.join(PEPDICE_EXAMPLES , 'data/alpha/1GAB/1gab_ff03ua_AMBER_extended.prmtop')   , #
                                 torsions = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )                            #
 
-TRAJECTORY = os.path.join(PEPDICE_EXAMPLES , 'outputs/example10_n'   )   
+TRAJECTORY = os.path.join(PEPDICE_EXAMPLES , 'outputs/example10_n'   )
 try:                                                                                                                                #
     os.remove(TRAJECTORY)                                                                                                           #
-except:                                                                                                                             #
-    pass                                                                                                                            #
+except OSError:                                                                                                                             #
+    # File doesnt exist, so nothing to do here
+    pass                                                                                                                      #
 #-----------------------------------------------------------------------------------------------------------------------------------#
 #system.energy(log = True)
 
-    
+
 
 import pickle
 system.fragments = pickle.load( open( "1gab_fragments.p", "rb" ) )
@@ -77,12 +78,12 @@ system.fragments = pickle.load( open( "1gab_fragments.p", "rb" ) )
 #
 #print len(fragments)
 #print len(fragments[0])
-#n = 0 
+#n = 0
 #for resi in fragments:
 #    k = 0
 #    if resi == []:
 #        print n, resi
-#    for frag in resi: 
+#    for frag in resi:
 #        print 'Position: ',n , 'fragment index: ',k, 'Number of fragments : ',len(resi), 'fragment size : ', len(frag)
 #        k += 1
 #    n += 1
@@ -132,14 +133,14 @@ run_MC_replica_exchange (
                         CPUs               = 8                   ,
                         min_temp           = 100                 ,
                         max_temp           = 1000                ,
-                        PhiPsi_rate        = 1.0                 , 
+                        PhiPsi_rate        = 1.0                 ,
                         max_angle_range    = 5                   ,
-                        trajectory         = 'MC_1GAB_replica_'  ,      
+                        trajectory         = 'MC_1GAB_replica_'  ,
                         Kb                 = 0.0019872041        ,
-                        log_frequence      = 10                  , 
+                        log_frequence      = 10                  ,
                         nSteps             = 10000               ,
                         nExchanges         = 5                   ,
-                        
+
                         fragment_rate      = 1.0                 ,
                         log                = False               ,
                         #filelog            = 'MC_1GAB_replica_'
