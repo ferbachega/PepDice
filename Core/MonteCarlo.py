@@ -53,7 +53,7 @@ class TextLofFileWriter():
 --------------------------------------------------------------
 '''
 
-def exchange_acceptance_test (Ei = 0, Ej = 0, Kb = 0.0019872041, Ti = 1, Tj = 1, log = False):
+def exchange_acceptance_test (Ei = 0, Ej = 0, Kb = 1, Ti = 1, Tj = 1, log = False):
     """ Function doc
     Y. Sugita, Y. Okamotor Chemical Physics Letters 314 ( 1999 ) 141–151
 
@@ -104,14 +104,13 @@ def exchange_acceptance_test (Ei = 0, Ej = 0, Kb = 0.0019872041, Ti = 1, Tj = 1,
     #-------------------------------------------------#
 
 def metropolis_acceptance_test (energy = None        ,
-           previous_energy = None        ,
-               temperature = 273.15      ,
-                        Kb = 0.0019872041):
+                       previous_energy = None        ,
+                           temperature = 273.15      ,
+                                    Kb = 0.0019872041):
     """ Function doc """
     if energy < previous_energy:
         return True
     else:
-
         dE = (energy - previous_energy)
         #Px = math.exp(-1 * dE / (Kb * temperature))
         Px = math.exp(-1 * dE / (temperature))
@@ -142,10 +141,10 @@ def rotate_backbone_attempt (molecule = None,
     energy = molecule.energy(pn =pn)
 
     if energy:
-        if metropolis_acceptance_test (energy = energy         ,
-                 previous_energy = previous_energy ,
-                     temperature = 273.15          ,
-                              Kb = 0.0019872041    ):
+        if metropolis_acceptance_test (energy = energy          ,
+                              previous_energy = previous_energy ,
+                                  temperature = 273.15          ,
+                                           Kb = 0.0019872041    ):
             return energy
 
         else:
@@ -223,7 +222,7 @@ def monte_carlo(molecule           = None                       ,
     logfilename = trajectory+'.log'
     logfile     = open(logfilename, 'a')
     trajectory  = trajectory+'.xyz'
-
+    waste       = trajectory+'.waste.xyz'  
 
 
     previous_energy      = molecule.energy(pn = pn)
@@ -296,9 +295,11 @@ def monte_carlo(molecule           = None                       ,
                         #text.append("pn: {:<3d} step: {:5d} energy: {:<20.7f}fragment: {:<3d}\n".format(pn, i, energy , fragment_index))
                         #print "pn: {:<3d} step: {:5d} energy: {:<20.7f}fragment: {:<3d}".format(pn, i, energy , fragment_index)
                     else:
+                        save_XYZ_to_file (molecule, waste)
                         molecule.import_coordinates_to_system (previous_coordinates)
                         #print 'fragment: ',fragment_index, energy, len(fragment), 'failed'
                 else:
+                    save_XYZ_to_file (molecule, waste)
                     molecule.import_coordinates_to_system (previous_coordinates)
         #print 'temp: = ', temperature, 'energy = ', previous_energy, 'acceptance ratio (phi) =', (accepted_fragment / attempted_fragment)
 
@@ -350,6 +351,7 @@ def monte_carlo(molecule           = None                       ,
                         #text.append("pn: {:<3d} step: {:5d} energy: {:<20.7f}rotate_backbone theta: {:<6.3f}\n".format(pn, i, energy , theta*57.324))
                         #print "pn: {:<3d} step: {:5d} energy: {:<20.7f}rotate_backbone theta: {:<6.3f}".format(pn, i, energy , theta*57.324)
                     else:
+                        save_XYZ_to_file (molecule, waste)
                         molecule.import_coordinates_to_system (previous_coordinates)
 
         if energy:
@@ -456,12 +458,12 @@ def MC_replica_exchange (replicas   = [],
         #--------------------------------------------#
 
         #------------------------------------- Exchange -----------------------------------------#
-        REPLICAS = {}
+        replica_results = {}
         for result in results:
             #print 'replica: %3i energy: %10.7f temp: %i' %(result['pn']        ,
             #                                               result['energy']    ,
             #                                               result['temperature'])#, len(result[2])
-            REPLICAS[result['pn']] = {
+            replica_results[result['pn']] = {
                                 'energy'     : result['energy'],
                                 'coords'     : result['coords'],
                                 'temperature': result['temperature']
@@ -471,26 +473,30 @@ def MC_replica_exchange (replicas   = [],
 
         print '\n\n'
         # teste feito para verificar quais sao os pares de replicas que serao trocados
-        for i in range (1,len(REPLICAS)):
-            Ei = REPLICAS[i]  ['energy']                                                                       #
-            Ej = REPLICAS[i+1]['energy']                                                                       #
+        for i in range (1,len(replica_results)):
+            Ei = replica_results[i]  ['energy']                                                                       #
+            Ej = replica_results[i+1]['energy']                                                                       #
 
-            Ti = REPLICAS[i]  ['temperature']                                                                  #
-            Tj = REPLICAS[i+1]['temperature']                                                                  #
+            Ti = replica_results[i]  ['temperature']                                                                  #
+            Tj = replica_results[i+1]['temperature']                                                                  #
 
-            COORDi = REPLICAS[i]  ['coords']                                                                   #
-            COORDj = REPLICAS[i+1]['coords']                                                                   #
+            COORDi = replica_results[i]  ['coords']                                                                   #
+            COORDj = replica_results[i+1]['coords']                                                                   #
 
 
-            Kb = 0.0019872041
+            Kb = 1 #0.0019872041
             Bi = 1/(Kb*Ti)                                                   # (1)
             Bj = 1/(Kb*Tj)
             Delta = (Bj - Bi)*(Ei - Ej)                                      # (2)
 
             # exchange acceptance test - teste de aceitacao de troca das replicas
-            if exchange_acceptance_test(Ei=Ei, Ej=Ej , Kb = 0.0019872041, Ti=Ti, Tj=Tj ):
+            if exchange_acceptance_test(Ei=Ei, Ej=Ej , Kb = Kb, Ti=Ti, Tj=Tj ):
+                
+                # replicas comeca em 0 - pois eh uma lista
+                
                 replicas[i]  ['molecule'].import_coordinates_to_system (COORDi)
                 replicas[i-1]['molecule'].import_coordinates_to_system (COORDj)
+             
                 print 'replica ',i+1, ' ----> ', i    , 'Delta = ', Delta, 'accepted'
                 print 'replica ',i, ' ----> '  , i+1  , 'Delta = ', Delta, 'accepted'
 
@@ -512,18 +518,18 @@ def MC_replica_exchange (replicas   = [],
                                                                                                                        #
         # partindo de repĺica 1   1-2 3-4 5-6 ...                                                                      #
         if test  == 1:                                                                                                 #
-            for i in range (1,len(REPLICAS)+1,2):                                                                      #
-                if i == len(REPLICAS):                                                                                 #
+            for i in range (1,len(replica_results)+1,2):                                                                      #
+                if i == len(replica_results):                                                                                 #
                     pass                                                                                               #
                 else:                                                                                                  #
-                    Ei = REPLICAS[i]  ['energy']                                                                       #
-                    Ej = REPLICAS[i+1]['energy']                                                                       #
+                    Ei = replica_results[i]  ['energy']                                                                       #
+                    Ej = replica_results[i+1]['energy']                                                                       #
                                                                                                                        #
-                    Ti = REPLICAS[i]  ['temperature']                                                                  #
-                    Tj = REPLICAS[i+1]['temperature']                                                                  #
+                    Ti = replica_results[i]  ['temperature']                                                                  #
+                    Tj = replica_results[i+1]['temperature']                                                                  #
                                                                                                                        #
-                    COORDi = REPLICAS[i]  ['coords']                                                                   #
-                    COORDj = REPLICAS[i+1]['coords']                                                                   #
+                    COORDi = replica_results[i]  ['coords']                                                                   #
+                    COORDj = replica_results[i+1]['coords']                                                                   #
                                                                                                                        #
                                                                                                                        #
                     # se o criteiro de troca for satisfeito:                                                           #
@@ -542,16 +548,16 @@ def MC_replica_exchange (replicas   = [],
                                                                                                                        #
         # partindo de repĺica 2   2-3 4-5 6-7 ... 1-n                                                                  #
         else:                                                                                                          #
-            for i in range (2,len(REPLICAS)+1,2):                                                                      #
-                if i == len(REPLICAS):                                                                                 #
-                    Ei = REPLICAS[1]['energy']                                                                         #
-                    Ej = REPLICAS[i]['energy']                                                                         #
+            for i in range (2,len(replica_results)+1,2):                                                                      #
+                if i == len(replica_results):                                                                                 #
+                    Ei = replica_results[1]['energy']                                                                         #
+                    Ej = replica_results[i]['energy']                                                                         #
                                                                                                                        #
-                    Ti = REPLICAS[1]['temperature']                                                                    #
-                    Tj = REPLICAS[i]['temperature']                                                                    #
+                    Ti = replica_results[1]['temperature']                                                                    #
+                    Tj = replica_results[i]['temperature']                                                                    #
                                                                                                                        #
-                    COORDi = REPLICAS[1]['coords']                                                                     #
-                    COORDj = REPLICAS[i]['coords']                                                                     #
+                    COORDi = replica_results[1]['coords']                                                                     #
+                    COORDj = replica_results[i]['coords']                                                                     #
                                                                                                                        #
                     # se o criteiro de troca for satisfeito:                                                           #
                     if exchange_acceptance_test(Ei=Ei, Ej=Ej , Kb = 0.0019872041, Ti=Ti, Tj=Tj ):                      #
@@ -569,14 +575,14 @@ def MC_replica_exchange (replicas   = [],
                         print 'replica ',i, '----> coord', i   , 'dE = ', (Ei - Ej)                                    #
                                                                                                                        #
                 else:                                                                                                  #
-                    Ei = REPLICAS[i]['energy']                                                                         #
-                    Ej = REPLICAS[i+1]['energy']                                                                       #
+                    Ei = replica_results[i]['energy']                                                                         #
+                    Ej = replica_results[i+1]['energy']                                                                       #
                                                                                                                        #
-                    Ti = REPLICAS[i]['temperature']                                                                    #
-                    Tj = REPLICAS[i+1]['temperature']                                                                  #
+                    Ti = replica_results[i]['temperature']                                                                    #
+                    Tj = replica_results[i+1]['temperature']                                                                  #
                                                                                                                        #
-                    COORDi = REPLICAS[i]  ['coords']                                                                   #
-                    COORDj = REPLICAS[i+1]['coords']                                                                   #
+                    COORDi = replica_results[i]  ['coords']                                                                   #
+                    COORDj = replica_results[i+1]['coords']                                                                   #
                                                                                                                        #
                     # se o criteiro de troca for satisfeito:                                                           #
                     if exchange_acceptance_test(Ei=Ei, Ej=Ej , Kb = 0.0019872041, Ti=Ti, Tj=Tj ):                      #
@@ -678,14 +684,14 @@ def run_MC_replica_exchange (
 
 
 
-#---------------------------------------------------------------------------------------
-for i in range(10):
-    Ei = random.uniform(-i,i)
-    Ej = random.uniform(-i,i)
-    Ti = 275
-    Tj = 300
-    print exchange_acceptance_test(Ei=Ei, Ej=Ej , Kb = 0.0019872041, Ti=Ti, Tj=Tj )
-#---------------------------------------------------------------------------------------
+##---------------------------------------------------------------------------------------
+#for i in range(10):
+#    Ei = random.uniform(-i,i)
+#    Ej = random.uniform(-i,i)
+#    Ti = 275
+#    Tj = 300
+#    print exchange_acceptance_test(Ei=Ei, Ej=Ej , Kb = 0.0019872041, Ti=Ti, Tj=Tj )
+##---------------------------------------------------------------------------------------
 
 
 
