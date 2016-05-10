@@ -151,7 +151,7 @@ class Energy:
 def write_AMBER_input_file (molecule=None, Type='energy', pn = 1):
     text = """  compute single-point energy 
  &cntrl
-   cut=300.0, igb=2, saltcon=0.2, gbsa=1,
+   cut=999.0, igb=1, saltcon=0.2, gbsa=1, rgbmax = 999.00000, surften = 0.010,
    ntpr=1,
    nstlim = 0, dt=0.002,
    ntt=1, tempi=300.0, temp0=300.0, tautp=2.0,
