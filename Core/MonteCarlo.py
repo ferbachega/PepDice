@@ -54,7 +54,8 @@ class TextLofFileWriter():
 '''
 
 def exchange_acceptance_test (Ei = 0, Ej = 0, Kb = 1, Ti = 1, Tj = 1, log = False):
-    """ Function doc
+    """             Exchange Acceptance Test
+    
     Y. Sugita, Y. Okamotor Chemical Physics Letters 314 ( 1999 ) 141–151
 
     B = 1/(Kb*T)                                                     (1)
@@ -78,8 +79,8 @@ def exchange_acceptance_test (Ei = 0, Ej = 0, Kb = 1, Ti = 1, Tj = 1, log = Fals
     Delta = (Bj - Bi)*(Ei - Ej)                                      # (2)
     if log:
         print '\n\n'
-        print 'Bi    = ', Bi
-        print 'Bj    = ', Bj
+        print 'Bi    = ',Bi
+        print 'Bj    = ',Bj
         print 'dE    = ',Bj - Bi
         print 'Delta = ',(Ei - Ej)*(Bj - Bi)
 
