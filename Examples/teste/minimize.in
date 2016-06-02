@@ -1,0 +1,10 @@
+Stage 1 - minimisation of TC5b
+ &cntrl
+  imin=1, maxcyc=100, ncyc=100,
+  cut=99, rgbmax=10,igb=1, ntb=0,
+  ntpr=1, 
+  ntr=0,
+  restraintmask = ':1-50 & @CA,N,C,O=',
+  restraint_wt=50.0,
+ /
+ 

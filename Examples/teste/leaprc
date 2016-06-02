@@ -1,0 +1,5 @@
+source leaprc.ff03ua 
+foo = sequence {NALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA ALA CALA } 
+saveamberparm foo 1GAB_poly_ala.top 1GAB_poly_ala.crd 
+savepdb foo 1GAB_poly_ala.pdb 
+quit
