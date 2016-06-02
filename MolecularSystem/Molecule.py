@@ -27,7 +27,7 @@ from Coordinates import Coordinates
 from Energy      import Energy
 from Residue import  Residue
 from Bio.PDB import PDBParser
-
+import subprocess
 '''
 #!/bin/bash
 
@@ -52,17 +52,21 @@ PEPDICE_SCRATCH=$PEPDICE_ROOT/scratch                                         ; 
 PYTHONPATH=:$PEPDICE_ROOT/Babel:$PEPDICE_ROOT/Core:$PEPDICE_ROOT/MolecularSystem ; export PYTHONPATH
 '''
 
+#-------------------------------------------------------------------------------
+PEPDICE = os.environ.get('PEPDICE')
+PEPDICE_EXAMPLES = os.path.join(PEPDICE, 'Examples')
+PEPDICE_PARAMETER= os.path.join(PEPDICE, 'Parameters')
+#-------------------------------------------------------------------------------
 from AATorsions import load_torsion_from_file
 
 class Molecule(Atom   ,
                Residue,
                Coordinates,
                Energy
-
                ):
     """ class to store info about a molecule"""
 
-    def __init__(self, id=0, name='MOL'):
+    def __init__(self, id=0, name = 'protein'):
 
         self.id       = id
         self.name     = name
@@ -100,6 +104,82 @@ class Molecule(Atom   ,
         self.egb       = 1.0
 
 
+    def build_peptide_from_sequence_AMBER (self, sequence = None, force_field = 'ff03ua', overwrite   = True  ):
+        """ 
+        Function doc 
+        source leaprc.ff03ua
+        foo = sequence { ACE ALA NME }
+        saveamberparm foo foo.top foo.crd
+        """
+        
+        aa_dic = { 
+                 'A' : 'ALA',
+                 'R' : 'ARG',
+                 'N' : 'ASN',
+                 'D' : 'ASP',
+                 'C' : 'CYS',
+                 'E' : 'GLU',
+                 'Q' : 'GLN',
+                 'G' : 'GLY',
+                 'H' : 'HIS',
+                 'I' : 'ILE',
+                 'L' : 'LEU',
+                 'K' : 'LYS',
+                 'M' : 'MET',
+                 'F' : 'PHE',
+                 'P' : 'PRO',
+                 'S' : 'SER',
+                 'T' : 'THR',
+                 'W' : 'TRP',
+                 'Y' : 'TYR',
+                 'V' : 'VAL'
+                 }
+        
+        if overwrite:
+            text  = 'source leaprc.' + force_field + ' \n'
+            text += 'foo = sequence {N'
+            
+            n = 1
+            for aa in sequence:
+                
+                if n == len(sequence):
+                    text += 'C'
+                
+                text += aa_dic[aa] + ' '
+                n += 1
+            
+            text += '} \n'
+            text += 'saveamberparm foo '+ self.name +'.top '+ self.name +'.crd \n'
+            text += 'savepdb foo ' + self.name +'.pdb \n'
+            text += 'quit'
+            leaprc = open('leaprc', 'w')
+            leaprc.write(text)
+            leaprc.close()
+            
+        #os.system('tleap -f leaprc')
+        subprocess.call(['tleap', '-f', 'leaprc'])
+        
+        
+        self.load_PDB_to_system      (filename  = self.name + '.pdb')  
+        self.import_AMBER_parameters (top       = self.name + '.top' ,
+                                      torsions  = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )
+
+    def build_peptide_from_sequence (self,
+                                     sequence    = 'AAAAAAAAA',
+                                     _type       = 'amber'    ,
+                                     force_field = 'ff03ua'    ,
+                                     overwrite   = True       ,
+                                     ):
+        """ :P """
+        if _type == 'amber':
+            self.build_peptide_from_sequence_AMBER(sequence    = sequence   , 
+                                                   force_field = force_field, 
+                                                   overwrite   = overwrite  )
+
+
+
+
+
     def load_PDB_to_system(self, filename = None):
         parser    = PDBParser(QUIET=True)
         structure = parser.get_structure('X', filename)
@@ -111,7 +191,7 @@ class Molecule(Atom   ,
             for chain in model:
 
                 self.id   = 1
-                self.name = "protein"
+                #self.name = "protein"
 
                 n = 1
                 r = 1
@@ -181,9 +261,9 @@ class Molecule(Atom   ,
                                           ],
 
                                 'CHI5' : ['OT1','OT2','CA','N','H', 'H1', 'H2', 'H3', 'HN','C', 'O','HA' ,
-                                         'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23',
-                                          'CG' ,'HG1','HG2','HG3',
-                                          'CD', 'HD1','HD2','HD3',
+                                          'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23',
+                                          'CG' ,'HG1','HG2','HG3' ,
+                                          'CD' , 'HD1','HD2','HD3',
                                           'HE' ,'HE1','HE2','HE3'
                                           ],
                                }

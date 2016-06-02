@@ -52,9 +52,16 @@ def import_fragments_from_pdb (molecule = None, residues = [], mainchain =True, 
             fragment[i]['PSI']   = computePhiPsi (molecule=molecule, resi=i, bond='PSI')
             fragment[i]['OMEGA'] = computePhiPsi (molecule=molecule, resi=i, bond='OMEGA')
             fragment[i]['NAME']  = molecule.residues[i].name
+        
         if sidechain:
+        
             for chi in ["CHI1","CHI2","CHI3","CHI4","CHI5"]:
-                fragment[i][chi] = computeCHI (molecule= molecule, resi=i, bond=chi)
+                residue   = molecule.residues[i]
+                if chi in molecule.torsions[residue.name]:
+        
+                    fragment[i][chi] = computeCHI (molecule= molecule, resi=i, bond=chi)
+                
+                
                 #print i, system.residues[i].name, chi,computeCHI (molecule=system, resi=i, bond=chi)
     return fragment 
 

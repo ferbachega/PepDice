@@ -173,10 +173,12 @@ def computeCHI (molecule=None, resi=1, bond='CHI1'):
                             a3.pos ,
                             a4.pos)
 
+        print  residue.name, resi, CHI, math.degrees(angle)
         return math.degrees(angle)
+    
     except KeyError as error:
-        raise KeyError("{} does not have a {}.".format(
-            residue.name, error.message))
+        raise KeyError("{} {} does not have a {}.".format(
+            residue.name, resi, error.message))
 
 
 def rotate_side_chain (molecule=None, resi=1, bond='CHI1', theta=math.radians(1), steps=1):
@@ -349,7 +351,7 @@ def rotate_backbone(molecule=None, resi=1, bond='PSI', theta=0, steps=1):
         elif atom_i.name == 'N':
             N = atom_i
                                                             #|---amber---|
-        elif atom_i.name in ['H', 'HT1', 'HT2', 'HT3', 'HN','H1','H2','H3']:
+        elif atom_i.name in ['H']:#, 'HT1', 'HT2', 'HT3', 'HN','H1','H2','H3']:
             H = atom_i
 
         elif atom_i.name == 'C':
@@ -357,6 +359,10 @@ def rotate_backbone(molecule=None, resi=1, bond='PSI', theta=0, steps=1):
 
         elif atom_i.name == 'O':
             O = atom_i
+        
+        elif atom_i.name == 'OXT':
+            O = atom_i
+
 
         else:
             sideChain.append(atom_i.id)
@@ -384,7 +390,7 @@ def rotate_backbone(molecule=None, resi=1, bond='PSI', theta=0, steps=1):
         z = subcoord[2]
         molecule = center_atom(molecule=molecule, x=x, y=y, z=z)
 
-        axis = N.pos     # CA - C alpha
+        axis = N.pos     # CA - C alphal
         window = range(0, N.id + 1)
         try:
             window.append(H.id)
@@ -393,8 +399,6 @@ def rotate_backbone(molecule=None, resi=1, bond='PSI', theta=0, steps=1):
 
         for i in range(0, steps):
             rotate_Calpha_dihedral(molecule, axis, theta, window=window)
-
-
 
     if bond == "OMEGA":
         residue = molecule.residues[resi+1]
@@ -429,6 +433,7 @@ def rotate_backbone(molecule=None, resi=1, bond='PSI', theta=0, steps=1):
         for i in range(0, steps):
             #print axis, theta, window
             rotate_Calpha_dihedral(molecule, axis, theta, window=window)
+
 
 def set_phi_psi_dihedral (molecule=None, resi=1, bond='PSI', angle = 0.0 ):
     """ Function doc """

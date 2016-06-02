@@ -81,6 +81,7 @@ class Energy:
 
         
         if  self.ff_type == 'amber':
+            # transformar numa funcao
             pn  = pn
             
             write_AMBER_input_file(molecule = self, Type='energy', pn= pn)
@@ -95,7 +96,7 @@ class Energy:
             
             energy = 0 
             energy += energy_list["ESURF"]       * esurf
-            energy += energy_list["RESTRAINT"]
+            #energy += energy_list["RESTRAINT"]
             energy += energy_list["EGB"]         * egb
             energy += energy_list["EELEC"]       * elect
 
@@ -106,8 +107,8 @@ class Energy:
             else:
                 energy += energy_list["VDWAALS"] * vdw
             
-            energy += energy_list["EEL"]
-            energy += energy_list["NB"]
+            #energy += energy_list["EEL"]
+            #energy += energy_list["NB"]
             energy += energy_list["DIHED"] * dihed
             energy += energy_list["ANGLE"] * angle
             energy += energy_list["BOND"]  * bond
