@@ -173,7 +173,7 @@ def computeCHI (molecule=None, resi=1, bond='CHI1'):
                             a3.pos ,
                             a4.pos)
 
-        print  residue.name, resi, CHI, math.degrees(angle)
+        #print  residue.name, resi, CHI, math.degrees(angle)
         return math.degrees(angle)
     
     except KeyError as error:

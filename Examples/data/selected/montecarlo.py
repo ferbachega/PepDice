@@ -44,6 +44,9 @@ from Energy import save_PDB_to_file                                             
 from SideChainRefine import optimize_side_chain                                                     #
 #---------------------------------------------------------------------------------------------------#
 
+import random
+random.seed(10)
+
 pdbs = {
         '2n1p':'HSVSHARPRWFWFSLLLLAAGVGIYLLPNR'                                                 ,
         '2n2r':'QKLCQRPSGTWSGVCGNNNACKNQCIRLEKARHGSCNYVFPAHKCICYFPC'                            ,
@@ -59,7 +62,7 @@ pdbs = {
         '2nbd':'MQIFVKTLTGKTITLEVEPSDTIENAKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG'   ,
         }
 
-for pdb in pdbs
+for pdb in pdbs:
     #-------------------------------------------------------------------#
     system = Molecule(name = pdb)                                       #
     system.build_peptide_from_sequence (                                #
@@ -75,8 +78,8 @@ for pdb in pdbs
     #'''                                                                #
     minimize(molecule = system,                                         #
              imin     = 1     ,                                         #
-             maxcyc   = 5000  ,                                         #
-             ncyc     = 2000  ,                                         #
+             maxcyc   = 100  ,                                         #
+             ncyc     = 50   ,                                         #
              cut      = 99    ,                                         #
              rgbmax   = 10    ,                                         #
              igb      = 1     ,                                         #
@@ -88,25 +91,38 @@ for pdb in pdbs
     #-------------------------------------------------------------------#
 
     #-------------------------------------------------------------------------------
-    try:
-        import pickle
-        system.fragments = pickle.load( open( pdb + '/' +pdb+"_fragments_raw.p", "rb" ))
-        #-------------------------------------------------------------------------------
-        monte_carlo(molecule           = system                                    ,
-                    temperature        = 1000                                      ,
-                    Kb                 = 1                                         ,
-                    angle_range        = 60                                        ,
-                    nSteps             = 10000                                     ,
-                    fragment_rate      = 0.2                                       ,
-                    fragment_sidechain = False                                     ,
-                    log_frequence      = 10                                        ,
-                    PhiPsi_rate        = 1.0                                       ,
-                    trajectory         = pdb + '/' +pdb+'MonteCarlo_trajectory.xyz',
-                    pn                 = 1                                         )
-    except:
-        print 'fail ', pdb 
+    #try:
+    import pickle
+    system.fragments = pickle.load( open( pdb + '/' +pdb+"_fragments_raw_5.p", "rb" ))
+    ##-------------------------------------------------------------------------------
+    monte_carlo(molecule           = system                                    ,
+                random             = random                                     ,
+                temperature        = 500                                       ,
+                Kb                 = 1                                         ,
+                angle_range        = 60                                        ,
+                nSteps             = 200                                       ,
+                fragment_rate      = 1.0                                       ,
+                fragment_sidechain = False                                     ,
+                log_frequence      = 10                                        ,
+                PhiPsi_rate        = 0.0                                       ,
+                trajectory         = pdb + '/' +pdb+'MC_raw_trajectory_5'      ,
+                pn                 = 1                                         )
+    #except:
+    #    print 'fail ', pdb 
 
-
+    system.fragments = pickle.load( open( pdb + '/' +pdb+"_fragments_min_5.p", "rb" ))
+    monte_carlo(molecule           = system                                    ,
+                random             = random                                     ,
+                temperature        = 500                                        ,
+                Kb                 = 1                                         ,
+                angle_range        = 60                                        ,
+                nSteps             = 200                                       ,
+                fragment_rate      = 1.0                                       ,
+                fragment_sidechain = False                                     ,
+                log_frequence      = 10                                        ,
+                PhiPsi_rate        = 0.0                                       ,
+                trajectory         = pdb + '/' +pdb+'MC_min_trajectory_5'      ,
+                pn                 = 1                                         )
 
 
 '''

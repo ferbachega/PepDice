@@ -58,9 +58,11 @@ def import_fragments_from_pdb (molecule = None, residues = [], mainchain =True, 
             for chi in ["CHI1","CHI2","CHI3","CHI4","CHI5"]:
                 residue   = molecule.residues[i]
                 if chi in molecule.torsions[residue.name]:
-        
-                    fragment[i][chi] = computeCHI (molecule= molecule, resi=i, bond=chi)
-                
+                    #print chi
+                    try:
+                        fragment[i][chi] = computeCHI (molecule= molecule, resi=i, bond=chi)
+                    except:
+                        print i , 'and', chi ,  ' failed'
                 
                 #print i, system.residues[i].name, chi,computeCHI (molecule=system, resi=i, bond=chi)
     return fragment 
@@ -92,7 +94,7 @@ def build_fragment_library_from_pdbs (
                  ]
     '''
 
-
+    #print 1, len(molecule.residues)
     # lista  (posicoes  =  index do residuo), 
     # cade elemento eh uma lista com N fragmentos 
     # possiveis.
@@ -105,7 +107,7 @@ def build_fragment_library_from_pdbs (
     for pdb in pdblist:
         #para os pdbs na lista, importar fragmentos
         molecule.load_PDB_to_system(filename = pdb)  
-        
+        #print 2, len(molecule.residues), pdb
         
         for i in range(0, number_of_fragments):
             
