@@ -301,7 +301,7 @@ def monte_carlo_dic (parameters):
     uma variavel como entrada -> necessaria para a paralelizacao.
 
     """
-    random.seed(parameters['pn'])
+    #random.seed(parameters['pn'])
     return  monte_carlo(**parameters)
 
 
@@ -717,7 +717,7 @@ def MC_replica_exchange (replicas   = [],
 
 def run_MC_replica_exchange (
                             molecule           = None         ,
-
+                            random             = None         ,
                             N_replicas         = 1            , # >= number of CPUs
                             CPUs               = 1            , # Number os CPUs
 
@@ -727,9 +727,7 @@ def run_MC_replica_exchange (
                             max_angle_range    = 5            ,
                             trajectory         = 'MC_replica_',
                             log_frequence      = 100          ,
-
-                            Kb                 = 0.0019872041 , #0.0083144621 ,
-
+                            Kb                 = 1            , #  0.0019872041 , #0.0083144621 ,
                             nSteps             = 1000         , # (bloco de sim) numero de passos na simulacao de MC
                             nExchanges         = 5            , # numero de eventos de troca  ->  total de simulacao eh dado pelo  nExchanges x nSteps
 
@@ -749,6 +747,7 @@ def run_MC_replica_exchange (
     for i in range(1, N_replicas + 1):                                 #
         parameters = {}                                                #
         parameters['molecule'          ] = molecule                    #
+        parameters['random'            ] = random            
         parameters['temperature'       ] = min_temp                    #
         parameters['Kb'                ] = Kb                          #
         parameters['nSteps'            ] = nSteps                      #
