@@ -173,23 +173,26 @@ def insert_fragment (molecule = None, fragment = None, sidechain = False):
 
 
         if sidechain:
-            try:
-                for bond in ['CHI1','CHI2','CHI3','CHI4','CHI5']:
-                    if fragment[key][bond]:
-                        set_chi_dihedral (molecule  = molecule,
-                                              resi  = key,
-                                              bond  = bond,
-                                              angle = fragment[key][bond])
-            except KeyError as error:
-                logger.debug(error.message)
-                logger.debug("Target: " + "".join([
-                    three_to_one(molecule.residues[i].name)
-                        if molecule.residues[i].name != 'HIE' else 'H'
-                        for i in fragment
-                ]))
-                logger.debug("Fragment: " + "".join([
-                    three_to_one(a['NAME']) for a in fragment.values()
-                ]))
+            #try:
+            for bond in ['CHI1','CHI2','CHI3','CHI4','CHI5']:
+                #try:
+                if bond in fragment[key]:
+                    set_chi_dihedral (molecule  = molecule,
+                                          resi  = key,
+                                          bond  = bond,
+                                          angle = fragment[key][bond])
+                #except:
+                #    print 'fail', bond
+            #except KeyError as error:
+            #    logger.debug(error.message)
+            #    logger.debug("Target: " + "".join([
+            #        three_to_one(molecule.residues[i].name)
+            #            if molecule.residues[i].name != 'HIE' else 'H'
+            #            for i in fragment
+            #    ]))
+            #    logger.debug("Fragment: " + "".join([
+            #        three_to_one(a['NAME']) for a in fragment.values()
+            #    ]))
 
 
 
@@ -312,9 +315,14 @@ def monte_carlo(molecule           = None                       ,
                 angle_range        = 1                          ,
                 nSteps             = 10000                      ,
                 fragment_rate      = 1.0                        , #between 0  and 1
-                fragment_sidechain = False                      ,
-                log_frequence      = 10                         ,
+                fragment_sidechain = True                       ,
                 PhiPsi_rate        = 1.0                        ,
+
+                #side_chain         = False                      ,
+                #side_chain_steps   = 1000                       ,
+                #rotamers           = None                       ,
+                
+                log_frequence      = 10                         ,
                 trajectory         = 'MonteCarlo_trajectory.xyz',
                 pn                 = 1                          ):
 
@@ -466,6 +474,17 @@ def monte_carlo(molecule           = None                       ,
                         save_XYZ_to_file (molecule, waste)
                         molecule.import_coordinates_to_system (previous_coordinates)
 
+        
+        #if side_chain == True:
+        #    monte_carlo_side_chain (molecule  = molecule        ,
+        #                           rotamers   = rotamers        ,
+        #                           random     = random          ,
+        #                           initial_T  = temperature     ,
+        #                           final_T    = temperature     ,
+        #                           angle_range= angle_range     ,
+        #                           nSteps     = side_chain_steps,
+        #                           trajectory = trajectory      )
+        
         if energy:
             if energy <= previous_energy:
                 if FRAGMENTS:
@@ -494,13 +513,15 @@ def monte_carlo(molecule           = None                       ,
 
 
 def monte_carlo_side_chain (molecule  = None,
+                           rotamers   = None,
+                           random     = None,
                            initial_T  = 1000,
                            final_T    = 1   ,
                            angle_range= 20  ,
                            nSteps     = 1000,
                            trajectory='MonteCarlo_trajectory.xyz'):
 
-    Kb              = 0.0019872041 #, #0.0083144621
+    Kb              = 1 #0.0019872041 #, #0.0083144621
     temp            = initial_T
     gamma           = -1 * (math.log(float(final_T) / float(initial_T))) / nSteps
     tau_angle_range = (float(angle_range) / nSteps) * -1
@@ -513,16 +534,16 @@ def monte_carlo_side_chain (molecule  = None,
     for i in range(0, nSteps):
 
         for i in range(0, len(molecule.residues)):
-            name         = system.residues[i].name
-            res          = system.residues[i]
+            name         = molecule.residues[i].name
+            res          = molecule.residues[i]
             if name in ['HSD', 'HSE', 'HDP', 'HIE', 'HID']:
                 name = 'HIS'
-            res_rotamers =  ROTAMER_LIST[name]
+            res_rotamers =  rotamers[name]
 
             for key in res_rotamers:
-                set_side_chain_rotamer(molecule=system, resi=i, rotamer=res_rotamers[key])
+                set_side_chain_rotamer(molecule=molecule, resi=i, rotamer=res_rotamers[key])
 
-                energy = system.energy()
+                energy = molecule.energy()
                 if energy:
                     if energy <= initial_energy:
                         save_XYZ_to_file(molecule, trajectory)

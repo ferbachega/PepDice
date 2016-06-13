@@ -48,28 +48,29 @@ import random
 random.seed(10)
 
 pdbs = {
-        '2n1p':'HSVSHARPRWFWFSLLLLAAGVGIYLLPNR'                                                 ,
-        '2n2r':'QKLCQRPSGTWSGVCGNNNACKNQCIRLEKARHGSCNYVFPAHKCICYFPC'                            ,
-        '2n2s':'SCGSECAPEPDCWGCCLVQCAPSICAGWCGGS'                                               ,
-        '2n52':'VFSQGGQVDCGEFQDTKVYCTRESNPHCGSDGQTYGNKCAFCKAIVKSGGKISLKHPGKC'                   ,
-        '2n5j':'GPHMTSELQMKVDFFRKLGYSSSEIHSVLQKLGVQADTNTVLGELVKHG'                              ,
-        '2n5u':'MASWSHPQFEKIEGRMDVGQKVRVCRIRDRVAQDIIQKLGQVGQITGFKMTDGSGVGVIVTFDDRSSTWFFEDEVEVVG',
-        '2n7f':'RDCQEKWEYCIVPILGFVYCCPGLICGPFVCV'                                               ,
-        '2n7i':'GSFTMNDTTVWISVAVLSAVICLIIVWAVALKGYSMV'                                          ,
-        '2n9c':'MTEYKLVVVGAGGVGKSHVW'                                                           ,
-        '2nat':'KYEITTIHNLFRKLTHRLFRRNFGYTLR'                                                   ,
-        '2nav':'HGEGTFTSDCSKQCEEGIGHKYPFCHCR'                                                   ,
-        '2nbd':'MQIFVKTLTGKTITLEVEPSDTIENAKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG'   ,
+        '1gab': ['TIDQWLLKNAKEDAIAELKKAGITSDFYFNAINKAKTVEEVNALKNEILKAHA'                          , '1gab/1gab_fragments_min_5.p'],
+        #'2n1p':['HSVSHARPRWFWFSLLLLAAGVGIYLLPNR'                                                 , None],
+        #'2n2r':['QKLCQRPSGTWSGVCGNNNACKNQCIRLEKARHGSCNYVFPAHKCICYFPC'                            , None],
+        #'2n2s':['SCGSECAPEPDCWGCCLVQCAPSICAGWCGGS'                                               , None],
+        #'2n52':['VFSQGGQVDCGEFQDTKVYCTRESNPHCGSDGQTYGNKCAFCKAIVKSGGKISLKHPGKC'                   , None],
+        #'2n5j':['GPHMTSELQMKVDFFRKLGYSSSEIHSVLQKLGVQADTNTVLGELVKHG'                              , None],
+        #'2n5u':['MASWSHPQFEKIEGRMDVGQKVRVCRIRDRVAQDIIQKLGQVGQITGFKMTDGSGVGVIVTFDDRSSTWFFEDEVEVVG', None],
+        #'2n7f':['RDCQEKWEYCIVPILGFVYCCPGLICGPFVCV'                                               , None],
+        #'2n7i':['GSFTMNDTTVWISVAVLSAVICLIIVWAVALKGYSMV'                                          , None],
+        #'2n9c':['MTEYKLVVVGAGGVGKSHVW'                                                           , None],
+        #'2nat':['KYEITTIHNLFRKLTHRLFRRNFGYTLR'                                                   , None],
+        #'2nav':['HGEGTFTSDCSKQCEEGIGHKYPFCHCR'                                                   , None],
+        #'2nbd':['MQIFVKTLTGKTITLEVEPSDTIENAKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG'   , None],
         }
 
 for pdb in pdbs:
     #-------------------------------------------------------------------#
     system = Molecule(name = pdb)                                       #
     system.build_peptide_from_sequence (                                #
-                                        sequence    = pdbs[pdb]  ,      #
-                                        _type       = 'amber'    ,      #
-                                        force_field = 'ff03ua'   ,      #
-                                        overwrite   = True       ,      #
+                                        sequence    = pdbs[pdb][0],     #
+                                        _type       = 'amber'     ,     #
+                                        force_field = 'ff03ua'    ,     #
+                                        overwrite   = True        ,     #
                                         )                               #
     #-------------------------------------------------------------------#
 
@@ -78,8 +79,8 @@ for pdb in pdbs:
     #'''                                                                #
     minimize(molecule = system,                                         #
              imin     = 1     ,                                         #
-             maxcyc   = 100  ,                                         #
-             ncyc     = 50   ,                                         #
+             maxcyc   = 1000  ,                                         #
+             ncyc     = 500   ,                                         #
              cut      = 99    ,                                         #
              rgbmax   = 10    ,                                         #
              igb      = 1     ,                                         #
@@ -90,109 +91,43 @@ for pdb in pdbs:
     print system.energy()                                               #
     #-------------------------------------------------------------------#
 
-    #-------------------------------------------------------------------------------
-    #try:
-    import pickle
-    system.fragments = pickle.load( open( pdb + '/' +pdb+"_fragments_raw_5.p", "rb" ))
-    ##-------------------------------------------------------------------------------
-    monte_carlo(molecule           = system                                    ,
-                random             = random                                     ,
-                temperature        = 500                                       ,
-                Kb                 = 1                                         ,
-                angle_range        = 60                                        ,
-                nSteps             = 200                                       ,
-                fragment_rate      = 1.0                                       ,
-                fragment_sidechain = False                                     ,
-                log_frequence      = 10                                        ,
-                PhiPsi_rate        = 0.0                                       ,
-                trajectory         = pdb + '/' +pdb+'MC_raw_trajectory_5'      ,
-                pn                 = 1                                         )
-    #except:
-    #    print 'fail ', pdb 
 
-    system.fragments = pickle.load( open( pdb + '/' +pdb+"_fragments_min_5.p", "rb" ))
+
+    #-------------------------------------------------------------------------------
+    import pickle
+    #-------------------------------------------------------------------------------
+    #-------------------------------------------------------------------------------
+    system.fragments = pickle.load( open( pdbs[pdb][1], "rb" ))
     monte_carlo(molecule           = system                                    ,
-                random             = random                                     ,
-                temperature        = 500                                        ,
+                random             = random                                    ,
+                temperature        = 1000                                       ,
                 Kb                 = 1                                         ,
                 angle_range        = 60                                        ,
-                nSteps             = 200                                       ,
+                nSteps             = 10000                                     ,
                 fragment_rate      = 1.0                                       ,
                 fragment_sidechain = False                                     ,
                 log_frequence      = 10                                        ,
                 PhiPsi_rate        = 0.0                                       ,
                 trajectory         = pdb + '/' +pdb+'MC_min_trajectory_5'      ,
                 pn                 = 1                                         )
-
-
-'''
-run_MC_replica_exchange (
-                        molecule           = system              ,
-                        N_replicas         = 8                   , # >= number of CPUs
-                        CPUs               = 8                   ,
-                        min_temp           = 100                 ,
-                        max_temp           = 1000                ,
-                        PhiPsi_rate        = 1.0                 ,
-                        max_angle_range    = 5                   ,
-                        trajectory         = 'MC_1GAB_replica_'  ,
-                        Kb                 = 0.0019872041        ,
-                        log_frequence      = 10                  ,
-                        nSteps             = 10000               ,
-                        nExchanges         = 5                   ,
-
-                        fragment_rate      = 0                 ,
-                        log                = False               ,
-                        #filelog            = 'MC_1GAB_replica_'
-                        fragment_sidechain = True               ,
-                        )
-'''
-
-'''
-monte_carlo(molecule           = system                     ,
-            temperature        = 1000                       ,
-            Kb                 = 1                          ,  #0.0019872041               ,
-            angle_range        = 60                         ,
-            nSteps             = 10000                      ,
-            fragment_rate      = 0.2                        ,
-            fragment_sidechain = False                      ,
-            log_frequence      = 10                         ,
-            PhiPsi_rate        = 1.0                        ,
-            trajectory         = 'MonteCarlo_trajectory.xyz',
-            pn                 = 1                          )
-#'''
-
-#TRAJECTORY  = os.path.join(PEPDICE_EXAMPLES , 'outputs/1gab_amber_example04_refold.xyz')
-#---------------------------------------------------------------------------------------------------------
-
-'''
-def test_rotetaPhiPsiOMEGA (system = None, theta =  0.017453292519943295,  computeTorsion = False):
-    """ Function doc """
-    backup  = system 
+    #-------------------------------------------------------------------------------
     
-    for j in range(0,10):
-        system = backup
-        for i in range (0,len(system.residues)):
-
-            try:
-                rotate_backbone(molecule=system, resi=i, bond='PHI'  , theta= theta*(randint(j*-10,j)))
-            except:
-                print 'impossible to rotate PHI'
-            
-            try:
-                rotate_backbone(molecule=system, resi=i, bond='PSI'  , theta=theta*(randint(j*-10,j)))
-            except:
-                print 'impossible to rotate PSI'
-
-            #try:
-            #    rotate_backbone(molecule=system, resi=i, bond='OMEGA', theta=theta*(randint(j*-1,j)))
-            #except:
-            #    print 'impossible to rotate OMEGA'
-                
-                
-        save_PDB_to_file(system, 'example05_polyAla_rotetaBackbone_'+str(j)+'_rand.pdb')
-        #test_computeTorsions (system = system)
-
-test_rotetaPhiPsiOMEGA (system = system)
-#'''
+    
+    
+    ##-------------------------------------------------------------------------------
+    #system.fragments = pickle.load( open( pdb + '/' +pdb+"_fragments_min_5.p", "rb" ))
+    #monte_carlo(molecule           = system                                    ,
+    #            random             = random                                     ,
+    #            temperature        = 1000                                       ,
+    #            Kb                 = 1                                         ,
+    #            angle_range        = 60                                        ,
+    #            nSteps             = 10000                                     ,
+    #            fragment_rate      = 1.0                                       ,
+    #            fragment_sidechain = False                                     ,
+    #            log_frequence      = 10                                        ,
+    #            PhiPsi_rate        = 0.0                                       ,
+    #            trajectory         = pdb + '/' +pdb+'MC_min_trajectory_5'      ,
+    #            pn                 = 1                                         )
+    ##-------------------------------------------------------------------------------
 
 
