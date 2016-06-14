@@ -18,6 +18,61 @@ def compute_vdw_ij (atom_i, atom_j):
     return E_ab
 
 
+
+def compute_AB_vdw_ij (atom_i, atom_j):
+    """ Function doc """ #-23085572255.9
+    
+    A    = 1
+    B    = 1
+    
+    if atom_i.AB + atom_j.AB == 'AA':   # apolares
+        C = 1
+    elif atom_i.AB + atom_j.AB == 'BB': # polares
+        C = 0.5
+    else:
+        C = -0.5
+    
+    R_ab = distance_ab (atom_i, atom_j)
+    E_ab = A*((R_ab**-12) - C*(R_ab**-6))
+    return E_ab
+
+def compute_AB_energy (molecule = None):
+    """ Function doc """
+    total_E = 0
+    #----------------------- atom i -----------------------------#
+    for residue_i in molecule.residues:
+        for atom_i in residue_i.atoms:
+            
+            if atom_i.name == 'CA':
+                if residue_i.name in ['ALA','ILE','LEU','MET','VAL','PRO','GLY','CYS']:
+                    atom_i.AB = 'A'
+                else:
+                    atom_i.AB = 'B'
+                #------------------- atom j ---------------------#
+                for residue_j in molecule.residues:
+                    if residue_j.id == residue_i:
+                        pass
+                    else:
+                        
+                        for atom_j in  residue_j.atoms:
+                            
+                            if atom_i.id == atom_j.id:
+                                pass
+                            
+                            else:
+                                if atom_j.name == 'CA':
+                                    if residue_j.name in ['ALA','ILE','LEU','MET','VAL','PRO','GLY','CYS']:
+                                        atom_j.AB = 'A'
+                                    else:
+                                        atom_j.AB = 'B'
+                                    vdw =  compute_AB_vdw_ij (atom_i, atom_j)
+                                    total_E += vdw
+    return total_E
+
+
+
+
+
 class Energy:
     """ Class doc """
     
@@ -31,6 +86,7 @@ class Energy:
                external_coordinates      = False, 
                external_coordinates_type = 'pdb',
                external_coordinates_file = None , 
+               #energy_AB                 = True ,
                ):
                     
         """ Function doc """
@@ -112,6 +168,11 @@ class Energy:
             energy += energy_list["DIHED"] * dihed
             energy += energy_list["ANGLE"] * angle
             energy += energy_list["BOND"]  * bond
+            
+            if self.AB != 0.0:
+                energy +=   compute_AB_energy(molecule = self)*self.AB
+            
+            #print 'energy_AB:', energy_AB 
             
             if log:
                 from pprint import pprint

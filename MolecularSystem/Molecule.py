@@ -102,7 +102,7 @@ class Molecule(Atom   ,
         self.boundary  = 1.0
         self.esurf     = 1.0
         self.egb       = 1.0
-
+        self.AB        = 0.0
 
     def build_peptide_from_sequence_AMBER (self, sequence = None, force_field = 'ff03ua', overwrite   = True  ):
         """ 
