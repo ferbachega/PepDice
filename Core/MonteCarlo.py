@@ -177,10 +177,13 @@ def insert_fragment (molecule = None, fragment = None, sidechain = False):
             for bond in ['CHI1','CHI2','CHI3','CHI4','CHI5']:
                 #try:
                 if bond in fragment[key]:
-                    set_chi_dihedral (molecule  = molecule,
-                                          resi  = key,
-                                          bond  = bond,
-                                          angle = fragment[key][bond])
+                    try:
+                        set_chi_dihedral (molecule  = molecule,
+                                              resi  = key,
+                                              bond  = bond,
+                                              angle = fragment[key][bond])
+                    except:
+                        pass
                 #except:
                 #    print 'fail', bond
             #except KeyError as error:
@@ -355,8 +358,9 @@ def monte_carlo(molecule           = None                       ,
     attempted_psi = 0.0              #
     accepted_psi  = 0.0              #
     #--------------------------------#
-
-
+    
+    decay_factor  =  float(temperature)/float(nSteps)
+    print decay_factor
 
     for i in range(0, nSteps):
         # parametros controla a taxa de tentativas com que novos fragmentos sao testatos
@@ -508,6 +512,8 @@ def monte_carlo(molecule           = None                       ,
             logfile = open(logfilename, 'a')
             logfile_counter = 1
         #----------------------------------------------
+        print 'energy', previous_energy, 'temperature', temperature
+        temperature = temperature - decay_factor
 
     return {'pn':pn, 'energy': previous_energy, 'coords': previous_coordinates, 'temperature': temperature }
 
