@@ -89,6 +89,17 @@ system.fragments = pickle.load( open( "1gab_fragments.p", "rb" ) )
 #    n += 1
 #
 
+'''
+print len(system.fragments[0])
+
+for fragment in system.fragments:
+    pprint(fragment[0])
+'''
+#
+
+
+
+
 i = 1
 monte_carlo(molecule           = system      ,
             #random             = random      ,
@@ -101,6 +112,8 @@ monte_carlo(molecule           = system      ,
             PhiPsi_rate        = 0.0         ,
             trajectory         = TRAJECTORY+str(i),
             pn                 = 1                       )
+
+
 
 
 

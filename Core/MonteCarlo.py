@@ -1,17 +1,12 @@
 from MetropolisAcceptanceTest import metropolis_acceptance_test
+from Geometry                 import *
+from XYZFiles                 import save_XYZ_to_file
 
-
-
-def fragment_attempt (molecule           = None                       ,
-                      temperature        = 1000                       ,
-                      Kb                 = 1                          , # 0.0083144621               ,
-                      fragment_rate      = 1.0                        , #between 0  and 1
-                      fragment_sidechain = False                      ,
-                      log_frequence      = 10                         ,
-                      trajectory         = 'MonteCarlo_trajectory.xyz',
-                      pn                 = 1                          ,
-                      random             = None                       ):
-    """ Function doc """
+def fragment_selection (molecule           = None  ,
+                        previous_fragment  = None  ,
+                        fragment_rate      = None  , 
+                        random             = None  ):
+    
     
     fragment_acceptance = random.uniform(0, 1)
     FRAGMENTS = False
@@ -20,60 +15,432 @@ def fragment_attempt (molecule           = None                       ,
     #----------------------------------------------#
     #                  FRAGMENTS                   #
     #----------------------------------------------#
-    # se o numero for menor ou igual a chance, entao um novo fragmento eh atribuido a estrutura
+    # (1) se o numero for menor ou igual a chance, entao um novo fragmento eh atribuido a estrutura
     if fragment_acceptance <= fragment_rate:
-        
-        #attempted_fragment += 1
-        #sorteia uma posicao do alinhamento
+             
+        # (2) sorteia uma posicao do alinhamento
         resi = random.randint(0, len(molecule.fragments)-1)
 
-        # enquando nao houver fragmentos para esta posicao (ou seja, lista vazia) sortear novas posicoes
+        # (3) enquando nao houver fragmentos para esta posicao (ou seja, lista vazia) sortear novas posicoes
         while molecule.fragments[resi] == []:
-            resi = random.randint(0, len(molecule.fragments)-1) #(-1) -> nao pegar aultima posicao
+            resi = random.randint(0, len(molecule.fragments)-1) #(-1) -> nao pegar a ultima posicao
             
-        
-        # sorteia um fragmento para a posicao selecionada anteriormente 
+        # (4) sorteia um fragmento para a posicao selecionada 
         fragment_index = random.randint(0, len(molecule.fragments[resi])-1)
         fragment       = molecule.fragments[resi][fragment_index]
         
-        #print resi, len(molecule.fragments[resi]), fragment_index, molecule.fragments[resi][fragment_index].keys()
-
-
         if fragment != previous_fragment:
+            return fragment, fragment_index
+        
+        else:
+            return False
+    
+    else:
+        return False
+  
 
+def fragment_check ():
+    """ Verifies if the fragment was used in the previous step"""
+    
+
+def insert_fragment (molecule = None, fragment = None, sidechain = False):
+    """ Function doc """
+    if fragment is None:
+        return
+    for key in fragment:
+        #PSI = fragment[key]['PSI']
+        #PHI = fragment[key]['PHI']
+        for bond in ['PSI','PHI']:
+            #print  key, bond,  fragment[key][bond]
+            set_phi_psi_dihedral (molecule = molecule,
+                                      resi = key     ,
+                                      bond = bond    ,
+                                      angle = fragment[key][bond])
+
+
+        if sidechain:
+            #try:
+            for bond in ['CHI1','CHI2','CHI3','CHI4','CHI5']:
+                #try:
+                if bond in fragment[key]:
+                    try:
+                        set_chi_dihedral (molecule  = molecule,
+                                              resi  = key,
+                                              bond  = bond,
+                                              angle = fragment[key][bond])
+                    except:
+                        pass
+                #except:
+                #    print 'fail', bond
+            #except KeyError as error:
+            #    logger.debug(error.message)
+            #    logger.debug("Target: " + "".join([
+            #        three_to_one(molecule.residues[i].name)
+            #            if molecule.residues[i].name != 'HIE' else 'H'
+            #            for i in fragment
+            #    ]))
+            #    logger.debug("Fragment: " + "".join([
+            #        three_to_one(a['NAME']) for a in fragment.values()
+            #    ]))
+
+def rotate_backbone_attempt (molecule  = None,
+                                 resi  = None,
+                                 bond  = None,
+                                theta  = None,
+                      previous_energy  = None,
+                          temperature  = None,
+                                   pn  = None,
+                                   Kb  = None,
+                                random = None):
+
+    rotate_backbone(molecule = molecule,
+                        resi = resi    ,
+                        bond = bond    ,
+                       theta = theta   )
+
+    energy = molecule.energy(pn =pn)
+
+    if energy:
+        if metropolis_acceptance_test (energy  = energy          ,
+                              previous_energy  = previous_energy ,
+                                  temperature  = temperature     ,
+                                           Kb  = Kb              , 
+                                       random  =  random):
+            return energy
+
+        else:
+            return False
+    else:
+        return False
+
+
+
+def monte_carlo(molecule            = None                   ,
+                random              = None                   ,
+                temperature         = 10                     ,
+                Kb                  = 1                      , # 0.0083144621               ,
+                angle_range         = 1                      ,
+                nSteps              = 10000                  ,
+                fragment_rate       = 1.0                    , #between 0  and 1
+                fragment_sidechain  = True                   ,
+                PhiPsi_rate         = 1.0                    ,
+                                    
+                simulated_annealing = None                   ,# exp, linear
+                                    
+                                    
+                #side_chain          = False                  ,
+                #side_chain_steps    = 1000                   ,
+                #rotamers            = None                   ,
+                log_frequence       = 10                     ,
+                trajectory          = 'MonteCarlo_trajectory',
+                pn                  = 1                      ):
+
+
+
+    if random == None:
+        import random as random
+
+    
+    #LOGFILE    = trajectory+'.log'
+    logfilename = trajectory+'.log'
+    logfile     = open(logfilename, 'a')
+    
+
+    trajectory  = trajectory+'.xyz'
+    waste       = trajectory+'.waste.xyz'  
+
+
+    previous_energy      = molecule.energy(pn = pn)
+    previous_coordinates = molecule.get_coordinates_from_system()
+    previous_fragment    = None
+
+
+
+    logfile_counter = 1
+    text = []
+    n = 0
+
+    
+    #--------------------------------#
+    #       attempted_accepted       #
+    #--------------------------------#
+    attempted_fragment = 0.0         #
+    accepted_fragment  = 0.0         #
+                                     #
+    attempted_phi = 0.0              #
+    accepted_phi  = 0.0              #
+                                     #
+    attempted_psi = 0.0              #
+    accepted_psi  = 0.0              #
+    #--------------------------------#
+
+    decay_factor  =  float(temperature)/float(nSteps)
+    print decay_factor
+
+
+    for i in range(0, nSteps):
+        # parametros controla a taxa de tentativas com que novos fragmentos sao testatos
+        fragment_acceptance = random.uniform(0, 1)
+        FRAGMENTS = False
+        PHIPSI    = False
+        
+        
+        #----------------------------------------------#
+        #                 FRAGMENTS                    #
+        #----------------------------------------------#
+        try:
+            fragment, fragment_index  = fragment_selection (molecule          = molecule         ,
+                                                            previous_fragment = previous_fragment,
+                                                            fragment_rate     = fragment_rate    ,
+                                                            random            = random           )
+        except:
+            print ' - - - fragment_selection failed - - - '
+            #print molecule          
+            print 'previous_fragment:'
+            print previous_fragment
+            
+            print 'fragment:'
+            print fragment    
+            print random           
+            
+            
+        
+        if fragment: 
+            
+            attempted_fragment += 1.0
             #------- associa o fragmento selecionado com a estrutura -------
             previous_fragment = fragment
+            
             insert_fragment (molecule   = molecule,
                              fragment   = fragment,
                              sidechain  = fragment_sidechain)
+            
             #---------------------------------------------------------------
-
-            energy = molecule.energy(pn = pn)
+            energy = molecule.energy(pn = pn)            
+            
             if energy:
-                if metropolis_acceptance_test (energy = energy         ,
-                                      previous_energy = previous_energy,
-                                          temperature = temperature    , 
-                                          random      = random         ,
-                                          Kb          = Kb             ):
+
+                if metropolis_acceptance_test (energy          = energy         ,
+                                               previous_energy = previous_energy,
+                                               temperature     = temperature    , 
+                                               random          = random         ,
+                                               Kb              = Kb             ):
 
                     save_XYZ_to_file (molecule, trajectory)
                     previous_energy      = energy
                     previous_coordinates = molecule.get_coordinates_from_system()
-                    return True
-                    #accepted_fragment += 1
-                    #FRAGMENTS = True
+                    accepted_fragment += 1
+                    FRAGMENTS = True
                     #text.append("pn: {:<3d} step: {:5d} energy: {:<20.7f}fragment: {:<3d}\n".format(pn, i, energy , fragment_index))
                     #print "pn: {:<3d} step: {:5d} energy: {:<20.7f}fragment: {:<3d}".format(pn, i, energy , fragment_index)
                 else:
                     save_XYZ_to_file (molecule, waste)                            # salva as coordenadas no descarte
                     molecule.import_coordinates_to_system (previous_coordinates)  # Restaura as coordenadas entriores 
                     #print 'fragment: ',fragment_index, energy, len(fragment), 'failed'
-                    return False
-
             else:
                 save_XYZ_to_file (molecule, waste)                                # salva as coordenadas no descarte
                 molecule.import_coordinates_to_system (previous_coordinates)      # Restaura as coordenadas entriores 
+    #print 'temp: = ', temperature, 'energy = ', previous_energy, 'acceptance ratio (phi) =', (accepted_fragment / attempted_fragment)
+
+
+        
+
+        #----------------------------------------------#
+        #               PHI/PSI sampling               #
+        #----------------------------------------------#
+
+        PhiPsi_acceptance = random.uniform(0, 1)
+        
+        if PhiPsi_acceptance <= PhiPsi_rate:
+            resi = random.randint(0, len(molecule.residues)-1)
+    
+            if resi in molecule.fixed_residues:
+                pass
+            
+            else:
+                for bond in ['PSI','PHI']:
+
+                    if bond == 'PSI':
+                        attempted_phi += 1
+                    if bond == 'PHI':
+                        attempted_psi += 1
+
+                    #attempted_psi += 1
+                    theta  = random.uniform(-1 * angle_range, angle_range)
+                    theta = math.radians(theta)
+
+                    #------------------------------------------#
+                    #         rotate_backbone_attempt          #
+                    #------------------------------------------#
+
+                    energy = rotate_backbone_attempt (molecule = molecule      ,
+                                                        resi = resi            ,
+                                                        bond = bond            ,
+                                                       theta = theta           ,
+                                              previous_energy = previous_energy,
+                                                 temperature = temperature     ,
+                                                          pn = pn              ,
+                                                      random = random          ,
+                                                          Kb = Kb              )
+
+                    if energy:
+                        save_XYZ_to_file (molecule, trajectory)
+                        previous_energy      = energy
+                        previous_coordinates = molecule.get_coordinates_from_system()
+
+                        if bond == 'PSI':
+                            accepted_psi += 1
+                        if bond == 'PHI':
+                            accepted_phi += 1
+                        PHIPSI = True
+                        #text.append("pn: {:<3d} step: {:5d} energy: {:<20.7f}rotate_backbone theta: {:<6.3f}\n".format(pn, i, energy , theta*57.324))
+                        #print "pn: {:<3d} step: {:5d} energy: {:<20.7f}rotate_backbone theta: {:<6.3f}".format(pn, i, energy , theta*57.324)
+                    else:
+                        save_XYZ_to_file (molecule, waste)
+                        molecule.import_coordinates_to_system (previous_coordinates)
+
+        
+        #if side_chain == True:
+        #    monte_carlo_side_chain (molecule  = molecule        ,
+        #                           rotamers   = rotamers        ,
+        #                           random     = random          ,
+        #                           initial_T  = temperature     ,
+        #                           final_T    = temperature     ,
+        #                           angle_range= angle_range     ,
+        #                           nSteps     = side_chain_steps,
+        #                           trajectory = trajectory      )
+        
+        if energy:
+            if energy <= previous_energy:
+                if FRAGMENTS:
+                    frag   = "fragment: {:<4d}  ".format(fragment_index)
+                else:
+                    frag   = 'fragment: -     ';format('-')
+                if PHIPSI:
+                    phipsi = "rotate_backbone: {:<6.3f}".format(theta*57.324)
+                else:
+                    phipsi = 'rotate_backbone: None'
+                text.append("pn: {:<3d} step: {:5d} energy: {:<20.10f}".format(pn, i, energy) + frag + phipsi+'\n')
+
+        #---------------------------------------------#
+        #                LOGFILEWRITE                 #
+        #---------------------------------------------#
+        logfile_counter += logfile_counter
+        
+        if logfile_counter >= log_frequence:
+            logfile.writelines(text)
+            logfile.close()
+            text    = []
+            logfile = open(logfilename, 'a')
+            logfile_counter = 1
+        
+        
+        #----------------------------------------------
+        print i, 'energy', previous_energy, 'temperature', temperature
+        
+        
+        
+        if simulated_annealing == 'exp':
+            pass
+        
+        if simulated_annealing == 'linear':
+            temperature = temperature - decay_factor
+
+    return {'pn':pn, 'energy': previous_energy, 'coords': previous_coordinates, 'temperature': temperature }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def fragment_attempt (molecule           = None                       ,
+                      temperature        = 1000                       ,
+                      Kb                 = 1                          , # 0.0083144621               ,
+                      fragment_rate      = 1.0                        , #between 0  and 1
+                      sidechain          = False                      ,
+                      
+                      
+                      
+                      #log_frequence      = 10                         ,
+                      #trajectory         = 'MonteCarlo_trajectory.xyz',
+                      pn                 = 1                          ,
+                      
+                      random             = None                       ):
+    
+   
+    """ Function doc """
+    fragment = fragment_selection (molecule = molecule,
+                                   random   = random  )
+        
+    if fragment != previous_fragment:
+        #------- associa o fragmento selecionado com a estrutura -------
+        previous_fragment = fragment
+        insert_fragment (molecule  = molecule,
+                         fragment  = fragment,
+                         sidechain = fragment_sidechain)
+        #---------------------------------------------------------------
+        energy = molecule.energy(pn = pn)
+        
+        if energy:
+            if metropolis_acceptance_test (energy = energy         ,
+                                  previous_energy = previous_energy,
+                                      temperature = temperature    , 
+                                      random      = random         ,
+                                      Kb          = Kb             ):
+
+                save_XYZ_to_file (molecule, trajectory)
+                previous_energy      = energy
+                previous_coordinates = molecule.get_coordinates_from_system()
                 return True
+                #accepted_fragment += 1
+                #FRAGMENTS = True
+                #text.append("pn: {:<3d} step: {:5d} energy: {:<20.7f}fragment: {:<3d}\n".format(pn, i, energy , fragment_index))
+                #print "pn: {:<3d} step: {:5d} energy: {:<20.7f}fragment: {:<3d}".format(pn, i, energy , fragment_index)
+            else:
+                save_XYZ_to_file (molecule, waste)                            # salva as coordenadas no descarte
+                molecule.import_coordinates_to_system (previous_coordinates)  # Restaura as coordenadas entriores 
+                #print 'fragment: ',fragment_index, energy, len(fragment), 'failed'
+                return False
+
+        else:
+            save_XYZ_to_file (molecule, waste)                                # salva as coordenadas no descarte
+            molecule.import_coordinates_to_system (previous_coordinates)      # Restaura as coordenadas entriores 
+            return True
 
     else:
         return False
@@ -81,9 +448,7 @@ def fragment_attempt (molecule           = None                       ,
 
 
 
-
-
-
+'''
 def testing ():
     """ Function doc """
     import random as random
@@ -96,6 +461,6 @@ def testing ():
     
     
 testing()
-
+'''
 
 

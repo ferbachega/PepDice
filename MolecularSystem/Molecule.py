@@ -90,7 +90,17 @@ class Molecule(Atom   ,
         # Parameters
         self.fixed_residues = []
         self.fragments      = []
-
+        
+        
+        
+        # MC important atributes
+        self.actual_energy   = None
+        self.previous_energy = None 
+        
+        
+        
+        
+        
 
         #self.pn
         self.bond      = 1.0
