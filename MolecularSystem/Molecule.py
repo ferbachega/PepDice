@@ -52,6 +52,17 @@ PEPDICE_SCRATCH=$PEPDICE_ROOT/scratch                                         ; 
 PYTHONPATH=:$PEPDICE_ROOT/Babel:$PEPDICE_ROOT/Core:$PEPDICE_ROOT/MolecularSystem ; export PYTHONPATH
 '''
 
+
+def pdb_corrections (pdbin = None, pdbout = None):
+    """ Function doc """
+    pdb  = open(pdbin, 'r') 
+    pdb  = pdb.readlines()
+    print pdb
+    text = []
+    #for line in pdb:
+    #    print line
+
+
 #-------------------------------------------------------------------------------
 PEPDICE = os.environ.get('PEPDICE')
 PEPDICE_EXAMPLES = os.path.join(PEPDICE, 'Examples')
@@ -114,7 +125,7 @@ class Molecule(Atom   ,
         self.egb       = 1.0
         self.AB        = 0.0
 
-    def build_peptide_from_sequence_AMBER (self, sequence = None, force_field = 'ff03ua', overwrite   = True  ):
+    def build_peptide_from_sequence_AMBER (self, sequence = None, force_field = 'ff03ua', overwrite   = True  , NCTER = False):
         """ 
         Function doc 
         source leaprc.ff03ua
@@ -147,14 +158,20 @@ class Molecule(Atom   ,
         
         if overwrite:
             text  = 'source leaprc.' + force_field + ' \n'
-            text += 'foo = sequence {N'
             
+            if NCTER:
+                text += 'foo = sequence {N'
+            else:
+                text += 'foo = sequence {'
+
             n = 1
             for aa in sequence:
                 
                 if n == len(sequence):
-                    text += 'C'
-                
+                    if NCTER:
+                        text += 'C'
+                    else:
+                        pass
                 text += aa_dic[aa] + ' '
                 n += 1
             
@@ -166,9 +183,14 @@ class Molecule(Atom   ,
             leaprc.write(text)
             leaprc.close()
             
+        
+        
+        
+        
         #os.system('tleap -f leaprc')
         subprocess.call(['tleap', '-f', 'leaprc'])
-        
+        pdb_corrections (pdbin = self.name+'.pdb', pdbout = None)
+        #subprocess.call(['babel', '-ipdb', self.name +'.pdb' ,'-opdb', self.name +'.pdb'])
         
         self.load_PDB_to_system      (filename  = self.name + '.pdb')  
         self.import_AMBER_parameters (top       = self.name + '.top' ,

@@ -4,7 +4,7 @@
 # . Some of these values may need modifying (e.g. PEPDICE_SCRATCH and PYTHONPATH).
 
 # . The root of the program.
-PEPDICE_ROOT=$HOME/programs/pepdice ; export PEPDICE_ROOT
+PEPDICE_ROOT=$HOME/Programas/pepdice/ ; export PEPDICE_ROOT
 export PEPDICE=$PEPDICE_ROOT
 
 # . Package paths.
