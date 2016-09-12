@@ -52,71 +52,65 @@ def save_CRD_to_file(molecule, filename):
 
 def load_CRD_from_file (molecule = None, filename = None):
     newcoords  =  []
-        
+    
+    '''   3.3380001   2.4640000  -0.2370000   3.7279999   1.7250000  -0.0340000'''    
+    
     with open(filename, "r") as crdin:
-        text  = crdin.read()
-        text.replace('\n', '')
-        text  = text.split()
-        
+        text  = crdin.readlines()
+        #text  = text.readlines() 
         pos = []
-        n = 0
-        j = 1
+        n   = 0
+        j   = 1
         
-        for coord in text[2:(len(text)+1)]:
-           pos.append(coord)
-           n = n + 1
-           #print coord
-           
-           if n == 3:
-                j   = j + 1
-                newcoords.append(pos)
-                n   = 0
-                pos = []
+        for line in text:
+            line.replace('\n', '')
+            
+            #print line[0:12], line[12:24], line[24:36], line[36:48], line[48:60], line[60:72]
+
+            pos.append(line[0:12] )
+            pos.append(line[12:24])
+            pos.append(line[24:36])
+            pos.append(line[36:48])
+            pos.append(line[48:60])       
+            pos.append(line[60:72])
         
-        #print 'jota', j , len(newcoords), newcoords[-1], text[-1]
+    print pos
+        
+        
+        
+        
+    #    #text  = text.split()
+    #    
+    #    pos = []
+    #    n = 0
+    #    j = 1
+    #    
+    #    for coord in text[2:(len(text)+1)]:
+    #       pos.append(coord)
+    #       n = n + 1
+    #       #print coord
+    #       
+    #       if n == 3:
+    #            j   = j + 1
+    #            newcoords.append(pos)
+    #            n   = 0
+    #            pos = []
+    #    
+    #    #print 'jota', j , len(newcoords), newcoords[-1], text[-1]
     
     n = 0
     newcoords
-    for residue in molecule.residues:
-        for atom in residue.atoms:
-            #print n, atom.id, newcoords[n][0], newcoords[n][1], newcoords[n][2]
-            
-            atom.pos[0] = newcoords[n][0]
-            atom.pos[1] = newcoords[n][1]
-            atom.pos[2] = newcoords[n][2]
-            n = n+1
-
-        
-
-        
-        
-        #for line in crdin:
-        #    line2 = line.split()
-        #    if len(line2) >= 3:
-        #        print 
-        
-
-        #for residue_i in molecule.residues:
-        #    for atom_i in residue_i.atoms:
-        #        n = n +1
-        #        x = float(atom_i.pos[0])
-        #        y = float(atom_i.pos[1])
-        #        z = float(atom_i.pos[2])
-        #        
-        #        if n == 2:
-        #        
-        #            text += "%12.7f%12.7f%12.7f\n" %(x ,y,z)
-        #        
-        #            n = 0
-        #        
-        #        else:
-        #            text += "%12.7f%12.7f%12.7f" %(x ,y,z)
-        #
-        #output_file.write(text)
-        #output_file.close()
-        #pass
-
-#a  = 'b'
-#load_CRD_from_file (filename = '/home/fernando/programs/PepDice/Examples/1GAB/amber/1gab_amber.crd')
+    
+    if molecule != None:
+        for residue in molecule.residues:
+            for atom in residue.atoms:
+                #print n, atom.id, newcoords[n][0], newcoords[n][1], newcoords[n][2]
+                
+                atom.pos[0] = newcoords[n][0]
+                atom.pos[1] = newcoords[n][1]
+                atom.pos[2] = newcoords[n][2]
+                n = n+1
 
 
+
+load_CRD_from_file(molecule = None, filename = '/home/farminf/Programas/pepdice/Examples/SinglePoint1.crd')

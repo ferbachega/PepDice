@@ -137,103 +137,221 @@ def minimize_phenix (pdbin = None, geo = False, geofile = None ):
 
 
 
-sequences = {'1GAB':'TIDQWLLKNAKEDAIAELKKAGITSDFYFNAINKAKTVEEVNALKNEILKAHA'}
+PDBcodes =  {#'1GAB': []    ,
+             '1UAO': []    ,
+             #'1LE1':[]     ,
+             #'1CSK':[]     ,
+             #'2GB1':[]     ,
+             #'1E0Q':[]     ,
+             #'1L2Y':[]     ,
+             #'2JOF':[]     ,
+             #'1RIJ':[]     ,
+             #'1E0N':[]     ,
+             #'1E0L':[]     ,
+             #'1I6C':[]     ,
+             #'1FME':[]     ,
+             #'1PSV':[]     ,
+             #'1UBQ':[]     ,
+             #'1WY3':[]     ,
+             #'1YRF':[]     ,
+             #'2F21':[]     ,
+             #'2F4K':[]     ,
+             #'1VII':[]     ,
+             #'1EI0':[]     ,
+             #'2F21':[]     ,
+             #'1ERY':[]     ,
+             #'2HBA':[]     ,
+             #'2HEP':[]     ,
+             #'1RES':[]     ,
+             #'1BDD':[]     ,
+             #'1E0G':[]     ,
+             #'1BDD':[]     ,
+             #'1DV0':[]     ,
+             #'1PRB':[]     ,
+             #'2WXC':[]     ,
+            }
+
+
+def wget_pdb (pdbcode = None, filesInFolder = None):
+    """ Function doc """
+    
+    if filesInFolder == None:
+        filesInFolder = os.listdir('.')
+    
+    if pdbcode+'.pdb' in filesInFolder:
+        pass
+    else:
+        os.system('wget https://files.rcsb.org/download/'+pdbcode+'.pdb')    
+    
+    
+def wget_pdbs (PDBcodes = None):
+    """ Function doc """
+    filesInFolder = os.listdir('.')
+    
+    for pdbcode in PDBcodes:
+        wget_pdb (pdbcode       = pdbcode      , 
+                  filesInFolder = filesInFolder)
 
 
 
-#-------------------------------------------------------------------------------
-#system = Molecule() 
-#system.load_PDB_to_system      (filename = os.path.join(PEPDICE_EXAMPLES , 'data/alpha/1GAB/1gab_ff03ua_AMBER_extended.pdb'   )   )   
-#system.import_AMBER_parameters(top       = os.path.join(PEPDICE_EXAMPLES , 'data/alpha/1GAB/1gab_ff03ua_AMBER_extended.prmtop')   ,   
-#                                torsions = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )   
-#TRAJECTORY  = '/home/farminf/Programas/PepDice/Examples/1GAB/amber/1gab_amber_side_chain_rand.xyz' /home/farminf/Programas/pepdice/Examples/data/alpha/1GAB/1gab_ff03ua_AMBER_extended.prmtop
-#-------------------------------------------------------------------------------
+def get_sequence_from_pdb (pdbcode = None):
+    """ Function doc """
+    pdb     = pdbcode+'.pdb'
+    pdbtext =  open(pdb, 'r')
+    
+    sequence      = []
+    sequence_code = ''
+    previous_index = None
+    
+    
+    aa_dic = { 
+         'ALA':'A',
+         'ARG':'R',
+         'ASN':'N',
+         'ASP':'D',
+         'CYS':'C',
+         'GLU':'E',
+         'GLN':'Q',
+         'GLY':'G',
+         'HIS':'H',
+         'ILE':'I',
+         'LEU':'L',
+         'LYS':'K',
+         'MET':'M',
+         'PHE':'F',
+         'PRO':'P',
+         'SER':'S',
+         'THR':'T',
+         'TRP':'W',
+         'TYR':'Y',
+         'VAL':'V'
+         }
+    
+    
+    for line in pdbtext:
+        line2 = line.split()
+        #print line
+        if line2[0] == 'ATOM':
+            #print line
+            
+            try:
+                index = int(line2[5])
+                
+                if index == previous_index:
+                    pass
+                else:
+                    sequence.append(line2[3])
+                    previous_index = index
+                    sequence_code += aa_dic[line2[3]]
+            except:
+                print line
+            #print index
+            #sequence[index] = line2[3]
+            
+        if line2[0] == 'TER' or line2[0] == 'END' :
+            break
+    #print sequence
+    print pdbcode, sequence_code
+    return sequence_code
+
+def build_PDBcodes_dic (dic = None):
+    """ Function doc """
+    PDBcodes = dic
+    #wget_pdbs (PDBcodes = PDBcodes)
+    for pdbcode in PDBcodes:
+        try:
+        
+            sequence_code  = get_sequence_from_pdb(pdbcode = pdbcode)
+            PDBcodes[pdbcode] = sequence_code
+        
+        except:
+            print 'failed:', pdbcode
+
+    pprint(PDBcodes)
+    return PDBcodes
+
+
+def geo_opt_refnament (PDBcodes):
+    """ Function doc """
+    for pdbcode in PDBcodes:
+        
+        
+        try:
+            
+            # Importando as informacoes torcionais da estrutura nativa do pdb
+            #-------------------------------------------------------------------------------
+            reference = Molecule() 
+            reference.load_PDB_to_system (pdbcode+'.pdb')  
+            raw_phi_and_psi_table  = compute_torsions(system = reference, log = False)
+            #-------------------------------------------------------------------------------
+            
+            
+            # Importando as informacoes torcionais da estrutura nativa minimizada pela phenix.geometry_minimization
+            #-------------------------------------------------------------------------------
+            pdbou     = minimize_phenix(pdbin = pdbcode+'.pdb', geo = True, geofile = 'geo.in' )
+            reference = Molecule() 
+            reference.load_PDB_to_system (pdbcode+'_minimized.pdb')  
+            min_phi_and_psi_table  = compute_torsions(system = reference, log = False)
+            #-------------------------------------------------------------------------------    
+            
+            
+            # Criando o a estrutura de interesse na forma estendida
+            #----------------------------------------------------------------------
+            system = Molecule() 
+            system.name =  pdbcode+'_estendida'
+            system.build_peptide_from_sequence (sequence    = PDBcodes[pdbcode] ,
+                                                _type       = 'amber'           ,
+                                                force_field = 'ff03ua'          ,
+                                                overwrite   = True              ,
+                                                )
+            #----------------------------------------------------------------------
+
+            
+            '''Carregando o pdb com os nomes dos atomos corrigidos'''
+            #----------------------------------------------------------------------
+            filename = pdbcode+'_estendida'
+            save_PDB_to_file          (system,    filename+'.pdb')
+            system.load_PDB_to_system (filename = filename+'.pdb')
+            energy_estendida  = system.energy( log = True)
+            #----------------------------------------------------------------------
+            
+                    
+            # Atribuicao dos angulos torcionais para a cadeira estendida nao otimizada
+            refold (system = system, phi_and_psi_table = raw_phi_and_psi_table, fileout = pdbcode+'_01_refolded_raw.pdb')
+            refold (system = system, phi_and_psi_table = min_phi_and_psi_table, fileout = pdbcode+'_01_refolded_min.pdb')
+            
+            
+            #----------------------------------------------------------------------
+            # minimizacao da cadeia estendida
+            pdbou = minimize_phenix(pdbin = pdbcode+'_estendida.pdb', geo = True, geofile = 'geo.in' )
+            system.load_PDB_to_system (filename = pdbcode+'_estendida_minimized.pdb')
+            energy_estendida_minimized  = system.energy( log = True)
+            #----------------------------------------------------------------------
+            
+            print energy_estendida, energy_estendida_minimized
+            
+            # Atribuicao dos angulos torcionais para a cadeira estendida otimizada
+            refold (system = system, phi_and_psi_table = raw_phi_and_psi_table, fileout = pdbcode+'_02_refolded_raw.pdb')
+            refold (system = system, phi_and_psi_table = min_phi_and_psi_table, fileout = pdbcode+'_02_refolded_min.pdb')
+        except:
+            print 'failed: ', pdbcode
+        
+
+
+
+PDBcodes = build_PDBcodes_dic (dic = PDBcodes)
+geo_opt_refnament (PDBcodes)
 
 
 
 
 
 
-for pdbcode in sequences:
-    
-    
-    #-------------------------------------------------------------------------------
-    reference = Molecule() 
-    reference.load_PDB_to_system (pdbcode+'.pdb')  
-    raw_phi_and_psi_table  = compute_torsions(system = reference, log = False)
-    #-------------------------------------------------------------------------------
-    
-    #-------------------------------------------------------------------------------
-    reference = Molecule() 
-    reference.load_PDB_to_system (pdbcode+'_minimized.pdb')  
-    min_phi_and_psi_table  = compute_torsions(system = reference, log = False)
-    #-------------------------------------------------------------------------------    
-    
-    
-    
-    files = { }
-    
-    
-    #----------------------------------------------------------------------
-    system = Molecule() 
-    system.name =  pdbcode+'_estendida'
-    system.build_peptide_from_sequence (sequence    = sequences[pdbcode],
-                                        _type       = 'amber'           ,
-                                        force_field = 'ff03ua'          ,
-                                        overwrite   = True              ,
-                                        )
-    #----------------------------------------------------------------------
-
-    
-    
-    '''Carregando o pdb com os nomes dos atomos corrigidos'''
-    #----------------------------------------------------------------------
-    filename = pdbcode+'_estendida'
-    save_PDB_to_file          (system,    filename+'.pdb')
-    system.load_PDB_to_system (filename = filename+'.pdb')
-    energy_estendida  = system.energy( log = True)
-    #----------------------------------------------------------------------
-
-    refold (system = system, phi_and_psi_table = raw_phi_and_psi_table, fileout = pdbcode+'_01_refolded_raw.pdb')
-    refold (system = system, phi_and_psi_table = min_phi_and_psi_table, fileout = pdbcode+'_01_refolded_min.pdb')
-
-    
-   
-    #----------------------------------------------------------------------
-    # minimizacao da cadeia estendida
-    pdbou = minimize_phenix(pdbin = pdbcode+'_estendida.pdb', geo = True, geofile = 'geo.in' )
-    system.load_PDB_to_system (filename = pdbcode+'_estendida_minimized.pdb')
-    energy_estendida_minimized  = system.energy( log = True)
-    #----------------------------------------------------------------------
-    
-    print energy_estendida, energy_estendida_minimized
-    
-    refold (system = system, phi_and_psi_table = raw_phi_and_psi_table, fileout = pdbcode+'_02_refolded_raw.pdb')
-    refold (system = system, phi_and_psi_table = min_phi_and_psi_table, fileout = pdbcode+'_02_refolded_min.pdb')
 
 
 
-    ##----------------------------------------------------------------------
-    #pdbin = os.path.join(PEPDICE_PDBS, pdbcode+'.pdb')
-    #print  pdbin   
-    #pdbou = minimize_phenix(pdbin = os.path.join(PEPDICE_PDBS, pdbcode+'.pdb'), geo = False, geofile = None )
-    ##----------------------------------------------------------------------
-    
-    
-    
-    ##----------------------------------------------------------------------
-    #system.load_PDB_to_system (pdbou) 
-    #energy2 =  system.energy( log = True)
-    ##----------------------------------------------------------------------
-    #
-    #
-    #print  energy1, energy2
-    ##-------------------------------------------------------------------------------
-    #reference = Molecule() 
-    #reference.load_PDB_to_system (filename = os.path.join(PEPDICE_PDBS,pdbcode+'.pdb'))  
-    #phi_and_psi_table  = compute_torsions(system = reference, log = False)
-    ##-------------------------------------------------------------------------------
-    #pprint(phi_and_psi_table)
+
+
 
 
 
