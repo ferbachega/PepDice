@@ -62,7 +62,7 @@ def load_CRD_from_file (molecule = None, filename = None):
         n   = 0
         j   = 1
         
-        for line in text:
+        for line in text[2:]:
             line.replace('\n', '')
             
             #print line[0:12], line[12:24], line[24:36], line[36:48], line[48:60], line[60:72]
@@ -73,44 +73,22 @@ def load_CRD_from_file (molecule = None, filename = None):
             pos.append(line[36:48])
             pos.append(line[48:60])       
             pos.append(line[60:72])
-        
-    print pos
-        
-        
-        
-        
-    #    #text  = text.split()
-    #    
-    #    pos = []
-    #    n = 0
-    #    j = 1
-    #    
-    #    for coord in text[2:(len(text)+1)]:
-    #       pos.append(coord)
-    #       n = n + 1
-    #       #print coord
-    #       
-    #       if n == 3:
-    #            j   = j + 1
-    #            newcoords.append(pos)
-    #            n   = 0
-    #            pos = []
-    #    
-    #    #print 'jota', j , len(newcoords), newcoords[-1], text[-1]
-    
+            
     n = 0
-    newcoords
-    
     if molecule != None:
         for residue in molecule.residues:
             for atom in residue.atoms:
-                #print n, atom.id, newcoords[n][0], newcoords[n][1], newcoords[n][2]
                 
-                atom.pos[0] = newcoords[n][0]
-                atom.pos[1] = newcoords[n][1]
-                atom.pos[2] = newcoords[n][2]
-                n = n+1
+                atom.pos[0] = pos[n]
+                n += 1
+                
+                atom.pos[1] = pos[n]
+                n += 1
+                
+                atom.pos[2] = pos[n]
+                n += 1
 
 
 
-load_CRD_from_file(molecule = None, filename = '/home/farminf/Programas/pepdice/Examples/SinglePoint1.crd')
+
+load_CRD_from_file(molecule = None, filename = '/home/fernando/programs/pepdice/Examples/SinglePoint1.crd')

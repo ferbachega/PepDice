@@ -56,14 +56,24 @@ PEPDICE_PARAMETER= os.path.join(PEPDICE, 'Parameters')
 
 
 #-------------------------------------------------------------------------------
-system = Molecule() 
-system.load_PDB_to_system      (filename = os.path.join(PEPDICE_EXAMPLES , 'data/alpha/1GAB/1gab_ff03ua_AMBER_folded.pdb'   )   )  
-system.import_AMBER_parameters(top       = os.path.join(PEPDICE_EXAMPLES , 'data/alpha/1GAB/1gab_ff03ua_AMBER_extended.prmtop')   , 
-                                torsions = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )   
+#system = Molecule() 
+#system.load_PDB_to_system      (filename = os.path.join(PEPDICE_EXAMPLES , 'data/alpha/1GAB/1gab_ff03ua_AMBER_folded.pdb'   )   )  
+#system.import_AMBER_parameters(top       = os.path.join(PEPDICE_EXAMPLES , 'data/alpha/1GAB/1gab_ff03ua_AMBER_extended.prmtop')   , 
+#                                torsions = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )   
 #TRAJECTORY  = '/home/farminf/Programas/PepDice/Examples/1GAB/amber/1gab_amber_side_chain_rand.xyz'
 #-------------------------------------------------------------------------------
 
-
+# Criando o a estrutura de interesse na forma estendida
+#----------------------------------------------------------------------
+pdbcode = 'TEST'
+system = Molecule() 
+system.name =  pdbcode+'_estendida'
+system.build_peptide_from_sequence (sequence    = 'AWWWWWTYNMAAAAA' ,
+                                    _type       = 'amber'           ,
+                                    force_field = 'ff03ua'          ,
+                                    overwrite   = True              ,
+                                    )
+#----------------------------------------------------------------------
 
 
 print system.energy()

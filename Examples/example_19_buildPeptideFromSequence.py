@@ -137,7 +137,7 @@ def minimize_phenix (pdbin = None, geo = False, geofile = None ):
 
 
 
-PDBcodes =  {#'1GAB': []    ,
+PDBcodes =  {'1GAB': []    ,
              '1UAO': []    ,
              #'1LE1':[]     ,
              #'1CSK':[]     ,
@@ -259,13 +259,10 @@ def build_PDBcodes_dic (dic = None):
     PDBcodes = dic
     #wget_pdbs (PDBcodes = PDBcodes)
     for pdbcode in PDBcodes:
-        try:
-        
-            sequence_code  = get_sequence_from_pdb(pdbcode = pdbcode)
-            PDBcodes[pdbcode] = sequence_code
-        
-        except:
-            print 'failed:', pdbcode
+        sequence_code  = get_sequence_from_pdb(pdbcode = pdbcode)
+        PDBcodes[pdbcode] = sequence_code
+    
+        #print 'failed:', pdbcode
 
     pprint(PDBcodes)
     return PDBcodes
@@ -276,7 +273,7 @@ def geo_opt_refnament (PDBcodes):
     for pdbcode in PDBcodes:
         
         
-        try:
+        #try:
             
             # Importando as informacoes torcionais da estrutura nativa do pdb
             #-------------------------------------------------------------------------------
@@ -333,11 +330,11 @@ def geo_opt_refnament (PDBcodes):
             # Atribuicao dos angulos torcionais para a cadeira estendida otimizada
             refold (system = system, phi_and_psi_table = raw_phi_and_psi_table, fileout = pdbcode+'_02_refolded_raw.pdb')
             refold (system = system, phi_and_psi_table = min_phi_and_psi_table, fileout = pdbcode+'_02_refolded_min.pdb')
-        except:
-            print 'failed: ', pdbcode
+        #except:
+        #    print 'failed: ', pdbcode
         
 
-
+wget_pdbs(PDBcodes)
 
 PDBcodes = build_PDBcodes_dic (dic = PDBcodes)
 geo_opt_refnament (PDBcodes)
