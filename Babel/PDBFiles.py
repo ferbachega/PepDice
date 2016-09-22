@@ -48,13 +48,13 @@ def save_PDB_to_file(molecule, filename):
                 z = float(atom_i.pos[2])
                 occ = 1.00
                 tpF = 1.00
-                segID = 'P2'
+                segID = 'P1'
                 element = atom_i.name[0]
 
                 #text +=  "ATOM     1  " + atom +   " " +resn+ "  {:4d}    {:8.3f}{:8.3f}{:8.3f}  1.00  0.00          Na+\n".format(resi, float(k), float(i), float(j))
 
                 #ATOM, idx, Aname, " ",resn, ' ', chainID,resi,   x,     y,     z,    occ,   tpF,        segID,element," "
-                text += "{:<6s}{:5d} {:<4s}{:1s}{:3s}{:1s}{:4s}{:<2s}   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}      {:<4s}{:2s}  {:2s}\n".format(ATOM,
+                text += "{:<6s}{:5d} {:<4s}{:1s}{:<3s}{:1s}{:4s}{:<2s}   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}      {:<4s}{:2s}  {:2s}\n".format(ATOM,
                                                                                                                                               idx,
                                                                                                                                               Aname,
                                                                                                                                               "",

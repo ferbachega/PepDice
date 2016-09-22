@@ -55,49 +55,9 @@ PEPDICE_PARAMETER= os.path.join(PEPDICE, 'Parameters')
 PEPDICE_PDBS     = os.path.join(PEPDICE, 'PDBs')
 PEPDICE_OUTPUTS  = os.path.join(PEPDICE, 'outputs')
 
-
 os.path.join(PEPDICE_PDBS,)
 
 #-------------------------------------------------------------------------------
-
-
-def amber12_to_amber11_topology_converter (filein, fileout):
-	filein = open(filein, 'r')
-	text   = []
-	print_line = True
-
-	for line in filein:
-		line2 = line.split()
-		try:
-			if line2[0] == '%FLAG':
-				if   line2[1] == 'ATOMIC_NUMBER':
-					print 'excluding flag:', line
-					print_line = False
-
-				elif   line2[1] == 'SCEE_SCALE_FACTOR':
-					print 'excluding flag:', line
-					print_line = False
-
-				elif   line2[1] == "SCNB_SCALE_FACTOR":
-					print 'excluding flag:', line
-					print_line = False			
-
-				elif   line2[1] == 'IPOL':
-					print 'excluding flag:', line
-					print_line = False
-		
-				else:
-					print_line = True	
-					#print print_line
-		except:
-			a= None
-		if print_line == True:
-			text.append(line)
-
-	fileout = open(fileout, 'w')
-	fileout.writelines(text)
-	fileout.close()
-
 
 
 def compute_torsions (system = None, log =False):
@@ -157,41 +117,6 @@ def refold (system = None, phi_and_psi_table = None, fileout = None):
 
     save_PDB_to_file(system,  fileout)
     #------------------------------------------------------------------------------------------------------
-    #os.system('')
-
-def minimize_phenix (pdbin = None, geo = False, geofile = None ):
-    """ Function doc """
-    
-    if geo:
-        subprocess.call(['phenix.geometry_minimization', pdbin, geofile])
-    else:
-        subprocess.call(['phenix.geometry_minimization', pdbin])
-    
-    return pdbin+'_minimized.pdb'
-
-
-
-def wget_pdb (pdbcode = None, filesInFolder = None):
-    """ Function doc """
-    
-    if filesInFolder == None:
-        filesInFolder = os.listdir('.')
-    
-    if pdbcode+'.pdb' in filesInFolder:
-        pass
-    else:
-        os.system('wget https://files.rcsb.org/download/'+pdbcode+'.pdb')    
-    
-    
-
-def wget_pdbs (PDBcodes = None):
-    """ Function doc """
-    filesInFolder = os.listdir('.')
-    
-    for pdbcode in PDBcodes:
-        wget_pdb (pdbcode       = pdbcode      , 
-                  filesInFolder = filesInFolder)
-
 
 
 def get_sequence_from_pdb (pdbcode = None):
@@ -279,9 +204,39 @@ def read_sequence_from_seqFile(seqfile):
     return sequence
     
     
+  
+
+def amber_topology_angle_force_change (filein =  None, fileout = None, force = 'E+04'):
+    """ Function doc """
+    filein =  open(filein, 'r')
+    filein2 = filein.readlines()
+
+    text = []
     
+    for line in filein2:
+        if '%FLAG ANGLE_FORCE_CONSTANT                                                      ' in line:
+            inicio = filein2.index(line)
+
+        if '%FLAG ANGLE_EQUIL_VALUE                                                         ' in line:
+            final = filein2.index(line)
+
+    #print inicio, final
+    for line in range(inicio, final):
+        print filein2[line]
+        
+        if 'E+01' in filein2[line]:
+            filein2[line] = filein2[line].replace('E+01', force)
+            print filein2[line]
+
+
+    fileout =  open(fileout, 'w')
+    fileout.writelines(filein2)
+    fileout.close()
     
-def generate_extended_chains( pdbcode = None, 
+  
+
+
+def generate_extended_structures( pdbcode = None, 
                              sequence = None, 
                            phenix_opt = True, 
                             amber_opt = True,
@@ -299,7 +254,7 @@ def generate_extended_chains( pdbcode = None,
                                         overwrite   = True              ,
                                         )
     
-    amber12_to_amber11_topology_converter(system.name+'.top', system.name+'.top')
+    
     #----------------------------------------------------------------------
     '''Carregando o pdb com os nomes dos atomos corrigidos'''
     #----------------------------------------------------------------------
@@ -309,6 +264,12 @@ def generate_extended_chains( pdbcode = None,
     energy_estendida  = system.energy( log = True)
     #----------------------------------------------------------------------
             
+    
+    amber_topology_angle_force_change (filein =  filename+'.top', fileout = filename+'_angles.top', force = 'E+04')
+    system.import_AMBER_parameters    (top       =  filename+'_angles.top',   
+                                       torsions  = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )
+    
+    
     if amber_opt:
         try:
             minimize(molecule = system,
@@ -326,52 +287,12 @@ def generate_extended_chains( pdbcode = None,
             save_PDB_to_file(system, pdbcode+'_estendida_amber_opt.pdb')
         except:
             print 'amber opt failed'
-
-    if phenix_opt:
-        try:
-            #----------------------------------------------------------------------
-            # minimizacao da cadeia estendida
-            pdbou = minimize_phenix(pdbin = pdbcode+'_estendida.pdb', geo = True, geofile = 'geo.in' )
-            system.load_PDB_to_system (filename = pdbcode+'_estendida_minimized.pdb')
-            energy_estendida_minimized  = system.energy(log = True)
-            #----------------------------------------------------------------------
-        except:
-            print 'phenix opt failed'
-            
-    if pdynamo_opt:
-        try:
-            #----------------------------------------------------------------------------
-            from pBabel            import *
-            from pMolecule         import *
-            from pCore             import *
-            from pMoleculeScripts  import *
-            #----------------------------------------------------------------------------
-
-            system = AmberTopologyFile_ToSystem (filename+'.top' )
-            
-            try:
-                system.coordinates3 = AmberCrdFile_ToCoordinates3 (filename+'.crd')
-            except:
-                system.coordinates3 = PDBFile_ToCoordinates3 (filename+'.pdb')
-            
-            #system.DefineNBModel ( NBModelFull ( ) )
-            system.Summary ( )
-          
-            ConjugateGradientMinimize_SystemGeometry ( system                       ,
-                                                       logFrequency         =   1   ,
-                                                       maximumIterations    =  50   ,
-                                                       rmsGradientTolerance =  0.1 )
-            
-            PDBFile_FromSystem (filename+'_pDynamoMinimization.pdb', system )
-            #----------------------------------------------------------------------------
-        except:
-            print 'pDynamo opt failed'
-
     return system
 
 
+PDBcodes =  {#'1GAB': ['alpha'     ],
+            '1BX4': ['alpha_beta'],
 
-PDBcodes =  {'1GAB': ['alpha'     ],
              #'1UAO': ['beta'      ],
              #'1LE1': ['beta'      ],
              #'1CSK': ['beta'      ],
@@ -402,6 +323,59 @@ PDBcodes =  {'1GAB': ['alpha'     ],
              #'1PRB': ['alpha'     ],
              #'2WXC': ['alpha'     ],
             }
+
+
+
+for pdbcode in PDBcodes:
+    
+    path     = os.getcwd()
+    path     = os.path.join(path,'PDBs',PDBcodes[pdbcode][0], pdbcode)
+    sequence = read_sequence_from_seqFile(os.path.join(path,pdbcode+'_A.seq'))
+    
+#try:
+    print sequence
+    print pdbcode
+    system = generate_extended_structures(pdbcode = pdbcode, 
+                                         sequence = sequence, 
+                                       phenix_opt = True, 
+                                        amber_opt = True,
+                                      pdynamo_opt = True)
+
+    
+    reference = Molecule()
+    pdbin  = os.path.join(PEPDICE_EXAMPLES,'PDBs',PDBcodes[pdbcode][0], pdbcode, pdbcode +'_A_AMBER_minimized.pdb')
+    print pdbin
+    reference.load_PDB_to_system (filename = pdbin)
+    
+    #'/home/farminf/Programas/pepdice/Examples/PDBs/alpha/1GAB/1GAB_A_AMBER.pdb')      
+
+    torsions = compute_torsions (system = reference, log =False)
+    #print torsions
+    
+    for angle in torsions:
+        print angle[0], angle[1], angle[2]
+        #angle[2]  = 180
+    refold (system = system, phi_and_psi_table = torsions, fileout = pdbcode+'_A_AMBER_refold.pdb')
+    
+    
+    minimize(molecule = system,
+                         imin  = 1        ,
+                         maxcyc= 1000     ,
+                         ncyc  = 1000     ,
+                         cut   = 10       ,
+                         rgbmax= 999      ,
+                         igb   = 1        ,
+                         ntb   = 0        ,
+                         ntpr  = 100      ,
+                         ntr   = 0        )
+                         #restraintmask = ':1-50 & @CA,N,C,O=', 
+                         #restraint_wt  =  50.0 
+    save_PDB_to_file(system, pdbcode+'_A_AMBER_refold_minimized.pdb')
+#except:
+#    print 'failed geo_opt_refnament ', pdbcode 
+    
+    
+
 
 
 
@@ -530,10 +504,6 @@ def geo_opt_refnament (PDBcodes, phenix_opt = True, amber_opt = True):
 
         
 
-#wget_pdbs(PDBcodes)
-#PDBcodes = build_PDBcodes_dic (dic = PDBcodes)
-#
-geo_opt_refnament (PDBcodes)
 
 
 

@@ -91,4 +91,4 @@ def load_CRD_from_file (molecule = None, filename = None):
 
 
 
-load_CRD_from_file(molecule = None, filename = '/home/fernando/programs/pepdice/Examples/SinglePoint1.crd')
+#load_CRD_from_file(molecule = None, filename = '/home/fernando/programs/pepdice/Examples/SinglePoint1.crd')

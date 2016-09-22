@@ -281,7 +281,7 @@ def read_sequence_from_seqFile(seqfile):
     
     
     
-def generate_extended_chains( pdbcode = None, 
+def generate_extended_structures( pdbcode = None, 
                              sequence = None, 
                            phenix_opt = True, 
                             amber_opt = True,
@@ -402,6 +402,28 @@ PDBcodes =  {'1GAB': ['alpha'     ],
              #'1PRB': ['alpha'     ],
              #'2WXC': ['alpha'     ],
             }
+
+
+
+for pdbcode in PDBcodes:
+    
+    path     = os.getcwd()
+    path     = os.path.join(path,'PDBs',PDBcodes[pdbcode][0], pdbcode)
+    sequence = read_sequence_from_seqFile(os.path.join(path,pdbcode+'_A.seq'))
+    
+#try:
+    print sequence
+    print pdbcode
+    system = generate_extended_structures(pdbcode = pdbcode, 
+                                         sequence = sequence, 
+                                       phenix_opt = True, 
+                                        amber_opt = True,
+                                      pdynamo_opt = True)
+#except:
+#    print 'failed geo_opt_refnament ', pdbcode 
+    
+    
+
 
 
 
@@ -530,10 +552,6 @@ def geo_opt_refnament (PDBcodes, phenix_opt = True, amber_opt = True):
 
         
 
-#wget_pdbs(PDBcodes)
-#PDBcodes = build_PDBcodes_dic (dic = PDBcodes)
-#
-geo_opt_refnament (PDBcodes)
 
 
 
