@@ -1,0 +1,3 @@
+source leaprc.ff03ua.labio
+sys = loadpdb obj01.pdb
+saveamberparm sys sys.top sys.crd

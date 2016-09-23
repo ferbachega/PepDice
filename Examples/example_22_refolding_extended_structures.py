@@ -250,7 +250,7 @@ def generate_extended_structures( pdbcode = None,
     system.name =  pdbcode+'_estendida'
     system.build_peptide_from_sequence (sequence    = sequence          ,
                                         _type       = 'amber'           ,
-                                        force_field = 'ff03ua'          ,
+                                        force_field = 'ff03ua.labio'    ,
                                         overwrite   = True              ,
                                         )
     
@@ -265,8 +265,8 @@ def generate_extended_structures( pdbcode = None,
     #----------------------------------------------------------------------
             
     
-    amber_topology_angle_force_change (filein =  filename+'.top', fileout = filename+'_angles.top', force = 'E+04')
-    system.import_AMBER_parameters    (top       =  filename+'_angles.top',   
+    #amber_topology_angle_force_change (filein =  filename+'.top', fileout = filename+'_angles.top', force = 'E+04')
+    system.import_AMBER_parameters    (top       =  filename+'.top',   
                                        torsions  = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )
     
     
@@ -291,7 +291,7 @@ def generate_extended_structures( pdbcode = None,
 
 
 PDBcodes =  {#'1GAB': ['alpha'     ],
-            '1BX4': ['alpha_beta'],
+             '1BX4': ['alpha_beta'],
 
              #'1UAO': ['beta'      ],
              #'1LE1': ['beta'      ],
@@ -331,7 +331,7 @@ for pdbcode in PDBcodes:
     path     = os.getcwd()
     path     = os.path.join(path,'PDBs',PDBcodes[pdbcode][0], pdbcode)
     sequence = read_sequence_from_seqFile(os.path.join(path,pdbcode+'_A.seq'))
-    
+    print sequence
 #try:
     print sequence
     print pdbcode

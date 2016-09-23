@@ -157,7 +157,8 @@ class Molecule(Atom   ,
                  }
         
         if overwrite:
-            text  = 'source leaprc.' + force_field + ' \n'
+            text  = 'addpath '+PEPDICE+'/Parameters/amber/labio.amber \n'
+            text  += 'source leaprc.' + force_field + ' \n'
             
             if NCTER:
                 text += 'foo = sequence {N'
@@ -165,6 +166,7 @@ class Molecule(Atom   ,
                 text += 'foo = sequence {'
 
             n = 1
+            n2 = 1
             for aa in sequence:
                 
                 if n == len(sequence):
@@ -172,9 +174,17 @@ class Molecule(Atom   ,
                         text += 'C'
                     else:
                         pass
-                text += aa_dic[aa] + ' '
+                if n2 >= 10:
+                    text += aa_dic[aa] + ' \n'
+                    n2 = 1
+
+                else:
+                    text += aa_dic[aa] + ' '
+                    n2 += 1
                 n += 1
-            
+                
+                
+                
             text += '} \n'
             text += 'saveamberparm foo '+ self.name +'.top '+ self.name +'.crd \n'
             text += 'savepdb foo ' + self.name +'.pdb \n'
