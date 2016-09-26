@@ -1,20 +1,20 @@
 #-------------------------------------------------------------------------------
-import os                                             
-from pprint      import pprint                        
-from Molecule    import Molecule                      
-from Geometry    import *                             
-from MonteCarlo  import monte_carlo, insert_fragment  
-from XYZFiles    import save_XYZ_to_file              
-from CRDFiles    import load_CRD_from_file            
-from AATorsions  import ROTAMER_LIST                  
-                                                      
-from RMSD import compute_RMSD                         
-                                                                                                           
-from GeometryOptimization import minimize             
-                                                      
-from random import randint                            
-                                                      
-from Energy import save_PDB_to_file                   
+import os
+from pprint      import pprint
+from Molecule    import Molecule
+from Geometry    import *
+from MonteCarlo  import monte_carlo, insert_fragment
+from XYZFiles    import save_XYZ_to_file
+from CRDFiles    import load_CRD_from_file
+from AATorsions  import ROTAMER_LIST
+
+from RMSD import compute_RMSD
+
+from GeometryOptimization import minimize
+
+from random import randint
+
+from Energy import save_PDB_to_file
 #from Amber12ToAmber11 import amber12_to_amber11_topology_converter
 
 #-------------------------------------------------------------------------------
@@ -38,11 +38,11 @@ def pdb_hydrogen_remove (pdbin = None, pdbout = False):
     """ Function doc """
     print pdbin
     print pdbout
-    
+
 
 def pdb_extract_chain (pdbin = None, pdbout = None, chain = 'A', model = 1, remove_hydrogens = True):
     """ Function doc """
-    
+
     pdbtext = open(pdbin, 'r')
     text    = ''
     for line in pdbtext:
@@ -50,28 +50,28 @@ def pdb_extract_chain (pdbin = None, pdbout = None, chain = 'A', model = 1, remo
         #print line
         if len(line2) > 0:
             if line2[0] == 'ATOM':
-            
+
                 if chain in line2:
-                    
+
                     # ignora as linhas com H no final
                     if line2[-1] == 'H':
                         pass
-                    
-                    
+
+
                     else:
                         try:
-                            text += line +'\n' 
+                            text += line +'\n'
                         except:
                             print line
                 else:
                     pass
-            
+
             if line2[0] == 'MODEL':
                 if int(line2[1]) == 1:
                     pass
                 else:
                     break
-                
+
     pdbout = open(pdbout, 'w')
     pdbout.write(text)
     pdbout.close()
@@ -80,13 +80,13 @@ def pdb_extract_chain (pdbin = None, pdbout = None, chain = 'A', model = 1, remo
 def get_sequence_from_pdb (pdbin = None, seq_out = None):
     """ Function doc """
     pdb     = pdbin
-    
+
     pdbtext =  open(pdb, 'r')
     sequence      = []
     sequence_code = ''
     previous_index = None
 
-    aa_dic = { 
+    aa_dic = {
          'ALA':'A',
          'ARG':'R',
          'ASN':'N',
@@ -108,18 +108,18 @@ def get_sequence_from_pdb (pdbin = None, seq_out = None):
          'TYR':'Y',
          'VAL':'V'
          }
-    
-    
+
+
     for line in pdbtext:
         line2 = line.split()
         #print line
         if len(line2) > 0:
             if line2[0] == 'ATOM':
                 #print line
-                
+
                 try:
                     index = int(line2[5])
-                    
+
                     if index == previous_index:
                         pass
                     else:
@@ -130,50 +130,50 @@ def get_sequence_from_pdb (pdbin = None, seq_out = None):
                     print line
                 #print index
                 #sequence[index] = line2[3]
-                
+
             if line2[0] == 'TER' or line2[0] == 'END' :
                 break
-    
+
     if seq_out :
         pdbcode = pdbin.split('.')
         pdbcode = pdbcode[0]
         pdbcode = pdbcode +'  ' + sequence_code
         fileout = open(seq_out, 'w')
         fileout.write(pdbcode)
-    
+
     return sequence_code
 
 
 def phenix_geometry_minimization (pdbin = None, geo = False, geofile = None ):
     """ Function doc """
-    
+
     if geo:
         subprocess.call(['phenix.geometry_minimization', pdbin, geofile])
     else:
         subprocess.call(['phenix.geometry_minimization', pdbin])
-    
+
     return pdbin+'_minimized.pdb'
 
 
 def build_AMBER_system_from_PDB (pdbin = None    ,
                               basename = None    ,
                            force_field = 'ff03ua',
-                             overwrite = True 
+                             overwrite = True
                                  ):
-    """ 
-    Function doc 
+    """
+    Function doc
     source leaprc.ff03ua
     foo = sequence { ACE ALA NME }
     saveamberparm foo foo.top foo.crd
     """
-    
+
     if overwrite:
         #text  = 'source leaprc.' + force_field + ' \n'
         text  = 'addpath '+PEPDICE+'/Parameters/amber/labio.amber \n'
         text  += 'source leaprc.' + force_field + ' \n'
 
         text += 'foo = loadpdb '+ pdbin
-        
+
         text += '\n'
         text += 'saveamberparm foo '+ basename +'.top '+ basename +'.crd \n'
         text += 'savepdb foo ' + basename +'.pdb \n'
@@ -205,14 +205,14 @@ def amber12_to_amber11_topology_converter (filein, fileout):
 
 				elif   line2[1] == "SCNB_SCALE_FACTOR":
 					print 'excluding flag:', line
-					print_line = False			
+					print_line = False
 
 				elif   line2[1] == 'IPOL':
 					print 'excluding flag:', line
 					print_line = False
-		
+
 				else:
-					print_line = True	
+					print_line = True
 					#print print_line
 		except:
 			a= None
@@ -230,7 +230,7 @@ def amber_topology_angle_force_change (filein =  None, fileout = None, force = '
     filein2 = filein.readlines()
 
     text = []
-    
+
     for line in filein2:
         if '%FLAG ANGLE_FORCE_CONSTANT                                                      ' in line:
             inicio = filein2.index(line)
@@ -241,7 +241,7 @@ def amber_topology_angle_force_change (filein =  None, fileout = None, force = '
     #print inicio, final
     for line in range(inicio, final):
         print filein2[line]
-        
+
         if 'E+01' in filein2[line]:
             filein2[line] = filein2[line].replace('E+01', force)
             print filein2[line]
@@ -250,18 +250,18 @@ def amber_topology_angle_force_change (filein =  None, fileout = None, force = '
     fileout =  open(fileout, 'w')
     fileout.writelines(filein2)
     fileout.close()
-    
+
 
 def wget_pdb (pdbcode = None, filesInFolder = None):
     """ Function doc """
-    
+
     if filesInFolder == None:
         filesInFolder = os.listdir('.')
-    
+
     if pdbcode+'.pdb' in filesInFolder:
         pass
     else:
-        os.system('wget https://files.rcsb.org/download/'+pdbcode+'.pdb') 
+        os.system('wget https://files.rcsb.org/download/'+pdbcode+'.pdb')
 
 
 PDBcodes =  {
@@ -300,113 +300,114 @@ PDBcodes =  {
 
 
 
+if __name__ == '__main__':
 
-folder = os.getcwd()
-Types = ['alpha', 'beta', 'alpha_beta']
+    folder = os.getcwd()
+    Types = ['alpha', 'beta', 'alpha_beta']
 
-for Type in Types:
-    if not os.path.exists (Type):
-        os.mkdir (Type)
+    for Type in Types:
+        if not os.path.exists (Type):
+            os.mkdir (Type)
 
-logfile = open('logfile', 'w')
-logtext = []
-for code in PDBcodes:
-    print code
-    print PDBcodes[code][0]
-    #---------------------------------------------------------------------------
-    path = os.path.join(folder, PDBcodes[code][0])
-    os.chdir(path)
-    
-    
-    if not os.path.exists (code):
-        os.mkdir (code)
-    
-    os.chdir(os.path.join(path, code))
-    #---------------------------------------------------------------------------
-    
-    
-    
-    try:
+    logfile = open('logfile', 'w')
+    logtext = []
+    for code in PDBcodes:
+        print code
+        print PDBcodes[code][0]
         #---------------------------------------------------------------------------
-        wget_pdb (pdbcode = code, filesInFolder = None)
-        
-        pdb_extract_chain (pdbin = code+'.pdb', 
-                          pdbout = code+'_A.pdb', 
-                           chain = 'A')
-        
+        path = os.path.join(folder, PDBcodes[code][0])
+        os.chdir(path)
 
-        get_sequence_from_pdb      (pdbin = code+'_A.pdb', seq_out = code+'_A.seq')    
+
+        if not os.path.exists (code):
+            os.mkdir (code)
+
+        os.chdir(os.path.join(path, code))
         #---------------------------------------------------------------------------
-        logtext.append(code+' wget_pdb......Ok\n')
-    except:
-        print 'failed wget pdb'
-        logtext.append(code+' wget_pdb......failed\n')
-
-    
-    
-    try:
-        #---------------------------------------------------------------------------
-        build_AMBER_system_from_PDB(pdbin = code+'_A.pdb'    ,
-                                 basename = code+'_A_AMBER'    ,
-                              force_field = 'ff03ua.labio'         ,        
-                                overwrite = True 
-                                    )
-        #----------------------------------------------------------------------------
-        
-        
-        ##----------------------------------------------------------------------------
-        #amber_topology_angle_force_change(filein = code+'_A_AMBER.top', 
-        #                                 fileout = code+'_A_AMBER_angleMod.top', 
-        #                                   force = 'E+04')
-        ##----------------------------------------------------------------------------
-        
-        
-        #----------------------------------------------------------------------------
-        system = Molecule() 
-        system.load_PDB_to_system      (filename = code+'_A_AMBER.pdb')   
-        system.import_AMBER_parameters (top      = code+'_A_AMBER.top',   
-                                        torsions = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )
-        save_PDB_to_file(system, code+'_A.pdb')
-        logtext.append(code+' tleap......Ok\n')
-
-    except:
-        print 'failed wget pdb'
-        logtext.append(code+' tleap......failed\n')
-
-    #'''
-    try:
-        minimize(molecule = system,
-                 imin  = 1        ,
-                 maxcyc= 1000     ,
-                 ncyc  = 100      ,
-                 cut   = 10       ,
-                 rgbmax= 999      ,
-                 igb   = 1        ,
-                 ntb   = 0        ,
-                 ntpr  = 100      ,
-                 ntr   = 0        )
-                 #restraintmask = ':1-50 & @CA,N,C,O=', 
-                 #restraint_wt  =  50.0 
-        save_PDB_to_file(system, code+'_A_AMBER_minimized.pdb')
-        logtext.append(code+' amber opt......ok\n')
-    
-        #----------------------------------------------------------------------------
-    except:
-        print 'failed:', code, 'opt amber'
-        logtext.append(code+' amber opt......failed\n')
-    #'''
-
-
-logfile.writelines(logtext)
 
 
 
-'''
-get_sequence_from_pdb (pdbin = '1GAB_noH.pdb', seq_out = '1GBA.seq')    
+        try:
+            #---------------------------------------------------------------------------
+            wget_pdb (pdbcode = code, filesInFolder = None)
 
-build_AMBER_system_from_PDB(pdbin = '1GAB_noH.pdb'    ,
-                         basename = '1GAB_noH'        ,
-                      force_field = 'ff03ua',
-                        overwrite = True 
-                            )
-'''
+            pdb_extract_chain (pdbin = code+'.pdb',
+                            pdbout = code+'_A.pdb',
+                            chain = 'A')
+
+
+            get_sequence_from_pdb      (pdbin = code+'_A.pdb', seq_out = code+'_A.seq')
+            #---------------------------------------------------------------------------
+            logtext.append(code+' wget_pdb......Ok\n')
+        except:
+            print 'failed wget pdb'
+            logtext.append(code+' wget_pdb......failed\n')
+
+
+
+        try:
+            #---------------------------------------------------------------------------
+            build_AMBER_system_from_PDB(pdbin = code+'_A.pdb'    ,
+                                    basename = code+'_A_AMBER'    ,
+                                force_field = 'ff03ua.labio'         ,
+                                    overwrite = True
+                                        )
+            #----------------------------------------------------------------------------
+
+
+            ##----------------------------------------------------------------------------
+            #amber_topology_angle_force_change(filein = code+'_A_AMBER.top',
+            #                                 fileout = code+'_A_AMBER_angleMod.top',
+            #                                   force = 'E+04')
+            ##----------------------------------------------------------------------------
+
+
+            #----------------------------------------------------------------------------
+            system = Molecule()
+            system.load_PDB_to_system      (filename = code+'_A_AMBER.pdb')
+            system.import_AMBER_parameters (top      = code+'_A_AMBER.top',
+                                            torsions = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )
+            save_PDB_to_file(system, code+'_A.pdb')
+            logtext.append(code+' tleap......Ok\n')
+
+        except:
+            print 'failed wget pdb'
+            logtext.append(code+' tleap......failed\n')
+
+        #'''
+        try:
+            minimize(molecule = system,
+                    imin  = 1        ,
+                    maxcyc= 1000     ,
+                    ncyc  = 100      ,
+                    cut   = 10       ,
+                    rgbmax= 999      ,
+                    igb   = 1        ,
+                    ntb   = 0        ,
+                    ntpr  = 100      ,
+                    ntr   = 0        )
+                    #restraintmask = ':1-50 & @CA,N,C,O=',
+                    #restraint_wt  =  50.0
+            save_PDB_to_file(system, code+'_A_AMBER_minimized.pdb')
+            logtext.append(code+' amber opt......ok\n')
+
+            #----------------------------------------------------------------------------
+        except:
+            print 'failed:', code, 'opt amber'
+            logtext.append(code+' amber opt......failed\n')
+        #'''
+
+
+    logfile.writelines(logtext)
+
+
+
+    '''
+    get_sequence_from_pdb (pdbin = '1GAB_noH.pdb', seq_out = '1GBA.seq')
+
+    build_AMBER_system_from_PDB(pdbin = '1GAB_noH.pdb'    ,
+                            basename = '1GAB_noH'        ,
+                        force_field = 'ff03ua',
+                            overwrite = True
+                                )
+    '''
