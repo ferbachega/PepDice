@@ -570,11 +570,18 @@ def computePhiPsi (molecule=None, resi=1, bond='PSI'):
     if ome:
         if bond == 'OMEGA':
             angle = dihedral(
-                             CA2.pos  ,
+                             CA2.pos, 
                              C2.pos ,
-                             N3.pos  ,
+                             N3.pos ,
                              CA3.pos)
-            return angle*(180/math.pi)#57.29577951308232
+            
+            
+            
+            if math.degrees(angle) <= 1 and math.degrees(angle) >= -1:
+                # se o diedro é igual a 180 e funcao dihedral retorna 0
+                return 180
+            else:
+                return math.degrees(angle)#angle*(180/math.pi)#57.29577951308232
 
 
 
