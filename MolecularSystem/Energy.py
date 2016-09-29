@@ -37,23 +37,55 @@ def compute_AB_vdw_ij (atom_i, atom_j):
     return E_ab
 
 def compute_AB_energy (molecule = None):
-    """ Function doc """
+    """ Function doc 
+    ARG	   R	−4.5
+    LYS	   K	−3.9
+    ASN	   N	−3.5
+    ASP	   D	−3.5
+    GLU	   E	−3.5
+    GLN	   Q	−3.5
+    HIS	   H	−3.2
+    PRO	   P	−1.6
+    TYR	   Y	−1.3
+    TRP	   W	−0.9
+    SER	   S	−0.8
+    THR	   T	−0.7
+    GLY	   G	−0.4
+    ALA	   A	1.8
+    MET	   M	1.9
+    CYS	   C	2.5
+    PHE	   F	2.8
+    LEU	   L	3.8
+    VAL	   V	4.2
+    ILE	   I	4.5
+    
+    Kyte J, Doolittle RF (May 1982). "A simple method for displaying the hydropathic character of a protein". Journal of Molecular Biology. 
+    157 (1): 105–32. doi:10.1016/0022-2836(82)90515-0. PMID 7108955.Kyte J, Doolittle RF (May 1982). 
+    "A simple method for displaying the hydropathic character of a protein". 
+    Journal of Molecular Biology. 157 (1): 105–32. doi:10.1016/0022-2836(82)90515-0. PMID 7108955.
+    
+    """
+    
     total_E = 0
+    
     #----------------------- atom i -----------------------------#
+    
     for residue_i in molecule.residues:
         for atom_i in residue_i.atoms:
             
             if atom_i.name == 'CA':
+                
                 if residue_i.name in ['ALA','ILE','LEU','MET','VAL','PRO','GLY','CYS']:
                     atom_i.AB = 'A'
                 else:
                     atom_i.AB = 'B'
+                
                 #------------------- atom j ---------------------#
                 for residue_j in molecule.residues:
                     if residue_j.id == residue_i:
                         pass
+                    
                     else:
-                        
                         for atom_j in  residue_j.atoms:
                             
                             if atom_i.id == atom_j.id:
@@ -67,6 +99,7 @@ def compute_AB_energy (molecule = None):
                                         atom_j.AB = 'B'
                                     vdw =  compute_AB_vdw_ij (atom_i, atom_j)
                                     total_E += vdw
+                                    #print residue_i.id, residue_i.name,atom_i.name,  residue_j.id, residue_j.name, atom_j.name
     return total_E
 
 
@@ -86,7 +119,11 @@ class Energy:
                external_coordinates      = False, 
                external_coordinates_type = 'pdb',
                external_coordinates_file = None , 
-               #energy_AB                 = True ,
+               
+               # - - - -  novos termos - - - - -
+               AB_energy                 = False,
+               NDRD_energy               = False,
+               return_list               = False,
                ):
                     
         """ Function doc """
@@ -169,15 +206,25 @@ class Energy:
             energy += energy_list["ANGLE"] * angle
             energy += energy_list["BOND"]  * bond
             
-            if self.AB != 0.0:
-                energy +=   compute_AB_energy(molecule = self)*self.AB
+            
+            if AB_energy:
+                ab_energy = compute_AB_energy(molecule = self)*self.AB
+                energy +=   ab_energy
+                energy_list["AB_energy"]  = ab_energy
+            
+            
             
             #print 'energy_AB:', energy_AB 
             
             if log:
                 from pprint import pprint
                 pprint(energy_list)
-            return energy
+            
+            
+            if return_list:
+                return energy_list
+            else:
+                return energy
 
 
         if  self.ff_type == 'Calpha_model':
