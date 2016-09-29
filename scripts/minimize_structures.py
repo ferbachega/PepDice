@@ -2,11 +2,9 @@
 
 import argparse
 import glob
-
-# Can't use multiprocessing, since pepdice uses fixed input filenames
-# and a second process overwrites input files from the first
-# from multiprocessing import Pool
+import multiprocessing
 import os
+import traceback
 
 import pepdice.Examples.PDBs.database_builder as pepdice
 
@@ -21,7 +19,8 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-def minimize_structure(pdb_file, output_dir):
+def minimize_structure(pdb_file):
+    output_dir = args.output_dir
     input_filename = os.path.basename(pdb_file)[:-4]  # Remove extension
     base_filename = os.path.join(output_dir, input_filename)
 
@@ -40,28 +39,33 @@ def minimize_structure(pdb_file, output_dir):
             basename=base_filename + '_A_AMBER',
             force_field='ff03ua.labio',
             overwrite=True,
+            leaprc_filename=None,
         )
         system = pepdice.Molecule()
-        system.load_PDB_to_system(filename=base_filename + '_A_AMBER.pdb')
-        system.import_AMBER_parameters(
-            top=base_filename + '_A_AMBER.top',
-            torsions=os.path.join(
-                pepdice.PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat'),
-        )
-        pepdice.minimize(
-            molecule=system,
-            imin=1,
-            maxcyc=1000,
-            ncyc=100,
-            cut=10,
-            rgbmax=999,
-            igb=1,
-            ntb=0,
-            ntpr=100,
-            ntr=0,
-        )
-        pepdice.save_PDB_to_file(
-            system, base_filename + '_A_AMBER_minimized.pdb')
+        try:
+            system.load_PDB_to_system(filename=base_filename + '_A_AMBER.pdb')
+            system.import_AMBER_parameters(
+                top=base_filename + '_A_AMBER.top',
+                torsions=os.path.join(
+                    pepdice.PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat'),
+            )
+            pepdice.minimize(
+                molecule=system,
+                imin=1,
+                maxcyc=1000,
+                ncyc=100,
+                cut=10,
+                rgbmax=999,
+                igb=1,
+                ntb=0,
+                ntpr=100,
+                ntr=0,
+            )
+            pepdice.save_PDB_to_file(
+                system, base_filename + '_A_AMBER_minimized.pdb')
+        except Exception as e:
+            print e
+            traceback.print_stack()
 
 
 if __name__ == '__main__':
@@ -70,12 +74,14 @@ if __name__ == '__main__':
         os.makedirs(args.output_dir)
 
     if os.path.isfile(args.input_structure):
-        minimize_structure(args.input_structure, args.output_dir)
+        minimize_structure(args.input_structure)
     else:
         input_dir = args.input_structure
         pdb_files = glob.glob(os.path.join(input_dir, '*.pdb'))
         pdb_files += glob.glob(os.path.join(input_dir, '*.ent'))
 
         print 'Minimizing {} PDB files'.format(len(pdb_files))
-        for pdb_file in pdb_files:
-            minimize_structure(pdb_file, args.output_dir)
+        pool = multiprocessing.Pool()
+        pool.map(minimize_structure, pdb_files)
+        pool.close()
+        pool.join()
