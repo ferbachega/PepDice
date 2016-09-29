@@ -57,11 +57,11 @@ PEPDICE_PARAMETER= os.path.join(PEPDICE, 'Parameters')
 
 #-------------------------------------------------------------------------------
 system = Molecule() 
-system.load_PDB_to_system      (filename = os.path.join(PEPDICE_EXAMPLES , 'data/alpha/1GAB/1gab_ff03ua_AMBER_extended.pdb'   )   )   
-system.import_AMBER_parameters(top       = os.path.join(PEPDICE_EXAMPLES , 'data/alpha/1GAB/1gab_ff03ua_AMBER_extended.prmtop')   ,   
+system.load_PDB_to_system      (filename = os.path.join(PEPDICE_EXAMPLES , 'PDBs/alpha/1L2Y/1L2Y_A_AMBER_minimized.pdb'   )   )   
+system.import_AMBER_parameters(top       = os.path.join(PEPDICE_EXAMPLES , 'PDBs/alpha/1L2Y/1L2Y_A_AMBER.top')   ,   
                                 torsions = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )   
-#TRAJECTORY  = '/home/farminf/Programas/PepDice/Examples/1GAB/amber/1gab_amber_side_chain_rand.xyz' /home/farminf/Programas/pepdice/Examples/data/alpha/1GAB/1gab_ff03ua_AMBER_extended.prmtop
 #-------------------------------------------------------------------------------
-
-print system.energy( log = True)
+system.AB = 1
+print system.energy(log       = True,
+                    AB_energy = True)
 
