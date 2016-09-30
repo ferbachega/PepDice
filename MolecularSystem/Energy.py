@@ -36,39 +36,98 @@ def compute_AB_vdw_ij (atom_i, atom_j):
     E_ab = A*((R_ab**-12) - C*(R_ab**-6))
     return E_ab
 
+
+def compute_ij_CalphaModel_vdw (atom_i, atom_j):
+    """ Function doc """ #-23085572255.9
+    
+    A    = 1
+    B    = 1
+    
+    if atom_i.AB + atom_j.AB == 'AA':   # apolares
+        C = 1
+    elif atom_i.AB + atom_j.AB == 'BB': # polares
+        C = 0.5
+    else:
+        C = -0.5
+    
+    R_ab = distance_ab (atom_i, atom_j)
+    E_ab = A*((R_ab**-12) - C*(R_ab**-6))
+    return E_ab
+
+
+
 def compute_AB_energy (molecule = None):
-    """ Function doc 
-    ARG	   R	−4.5
-    LYS	   K	−3.9
-    ASN	   N	−3.5
-    ASP	   D	−3.5
-    GLU	   E	−3.5
-    GLN	   Q	−3.5
-    HIS	   H	−3.2
-    PRO	   P	−1.6
-    TYR	   Y	−1.3
-    TRP	   W	−0.9
-    SER	   S	−0.8
-    THR	   T	−0.7
-    GLY	   G	−0.4
-    ALA	   A	1.8
-    MET	   M	1.9
-    CYS	   C	2.5
-    PHE	   F	2.8
-    LEU	   L	3.8
-    VAL	   V	4.2
-    ILE	   I	4.5
+    '''
+    ARG =  -4.5
+    LYS =  -3.9
+    ASN =  -3.5
+    ASP =  -3.5
+    GLU =  -3.5
+    GLN =  -3.5
+    HIS =  -3.2
+    PRO =  -1.6
+    TYR =  -1.3
+    TRP =  -0.9
+    SER =  -0.8
+    THR =  -0.7
+    GLY =  -0.4
+    ALA =   1.8
+    MET =   1.9
+    CYS =   2.5
+    PHE =   2.8
+    LEU =   3.8
+    VAL =   4.2
+    ILE =   4.5
     
-    Kyte J, Doolittle RF (May 1982). "A simple method for displaying the hydropathic character of a protein". Journal of Molecular Biology. 
-    157 (1): 105–32. doi:10.1016/0022-2836(82)90515-0. PMID 7108955.Kyte J, Doolittle RF (May 1982). 
-    "A simple method for displaying the hydropathic character of a protein". 
-    Journal of Molecular Biology. 157 (1): 105–32. doi:10.1016/0022-2836(82)90515-0. PMID 7108955.
-    
-    """
+    Kyte J, Doolittle RF (May 1982). "A simple method for displaying the hydropathic character of a protein". 
+    Journal of Molecular Biology.157.
+    '''
+    hydropathic_table = {
+                        'ARG' : -4.5,
+                        'LYS' : -3.9,
+                        'ASN' : -3.5,
+                        'ASP' : -3.5,
+                        'GLU' : -3.5,
+                        'GLN' : -3.5,
+                        'HIS' : -3.2,
+                        'PRO' : -1.6,
+                        'TYR' : -1.3,
+                        'TRP' : -0.9,
+                        'SER' : -0.8,
+                        'THR' : -0.7,
+                        'GLY' : -0.4,
+                        'ALA' :  1.8,
+                        'MET' :  1.9,
+                        'CYS' :  2.5,
+                        'PHE' :  2.8,
+                        'LEU' :  3.8,
+                        'VAL' :  4.2,
+                        'ILE' :  4.5,
+                        }
     
     total_E = 0
+
     
-    #----------------------- atom i -----------------------------#
+    for index_i in range(0, len(molecule.residues)):
+        for index_j in range(index_i+2, len(molecule.residues)):
+            
+            name_i = molecule.residues[index_i].name
+            for atom in molecule.residues[index_i].atoms:
+                if atom.name == 'CA':
+                    atom_i    = atom  
+                    atom_i.hydropathic = hydropathic_table[name_i]
+                    
+            name_j = molecule.residues[index_j].name
+            for atom in molecule.residues[index_j].atoms:
+                if atom.name == 'CA':
+                    atom_j = atom  
+                    atom_i.hydropathic = hydropathic_table[name_j]
+
+
+            print index_i, name_i, hydropathic_table[name_i], atom_i.pos , index_j, name_j, hydropathic_table[name_j], atom_j.pos, 'distance ij: ', distance_ab (atom_i, atom_j)# compute_AB_vdw_ij (atom_i, atom_j)
+            #print index_i, name_i, index_j, name_j
+
+
     
     for residue_i in molecule.residues:
         for atom_i in residue_i.atoms:

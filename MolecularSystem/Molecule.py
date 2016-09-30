@@ -22,7 +22,8 @@
 #
 #
 import os
-from Atom import Atom
+from Atom    import Atom
+from ModelAB import ModelAB
 from Coordinates import Coordinates
 from Energy      import Energy
 from Residue import  Residue
@@ -70,10 +71,11 @@ PEPDICE_PARAMETER= os.path.join(PEPDICE, 'Parameters')
 #-------------------------------------------------------------------------------
 from AATorsions import load_torsion_from_file
 
-class Molecule(Atom   ,
-               Residue,
+class Molecule(Atom       ,
+               Residue    ,
                Coordinates,
-               Energy
+               Energy     ,
+               ModelAB    ,
                ):
     """ class to store info about a molecule"""
 
