@@ -3,12 +3,12 @@ from ParseGMXLog  import ParseGMXLog
 from ParseAMBERLog import ParseAMBERLog
 from CRDFiles      import save_CRD_to_file
 from Geometry    import  distance_ab
-
+import math 
 import os
 import sys
 
 
-
+'''
 def compute_vdw_ij (atom_i, atom_j):
     """ Function doc """ #-23085572255.9
     A    = 4
@@ -16,7 +16,6 @@ def compute_vdw_ij (atom_i, atom_j):
     R_ab = distance_ab (atom_i, atom_j)
     E_ab = A*((R_ab**-12) - B*(atom_i.epsilon*atom_j.epsilon)*(R_ab**-6))
     return E_ab
-
 
 
 def compute_AB_vdw_ij (atom_i, atom_j):
@@ -35,12 +34,11 @@ def compute_AB_vdw_ij (atom_i, atom_j):
     R_ab = distance_ab (atom_i, atom_j)
     E_ab = A*((R_ab**-12) - C*(R_ab**-6))
     return E_ab
+'''
 
-
-def compute_ij_CalphaModel_vdw (atom_i, atom_j):
+def compute_ij_CalphaModel_vdw (atom_i, atom_j, R_ab = False):
     """ Function doc """ #-23085572255.9
-    
-    A    = 1
+    A    = 100000
     B    = 1
     
     if atom_i.AB + atom_j.AB == 'AA':   # apolares
@@ -49,10 +47,37 @@ def compute_ij_CalphaModel_vdw (atom_i, atom_j):
         C = 0.5
     else:
         C = -0.5
+
     
-    R_ab = distance_ab (atom_i, atom_j)
-    E_ab = A*((R_ab**-12) - C*(R_ab**-6))
+    B = ((atom_i.hydropathic * atom_j.hydropathic))  
+    
+    
+    sigma_ab = (atom_i.sigma * atom_j.sigma)**0.5
+    
+    #E_ab = 10*(((sigma_ab**-12)/(R_ab**12)) - B*((sigma_ab**-6)/(R_ab**6)))
+    
+    
+    E_ab = A*( (sigma_ab/R_ab)**12 -  C*(sigma_ab/R_ab)**6)
+    
+    
+    #E_ab = A*((R_ab**-12) - B*(atom_i.epsilon * atom_j. epsilon)*(R_ab**-6))
+    
     return E_ab
+    
+    
+    #A    = 1
+    #B    = 1
+    #
+    #if atom_i.AB + atom_j.AB == 'AA':   # apolares
+    #    C = 1
+    #elif atom_i.AB + atom_j.AB == 'BB': # polares
+    #    C = 0.5
+    #else:
+    #    C = -0.5
+    #
+    #R_ab = distance_ab (atom_i, atom_j)
+    #E_ab = A*((R_ab**-12) - C*(R_ab**-6))
+    #return E_ab
 
 
 
@@ -83,31 +108,60 @@ def compute_AB_energy (molecule = None):
     Journal of Molecular Biology.157.
     '''
     hydropathic_table = {
-                        'ARG' : -4.5,
-                        'LYS' : -3.9,
-                        'ASN' : -3.5,
-                        'ASP' : -3.5,
-                        'GLU' : -3.5,
-                        'GLN' : -3.5,
-                        'HIS' : -3.2,
-                        'PRO' : -1.6,
-                        'TYR' : -1.3,
-                        'TRP' : -0.9,
-                        'SER' : -0.8,
-                        'THR' : -0.7,
-                        'GLY' : -0.4,
-                        'ALA' :  1.8,
-                        'MET' :  1.9,
-                        'CYS' :  2.5,
-                        'PHE' :  2.8,
-                        'LEU' :  3.8,
-                        'VAL' :  4.2,
-                        'ILE' :  4.5,
+                        'ARG' : -4.5 / 4.5, #-4.5,
+                        'LYS' : -3.9 / 4.5, #-3.9,
+                        'ASN' : -3.5 / 4.5, #-3.5,
+                        'ASP' : -3.5 / 4.5, #-3.5,
+                        'GLU' : -3.5 / 4.5, #-3.5,
+                        'GLN' : -3.5 / 4.5, #-3.5,
+                        'HIS' : -3.2 / 4.5, #-3.2,
+                        'HIE' : -3.2 / 4.5, #-3.2,
+                        'PRO' : -1.6 / 4.5, #-1.6,
+                        'TYR' : -1.3 / 4.5, #-1.3,
+                        'TRP' : -0.9 / 4.5, #-0.9,
+                        'SER' : -0.8 / 4.5, #-0.8,
+                        'THR' : -0.7 / 4.5, #-0.7,
+                        'GLY' : -0.4 / 4.5, #-0.4,
+                        'ALA' :  1.8 / 4.5, # 1.8,
+                        'MET' :  1.9 / 4.5, # 1.9,
+                        'CYS' :  2.5 / 4.5, # 2.5,
+                        'PHE' :  2.8 / 4.5, # 2.8,
+                        'LEU' :  3.8 / 4.5, # 3.8,
+                        'VAL' :  4.2 / 4.5, # 4.2,
+                        'ILE' :  4.5 / 4.5, # 4.5,
                         }
-    
+
+
+    hydropathic_table_AB = {
+                        'ARG' : 'B', #-4.5,
+                        'LYS' : 'B', #-3.9,
+                        'ASN' : 'B', #-3.5,
+                        'ASP' : 'B', #-3.5,
+                        'GLU' : 'B', #-3.5,
+                        'GLN' : 'B', #-3.5,
+                        'HIS' : 'B', #-3.2,
+                        'HIE' : 'B', #-3.2,
+
+                        'PRO' : 'B', #-1.6,
+                        'TYR' : 'B', #-1.3,
+                        'TRP' : 'B', #-0.9,
+                        'SER' : 'B', #-0.8,
+                        'THR' : 'B', #-0.7,
+                        'GLY' : 'B', #-0.4,
+                        'ALA' : 'A', # 1.8,
+                        'MET' : 'A', # 1.9,
+                        'CYS' : 'A', # 2.5,
+                        'PHE' : 'A', # 2.8,
+                        'LEU' : 'A', # 3.8,
+                        'VAL' : 'A', # 4.2,
+                        'ILE' : 'A', # 4.5,
+                        }
+
     total_E = 0
 
-    
+    atom_i = None
+    atom_J = None
+
     for index_i in range(0, len(molecule.residues)):
         for index_j in range(index_i+2, len(molecule.residues)):
             
@@ -116,49 +170,62 @@ def compute_AB_energy (molecule = None):
                 if atom.name == 'CA':
                     atom_i    = atom  
                     atom_i.hydropathic = hydropathic_table[name_i]
-                    
+                    atom_i.AB          = hydropathic_table_AB[name_i]
             name_j = molecule.residues[index_j].name
             for atom in molecule.residues[index_j].atoms:
                 if atom.name == 'CA':
                     atom_j = atom  
-                    atom_i.hydropathic = hydropathic_table[name_j]
-
-
-            print index_i, name_i, hydropathic_table[name_i], atom_i.pos , index_j, name_j, hydropathic_table[name_j], atom_j.pos, 'distance ij: ', distance_ab (atom_i, atom_j)# compute_AB_vdw_ij (atom_i, atom_j)
-            #print index_i, name_i, index_j, name_j
-
+                    atom_j.hydropathic = hydropathic_table[name_j]
+                    atom_j.AB          = hydropathic_table_AB[name_j]
+            R_ab = distance_ab (atom_i, atom_j)
+            
+            #print index_i, name_i, hydropathic_table[name_i], atom_i.pos , index_j, name_j, hydropathic_table[name_j], atom_j.pos, 'distance_ij: ', distance_ab (atom_i, atom_j), compute_ij_CalphaModel_vdw (atom_i, atom_j, R_ab)
+            #print '%4i %5s %10.6f %4i %5s %10.6f %10.4f %20.15f' %(index_i, name_i, hydropathic_table[name_i],  index_j, name_j, hydropathic_table[name_j], distance_ab (atom_i, atom_j), compute_ij_CalphaModel_vdw (atom_i, atom_j, R_ab))
+            total_E += compute_ij_CalphaModel_vdw (atom_i, atom_j, R_ab)
+            
+            
+    atom_i.sigma = 3.8
+    atom_j.sigma = 3.8
 
     
-    for residue_i in molecule.residues:
-        for atom_i in residue_i.atoms:
-            
-            if atom_i.name == 'CA':
-                
-                if residue_i.name in ['ALA','ILE','LEU','MET','VAL','PRO','GLY','CYS']:
-                    atom_i.AB = 'A'
-                else:
-                    atom_i.AB = 'B'
-                
-                #------------------- atom j ---------------------#
-                for residue_j in molecule.residues:
-                    if residue_j.id == residue_i:
-                        pass
-                    
-                    else:
-                        for atom_j in  residue_j.atoms:
-                            
-                            if atom_i.id == atom_j.id:
-                                pass
-                            
-                            else:
-                                if atom_j.name == 'CA':
-                                    if residue_j.name in ['ALA','ILE','LEU','MET','VAL','PRO','GLY','CYS']:
-                                        atom_j.AB = 'A'
-                                    else:
-                                        atom_j.AB = 'B'
-                                    vdw =  compute_AB_vdw_ij (atom_i, atom_j)
-                                    total_E += vdw
-                                    #print residue_i.id, residue_i.name,atom_i.name,  residue_j.id, residue_j.name, atom_j.name
+    for distance in range(1,500):
+        #print distance
+        pass
+        #print index_i, name_i,  index_j, name_j, distance*0.01, compute_ij_CalphaModel_vdw (atom_i, atom_j, distance*0.01)
+ 
+    
+
+    
+    #for residue_i in molecule.residues:
+    #    for atom_i in residue_i.atoms:
+    #        
+    #        if atom_i.name == 'CA':
+    #            
+    #            if residue_i.name in ['ALA','ILE','LEU','MET','VAL','PRO','GLY','CYS']:
+    #                atom_i.AB = 'A'
+    #            else:
+    #                atom_i.AB = 'B'
+    #            
+    #            #------------------- atom j ---------------------#
+    #            for residue_j in molecule.residues:
+    #                if residue_j.id == residue_i:
+    #                    pass
+    #                
+    #                else:
+    #                    for atom_j in  residue_j.atoms:
+    #                        
+    #                        if atom_i.id == atom_j.id:
+    #                            pass
+    #                        
+    #                        else:
+    #                            if atom_j.name == 'CA':
+    #                                if residue_j.name in ['ALA','ILE','LEU','MET','VAL','PRO','GLY','CYS']:
+    #                                    atom_j.AB = 'A'
+    #                                else:
+    #                                    atom_j.AB = 'B'
+    #                                vdw =  compute_AB_vdw_ij (atom_i, atom_j)
+    #                                total_E += vdw
+    #                                #print residue_i.id, residue_i.name,atom_i.name,  residue_j.id, residue_j.name, atom_j.name
     return total_E
 
 
@@ -288,29 +355,7 @@ class Energy:
 
         if  self.ff_type == 'Calpha_model':
             total_E = 0
-            #----------------------- atom i -----------------------------#
-            for residue_i in self.residues:
-                for atom_i in residue_i.atoms:
-                    if atom_i.name == 'CA':
-                        #------------------- atom j ---------------------#
-                        for residue_j in self.residues:
-                            if residue_j.id == residue_i:
-                                pass
-                            else:
-                                
-                                for atom_j in  residue_j.atoms:
-                                    
-                                    if atom_i.id == atom_j.id:
-                                        pass
-                                    
-                                    else:
-                                        if atom_j.name == 'CA':
-                                            vdw =  compute_vdw_ij (atom_i, atom_j)
-                                            #print atom_i.id, residue_i.name, atom_i.name,atom_i.epsilon, atom_j.id, residue_j.name, atom_j.name, atom_j.epsilon, distance_ab (atom_i, atom_j), vdw
-                                            total_E += vdw
-
-            if log == True:
-                print 'VdW energy: ',total_E
+            total_E = compute_AB_energy (molecule = self)
             return total_E
 
 

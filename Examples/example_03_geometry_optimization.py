@@ -68,9 +68,10 @@ PEPDICE_PARAMETER= os.path.join(PEPDICE, 'Parameters')
 pdbcode = 'TEST'
 system = Molecule() 
 system.name =  pdbcode+'_estendida'
-system.build_peptide_from_sequence (sequence    = 'AWWWWWTYNMAAAAA' ,
+system.build_peptide_from_sequence (sequence    = 'AWWWWWTYNMAAAAAWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW' ,
                                     _type       = 'amber'           ,
-                                    force_field = 'ff03ua'          ,
+                                    #force_field = 'ff03ua'          ,
+                                    force_field = 'ff99SB'          ,
                                     overwrite   = True              ,
                                     )
 #----------------------------------------------------------------------
@@ -92,7 +93,7 @@ minimize(molecule = system,
 
 
 print system.energy()
-save_PDB_to_file(system,  os.path.join(PEPDICE_EXAMPLES , 'outputs/example03_geometry_opt_1gab.pdb'))
+save_PDB_to_file(system,  os.path.join(PEPDICE_EXAMPLES , 'example03_geometry_opt_TEST.pdb'))
 
 
 

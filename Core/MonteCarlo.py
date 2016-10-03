@@ -140,7 +140,7 @@ def monte_carlo(molecule            = None                   ,
     if random == None:
         import random as random
 
-    
+    fragment = None 
     #LOGFILE    = trajectory+'.log'
     logfilename = trajectory+'.log'
     logfile     = open(logfilename, 'a')

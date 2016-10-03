@@ -386,6 +386,46 @@ class Molecule(Atom       ,
                         name = 'HIS'                                     #
                     atom_i.epsilon = hydropathy_index[name]              #
 
+        
+        self.torsions     = load_torsion_from_file (torsions)
+        
+        self.FIX_atoms_CHI ={
+                                'CHI1' : ['OT1','OT2','CA','N','H', 'H1', 'H2', 'H3', 'HN','C', 'O','HA'  ],
+
+                                'CHI2' : ['OT1','OT2','CA','N','H', 'H1', 'H2', 'H3', 'HN','C', 'O','HA',
+                                          'CB','HB', 'HB2', 'HB3', 'CG2', 'HG21', 'HG22', 'HG23',
+                                         ],
+
+                                         # 'HB','HB1','HB2','HB3', 'CG2', 'HG21', 'HG22','HG23','HG3'      ],
+
+                                'CHI3' : ['OT1','OT2','CA'  ,'N'  ,'H'  ,'H1'  ,'H2'  ,'H3'  ,'HN','C','O','HA',
+                                          'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23',
+                                          'CG' ,'HG2', 'HG3',
+                                          ],
+
+                                'CHI4' : ['OT1','OT2','CA','N','H', 'H1', 'H2', 'H3', 'HN','C', 'O','HA' ,
+                                          'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23',
+                                          'CG' ,'HD1','HG2','HG3',
+                                          'CD', 'HD1','HD2','HD3'
+                                          ],
+
+                                'CHI5' : ['OT1','OT2','CA','N','H', 'H1', 'H2', 'H3', 'HN','C', 'O','HA' ,
+                                          'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23',
+                                          'CG' ,'HG1','HG2','HG3' ,
+                                          'CD' , 'HD1','HD2','HD3',
+                                          'HE' ,'HE1','HE2','HE3'
+                                          ],
+                               }
+
+
+
+
+
+
+
+
+
+
 
     def import_GMX_parameters (self, tpr = None, torsions = None):
         """ Function doc """

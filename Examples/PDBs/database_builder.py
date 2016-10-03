@@ -231,8 +231,8 @@ def wget_pdb(pdbcode, filesInFolder=None):
 
 
 PDBcodes = {
-    # '1GAB': ['alpha'     ],
-    '1BX4': ['alpha_beta'],
+     '1GAB': ['alpha'     ],
+    #'1BX4': ['alpha_beta'],
     # '1UAO': ['beta'      ],
     # '1LE1': ['beta'      ],
     # '1CSK': ['beta'      ],
