@@ -226,9 +226,12 @@ def compute_AB_energy (molecule = None):
     #                                vdw =  compute_AB_vdw_ij (atom_i, atom_j)
     #                                total_E += vdw
     #                                #print residue_i.id, residue_i.name,atom_i.name,  residue_j.id, residue_j.name, atom_j.name
+    
     return total_E
 
 
+
+    
 
 
 
@@ -239,6 +242,96 @@ class Energy:
         """ Class initialiser """
         pass
 
+
+    def compute_AMBER_energy (self, pn = 1, log = None):
+        """ Function doc """
+        # transformar numa funcao
+        write_AMBER_input_file(molecule = self, Type='energy', pn= pn)
+        save_CRD_to_file      (molecule = self, filename='SinglePoint'+str(pn)+'.crd')
+        
+        os.system('sander -O -i SinglePoint'+str(pn)+'.in -c SinglePoint'+str(pn)+'.crd -o SinglePoint'+str(pn)+'.log -p ' + self.top)
+        
+        #sander -O -i energy.in  -o   energy.log -p 7tim.top -c 7tim.crd
+        
+        energy_list = ParseAMBERLog('SinglePoint'+str(pn)+'.log', log=log)
+        #print BOND , ANGLE , DIHED , IMPRP , ELECT , VDW , BOUNDARY
+        
+        energy = 0 
+        energy += energy_list["ESURF"]       * self.esurf
+        #energy += energy_list["RESTRAINT"]
+        energy += energy_list["EGB"]         * self.egb
+        energy += energy_list["EELEC"]       * self.elect
+
+        if energy_list["VDWAALS"] == None:
+            #energy_list["VDWAALS"] = 99999999999999999999999
+            #energy += energy_list["VDWAALS"] * vdw
+            return None
+        else:
+            energy += energy_list["VDWAALS"] * self.vdw
+        
+        #energy += energy_list["EEL"]
+        #energy += energy_list["NB"]
+        energy += energy_list["DIHED"] * self.dihed
+        energy += energy_list["ANGLE"] * self.angle
+        energy += energy_list["BOND"]  * self.bond
+        
+        
+        #if AB_energy:
+        #    ab_energy = compute_AB_energy(molecule = self)*self.AB
+        #    energy +=   ab_energy
+        #    energy_list["AB_energy"]  = ab_energy
+        
+        return energy, energy_list
+
+
+    def compute_CONTACT_energy (self, log = False, cutoff = 6.0):
+        """ Function doc """
+        energy = 0.0
+        
+        for index_i in range(0, len(self.residues)):
+            for index_j in range(index_i+2, len(self.residues)):
+                
+                name_i = self.residues[index_i].name
+                
+                for atom in self.residues[index_i].atoms:
+                    if atom.name == 'CA':
+                        atom_i    = atom  
+                name_j = self.residues[index_j].name
+                
+                for atom in self.residues[index_j].atoms:
+                    if atom.name == 'CA':
+                        atom_j = atom  
+                
+                R_ab = distance_ab (atom_i, atom_j)
+                #print index_i, name_i, index_j, name_j, R_ab
+                
+                
+                #if self.cmap[index_i][index_j] != 0:
+                #    print index_i, name_i, index_j, name_j, 'beep'
+                
+                if R_ab <= cutoff:
+                    #print 'R_ab <= cutoff', R_ab , cutoff
+                    
+                    #se houver contato
+                    if self.cmap[index_i][index_j] != 0:
+                        #print 'beep'
+                        #print energy
+                        #verifica se o contato eh valido - segundo a matrix de contato
+                        
+                        energy += -1
+                        
+                        #if log:
+                        #print 'beep'
+                        #print index_i, name_i, index_j, name_j, R_ab, 'contact', self.cmap[index_i][index_j]
+                else:
+                    #print index_i, name_i, index_j, name_j, R_ab, 'NO CONTACT contact', self.cmap[index_i][index_j]
+                    pass    
+        
+        if log:
+            print 'total E:', energy
+        
+        return energy
+        
     def energy(self, 
                log                       = False, 
                pn                        = 1    ,  #process number # used in multiprocess 
@@ -252,18 +345,102 @@ class Energy:
                return_list               = False,
                ):
                     
-        """ Function doc """
-        bond     = self.bond    
-        angle    = self.angle   
-        dihed    = self.dihed   
-        imprp    = self.imprp   
-        elect    = self.elect   
-        vdw      = self.vdw     
-        boundary = self.boundary
-        esurf    = self.esurf   
-        egb      = self.egb     
+    
+        energy_list = {}
         
+        if self.energy_model == 'amber':
+            energy, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
+            
+            if log:
+                from pprint import pprint
+                pprint(energy_list)
+            
+            
+            if return_list:
+                return energy_list
+            else:
+                return energy
+        
+        
+        if self.energy_model == 'Calpha':
+            
+            #-----------------------------------------------------------------
+            # getting dihedral energies from amber  - temporary function
+            # this function will be replaced by a empirical energy function 
+            energy, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
+            backbone = energy_list['DIHED']
+            #-----------------------------------------------------------------
+            
+        
+            energy_list = {'AB_energy' : 0,
+                           'backbone'  : 0,
+                           'contact'   : 0,}
 
+            
+            AB_energy = compute_AB_energy (molecule = self)
+            energy_list['AB_energy'] = AB_energy * 1000000
+            energy_list['backbone']  = backbone  * 1
+            energy_list['contact']   = 0
+            
+            # - - - total energy - - - 
+            energy = 0
+            for energy_conponent in energy_list:
+                energy += energy_list[energy_conponent]
+            # - - - - - - - - - - - - -
+            
+            
+            
+            # --------- printing data --------- 
+            if log:
+                from pprint import pprint
+                pprint(energy_list)
+            # --------------------------------- 
+
+            
+            
+            
+            if return_list:
+                return energy_list
+            else:
+                return energy
+            
+            
+        if self.energy_model == 'Contact':
+            energy = self.compute_CONTACT_energy(log = log)
+            energy_list['contact'] = energy
+            
+        
+            # --------- printing data --------- 
+            if log:
+                from pprint import pprint
+                pprint(energy_list)
+            # --------------------------------- 
+
+            if return_list:
+                return energy_list
+            else:
+                return energy
+        
+        
+        if self.energy_model == 'LPFSF':
+            energy, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
+            
+            energy = 1.15 - 1.96E-5*energy_list['EEL'] -2.36E-5*energy_list['NB'] - 4.4E-4 *energy_list['DIHED'] + 1.85E-3*energy_list['VDWAALS'] - 7.5E-5*energy_list['EGB'] + 2.66E-5*energy_list['ESURF']
+            #RMSD^0.3 = 1.15-1.96  
+            
+            
+            if log:
+                from pprint import pprint
+                pprint(energy_list)
+            
+            
+            if return_list:
+                return energy_list
+            else:
+                return energy            
+
+        
+        '''
         if  self.ff_type == 'charmm':
             write_NaMD_input_file (molecule = self, Type='energy', pn = pn)
             save_PDB_to_file      (molecule = self, filename='SinglePoint'+str(pn)+'.pdb')
@@ -275,28 +452,6 @@ class Energy:
                       IMPRP*imprp + ELECT*elect + VDW*vdw + BOUNDARY*boundary)
             
             return energy
-
-
-        if self.ff_type == 'gmx':
-            import subprocess
-            
-            pn  = pn
-            if external_coordinates:
-                command1   = 'mdrun -s '+ self.tpr+' -rerun '+ external_coordinates_file +' -e ener_'+str(pn)
-                
-                #os.system('mdrun -s '+ self.tpr+' -rerun '+ external_coordinates_file +' -e ener_'+str(pn))
-                #mdrun -s test.tpr -rerun complex_2.pdb
-                command2   = 'echo 1 2 3 4 5 8 33 | g_energy -f ener_'+str(pn)+'.edr -s '+ self.tpr + ' -o SP_'+str(pn)
-                #print command2
-                
-                null_file = open(os.devnull, 'w')
-                subprocess.call(command1.split(), stdout = null_file, stderr = null_file)
-                os.system('echo 1 2 3 4 5 6 10 | g_energy -f ener_'+str(pn)+'.edr -s '+ self.tpr + ' -o SP_'+str(pn))
-                #subprocess.call(command2.split(), stdout = null_file, stderr = null_file)
-                energy_list = ParseGMXLog('SP_'+str(pn)+'.xvg', log=log)
-                
-                os.system('rm *#')
-                return energy_list['Potential']
 
         
         if  self.ff_type == 'amber':
@@ -358,8 +513,31 @@ class Energy:
             total_E = compute_AB_energy (molecule = self)
             return total_E
 
+        '''
+        
+        '''
+        if self.ff_type == 'gmx':
+            import subprocess
+            
+            pn  = pn
+            if external_coordinates:
+                command1   = 'mdrun -s '+ self.tpr+' -rerun '+ external_coordinates_file +' -e ener_'+str(pn)
+                
+                #os.system('mdrun -s '+ self.tpr+' -rerun '+ external_coordinates_file +' -e ener_'+str(pn))
+                #mdrun -s test.tpr -rerun complex_2.pdb
+                command2   = 'echo 1 2 3 4 5 8 33 | g_energy -f ener_'+str(pn)+'.edr -s '+ self.tpr + ' -o SP_'+str(pn)
+                #print command2
+                
+                null_file = open(os.devnull, 'w')
+                subprocess.call(command1.split(), stdout = null_file, stderr = null_file)
+                os.system('echo 1 2 3 4 5 6 10 | g_energy -f ener_'+str(pn)+'.edr -s '+ self.tpr + ' -o SP_'+str(pn))
+                #subprocess.call(command2.split(), stdout = null_file, stderr = null_file)
+                energy_list = ParseGMXLog('SP_'+str(pn)+'.xvg', log=log)
+                
+                os.system('rm *#')
+                return energy_list['Potential']
 
-
+        '''
 
 def write_AMBER_input_file (molecule=None, Type='energy', pn = 1):
     text = """  compute single-point energy 

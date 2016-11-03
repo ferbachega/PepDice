@@ -77,10 +77,26 @@ class Molecule(Atom       ,
                Energy     ,
                ModelAB    ,
                ):
-    """ class to store info about a molecule"""
+    """ 
+    class to store info about a molecule
+    
+    energy models:
+        amber   - amber ff03ua energy components
+        Calpha  - C alpha model  - like AB model
+        Contact - Contact map only
+        LPFSF   - LABIO protein folding scoring function
+        
+    """
 
     def __init__(self, id=0, name = 'protein'):
-
+        
+        self.energy_model  = 'amber'
+        
+        self.energy_models = {'amber'  ,
+                              'Calpha' ,
+                              'Contact',
+                              'LPFSF'  }
+        
         self.id       = id
         self.name     = name
         self.residues = []
@@ -100,10 +116,11 @@ class Molecule(Atom       ,
 
         self.torsions       = None
         self.FIX_atoms_CHI  = None
+        
         # Parameters
         self.fixed_residues = []
         self.fragments      = []
-        
+        self.cmap           = None 
         
         
         # MC important atributes
@@ -111,10 +128,7 @@ class Molecule(Atom       ,
         self.previous_energy = None 
         
         
-        
-        
-        
-
+        # Energy components
         #self.pn
         self.bond      = 1.0
         self.angle     = 1.0
@@ -126,6 +140,17 @@ class Molecule(Atom       ,
         self.esurf     = 1.0
         self.egb       = 1.0
         self.AB        = 0.0
+        self.contact   = 0.0
+        
+    def set_energy_model (self, energy_model = 'amber'):
+        """ Function doc """
+
+        if energy_model in self.energy_models:
+            self.energy_model  = energy_model
+        else:
+            print '\nEnergy model not found. Please select one of the options:'
+            print self.energy_models
+            print '\n'
 
     def build_peptide_from_sequence_AMBER (self, sequence = None, force_field = 'ff03ua', overwrite   = True  , NCTER = False):
         """ 
@@ -211,16 +236,42 @@ class Molecule(Atom       ,
     def build_peptide_from_sequence (self,
                                      sequence    = 'AAAAAAAAA',
                                      _type       = 'amber'    ,
-                                     force_field = 'ff03ua'    ,
+                                     force_field = 'ff03ua'   ,
                                      overwrite   = True       ,
                                      ):
-        """ :P """
+        """
+         
+        energy models:
+            amber   - amber ff03ua energy components
+            Calpha  - C alpha model  - like AB model
+            Contact - Contact map only
+            LPFSF   - LABIO protein folding scoring function
+        
+        """
+        
         if _type == 'amber':
             self.build_peptide_from_sequence_AMBER(sequence    = sequence   , 
                                                    force_field = force_field, 
                                                    overwrite   = overwrite  )
 
+        if _type == 'Calpha':
+            pass
+            #self.build_peptide_from_sequence_AMBER(sequence    = sequence   , 
+            #                                       force_field = force_field, 
+            #                                       overwrite   = overwrite  )
+        
+        if _type == 'contact':
+            pass
+            #self.build_peptide_from_sequence_AMBER(sequence    = sequence   , 
+            #                                       force_field = force_field, 
+            #                                       overwrite   = overwrite  )
+        if _type == 'LPFSF':
+            pass
+            #self.build_peptide_from_sequence_AMBER(sequence    = sequence   , 
+            #                                       force_field = force_field, 
+            #                                       overwrite   = overwrite  )
 
+        self.energy_model = _type
 
 
 
@@ -417,9 +468,24 @@ class Molecule(Atom       ,
                                           ],
                                }
 
-
-
-
+    def import_CMAP_matrix (self, cmap = None, log = True, p_cmap = False):
+        """ Function doc """
+        if len(cmap) != len(self.residues):
+            if log:
+                print 'error - cmap wrong size.' 
+                print 'cmap size  : ', len(cmap) 
+                print 'system size: ', len(self.residues) 
+        else:
+            if log:
+                print '\n' 
+                print 'cmap size  : ', len(cmap) 
+                print 'system size: ', len(self.residues)
+            
+            self.cmap = cmap
+            
+            if p_cmap:
+                for index in range(0, len(cmap)):
+                    print cmap[index]
 
 
 
