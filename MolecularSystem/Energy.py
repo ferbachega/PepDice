@@ -349,13 +349,17 @@ class Energy:
         energy_list = {}
         
         if self.energy_model == 'amber':
-            energy, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
-            
+            try:
+                energy, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
+            except:
+                return None
+                
+                            
             if log:
                 from pprint import pprint
                 pprint(energy_list)
-            
-            
+
+
             if return_list:
                 return energy_list
             else:
@@ -367,18 +371,23 @@ class Energy:
             #-----------------------------------------------------------------
             # getting dihedral energies from amber  - temporary function
             # this function will be replaced by a empirical energy function 
-            energy, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
+            try:
+                energy_amber, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
+            except:
+                return None
             backbone = energy_list['DIHED']
             #-----------------------------------------------------------------
             
-        
             energy_list = {'AB_energy' : 0,
                            'backbone'  : 0,
                            'contact'   : 0,}
 
             
             AB_energy = compute_AB_energy (molecule = self)
-            energy_list['AB_energy'] = AB_energy * 1000000
+            
+            
+            
+            energy_list['AB_energy'] = AB_energy * 1000
             energy_list['backbone']  = backbone  * 1
             energy_list['contact']   = 0
             
@@ -397,8 +406,6 @@ class Energy:
             # --------------------------------- 
 
             
-            
-            
             if return_list:
                 return energy_list
             else:
@@ -406,10 +413,29 @@ class Energy:
             
             
         if self.energy_model == 'Contact':
-            energy = self.compute_CONTACT_energy(log = log)
-            energy_list['contact'] = energy
             
-        
+            energy = self.compute_CONTACT_energy(log = log)
+            
+            try:
+                energy_amber, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
+            except:
+                return None
+            
+            backbone = energy_list['DIHED']   *0.001
+            vdw      = energy_list["VDWAALS"] *0.00001
+            
+            
+            energy_list= {}
+            
+            
+            energy_list['contact']  = energy
+            energy_list['backbone'] = backbone
+            energy_list["VDWAALS"]  = vdw
+            
+            energy = 0
+            for component in energy_list:
+                energy += energy_list[component]
+            
             # --------- printing data --------- 
             if log:
                 from pprint import pprint

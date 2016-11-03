@@ -188,20 +188,22 @@ def monte_carlo(molecule            = None                   ,
         #----------------------------------------------#
         #                 FRAGMENTS                    #
         #----------------------------------------------#
-        try:
-            fragment, fragment_index  = fragment_selection (molecule          = molecule         ,
-                                                            previous_fragment = previous_fragment,
-                                                            fragment_rate     = fragment_rate    ,
-                                                            random            = random           )
-        except:
-            print ' - - - fragment_selection failed - - - '
-            #print molecule          
-            print 'previous_fragment:'
-            print previous_fragment
-            
-            print 'fragment:'
-            print fragment    
-            print random           
+        if fragment_rate != 0.0:
+            try:
+                fragment, fragment_index  = fragment_selection (molecule          = molecule         ,
+                                                                previous_fragment = previous_fragment,
+                                                                fragment_rate     = fragment_rate    ,
+                                                                random            = random           )
+            except:
+                pass
+                print ' - - - fragment_selection failed - - - '
+                #print molecule          
+                #print 'previous_fragment:'
+                #print previous_fragment
+                
+                print 'fragment:'
+                print fragment    
+                #print random           
             
             
         

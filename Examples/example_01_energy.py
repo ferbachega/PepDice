@@ -156,10 +156,39 @@ def build_contact_map_from_pdb (pdb = None, cutoff = 6.0, log= False):
 
 cmap = build_contact_map_from_pdb (pdb  = os.path.join(PEPDICE_EXAMPLES , 'PDBs/3Drobot/1I6C/1I6C_A_AMBER_minimized.pdb'   ))
 system.import_CMAP_matrix (cmap = cmap)
+
+
+
+system.build_peptide_from_sequence ( sequence    = 'KLPPGWEKRMSRSSGRVYYFNHITNASQWERPSGNSSSG',
+                                     _type       = 'amber'    ,
+                                     force_field = 'ff03ua.labio'   ,
+                                     overwrite   = True       ,
+                                     )
+try:
+    minimize(molecule = system,
+             imin  = 1        ,
+             maxcyc= 1000     ,
+             ncyc  = 100      ,
+             cut   = 10       ,
+             rgbmax= 999      ,
+             igb   = 1        ,
+             ntb   = 0        ,
+             ntpr  = 100      ,
+             ntr   = 0        )
+             #restraintmask = ':1-50 & @CA,N,C,O=', 
+             #restraint_wt  =  50.0 
+    save_PDB_to_file(system, pdbcode+'_estendida_amber_opt.pdb')
+except:
+    print 'amber opt failed'
+
+
+
+
+
 system.set_energy_model('Contact')
-system.set_energy_model('LPFSF')
-system.set_energy_model('amber')
-system.set_energy_model('Calpha')
+#system.set_energy_model('LPFSF')
+#system.set_energy_model('amber')
+#system.set_energy_model('Calpha')
 
 #print 'cmap energy:', 
 
@@ -472,6 +501,23 @@ decoys =  {
 
 #print system.energy(log       = True,
 #                    AB_energy = True)
+
+
+#from random import random
+monte_carlo(molecule           = system      ,
+            #random             = random     ,
+            temperature        = 100         ,
+            Kb                 = 1           ,
+            angle_range        = 60          ,
+            nSteps             = 50000       ,
+            fragment_rate      = 0.0         , #between 0  and 1
+            fragment_sidechain = True        ,
+            PhiPsi_rate        = 1.0         ,
+            trajectory         = 'trajectory',
+            pn                 = 1                       )
+
+
+
 
 for decoy in decoys:
     system.load_PDB_to_system      (filename = os.path.join(folder, decoy) )   
