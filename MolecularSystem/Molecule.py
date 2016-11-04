@@ -95,7 +95,7 @@ class Molecule(Atom       ,
         self.energy_models = {'amber'  ,
                               'Calpha' ,
                               'Contact',
-                              'LPFSF'  }
+                              'LSF'  }
         
         self.id       = id
         self.name     = name
@@ -265,7 +265,7 @@ class Molecule(Atom       ,
             #self.build_peptide_from_sequence_AMBER(sequence    = sequence   , 
             #                                       force_field = force_field, 
             #                                       overwrite   = overwrite  )
-        if _type == 'LPFSF':
+        if _type == 'LSF':
             pass
             #self.build_peptide_from_sequence_AMBER(sequence    = sequence   , 
             #                                       force_field = force_field, 

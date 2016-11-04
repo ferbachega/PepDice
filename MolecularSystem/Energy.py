@@ -448,7 +448,7 @@ class Energy:
                 return energy
         
         
-        if self.energy_model == 'LPFSF':
+        if self.energy_model == 'LSF':
             energy, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
             
             energy = 1.15 - 1.96E-5*energy_list['EEL'] -2.36E-5*energy_list['NB'] - 4.4E-4 *energy_list['DIHED'] + 1.85E-3*energy_list['VDWAALS'] - 7.5E-5*energy_list['EGB'] + 2.66E-5*energy_list['ESURF']

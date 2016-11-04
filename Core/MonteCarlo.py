@@ -338,7 +338,7 @@ def monte_carlo(molecule            = None                   ,
         
         
         #----------------------------------------------
-        print i, 'energy', previous_energy, 'temperature', temperature
+        print i, 'energy: ', previous_energy, 'temperature', temperature
         
         
         
