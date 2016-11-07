@@ -17,8 +17,9 @@ print(train_df.columns)
 #train_df['RMSD'].describe()
 #dfols=train_df[train_df['RMSD']]
 
-
-
+dfols=train_df[train_df['SIZE']==72] # Apenas para 1990
+ols=pd.ols(y=dfols['RMSD'], x=dfols[['contacts3', 'contacts2', 'ESURF']])
+print(ols)
 
 
 
