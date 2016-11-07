@@ -26,6 +26,7 @@ from Atom    import Atom
 from ModelAB import ModelAB
 from Coordinates import Coordinates
 from Energy      import Energy
+from Energy      import save_PDB_to_file
 from Residue import  Residue
 from Bio.PDB import PDBParser
 import subprocess
@@ -95,7 +96,8 @@ class Molecule(Atom       ,
         self.energy_models = {'amber'  ,
                               'Calpha' ,
                               'Contact',
-                              'LSF'  }
+                              'LSF'    ,
+                              'FULL'   }
         
         self.id       = id
         self.name     = name
@@ -105,14 +107,6 @@ class Molecule(Atom       ,
         self.psf     = None
         self.param   = None
         self.ff_type = None
-
-
-        self.concections = {
-                            'bonds': [],
-                            'angles': [],
-                            'dihedral': [],
-                            'improper': [],
-                           }
 
         self.torsions       = None
         self.FIX_atoms_CHI  = None
@@ -130,37 +124,168 @@ class Molecule(Atom       ,
         
         # Energy components
         #self.pn
-        self.bond      = 1.0
-        self.angle     = 1.0
-        self.dihed     = 1.0
-        self.imprp     = 1.0
-        self.elect     = 1.0
-        self.vdw       = 1.0
-        self.boundary  = 1.0
-        self.esurf     = 1.0
-        self.egb       = 1.0
-        self.AB        = 0.0
-        self.contact   = 0.0
         
-    def set_energy_model (self, energy_model = 'amber'):
-        """ Function doc """
-
-        if energy_model in self.energy_models:
-            self.energy_model  = energy_model
-        else:
-            print '\nEnergy model not found. Please select one of the options:'
-            print self.energy_models
-            print '\n'
-
-    def build_peptide_from_sequence_AMBER (self, sequence = None, force_field = 'ff03ua', overwrite   = True  , NCTER = False):
-        """ 
-        Function doc 
-        source leaprc.ff03ua
-        foo = sequence { ACE ALA NME }
-        saveamberparm foo foo.top foo.crd
-        """
         
-        aa_dic = { 
+        self.energy_model_parameters = None
+        
+        self.R_contact = 0.0
+        self.default_energy_model_setup ={'amber':{
+                                                  #         AMBER
+                                                  'ANGLE'      : 1.0       ,
+                                                  'BOND'       : 1.0       ,
+                                                  'DIHED'      : 1.0       ,
+                                                  'EEL'        : 1.0       ,
+                                                  'EELEC'      : 1.0       ,
+                                                  'EGB'        : 1.0       ,
+                                                  'EKtot'      : 1.0       ,
+                                                  'EPtot'      : 1.0       ,
+                                                  'ESURF'      : 1.0       ,
+                                                  'Etot'       : 1.0       ,
+                                                  'NB'         : 1.0       ,
+                                                  'VDWAALS'    : 1.0       ,
+                                                  
+                                                  'cut'        : 999.0     ,
+                                                  'igb'        : 1         ,
+                                                  'saltcon'    : 0.2       ,
+                                                  'gbsa'       : 1         ,
+                                                  'rgbmax'     : 999.00000 ,
+                                                  'surften'    : 0.010     ,
+                                                  
+                                                  'CONTACT'    : 0.0       ,
+                                                  'R_contact'  : self.R_contact       ,
+                                                  
+                                                  'AB'  : 0.0       ,
+                                                  'R_cutoff'   : 999.0     ,
+                                                  
+                                                  },
+
+                                         'FULL':{
+                                                  #         AMBER
+                                                  'ANGLE'      : 1.0           ,
+                                                  'BOND'       : 1.0           ,
+                                                  'DIHED'      : 1.0           ,
+                                                  'EEL'        : 1.0           ,
+                                                  'EELEC'      : 1.0           ,
+                                                  'EGB'        : 1.0           ,
+                                                  'EKtot'      : 1.0           ,
+                                                  'EPtot'      : 1.0           ,
+                                                  'ESURF'      : 1.0           ,
+                                                  'Etot'       : 1.0           ,
+                                                  'NB'         : 1.0           ,
+                                                  'VDWAALS'    : 1.0           ,
+                                                                               
+                                                  'cut'        : 999.0         ,
+                                                  'igb'        : 1             ,
+                                                  'saltcon'    : 0.2           ,
+                                                  'gbsa'       : 1             ,
+                                                  'rgbmax'     : 999.00000     ,
+                                                  'surften'    : 0.010         ,
+                                                                               
+                                                  'CONTACT'    : 1.0           ,
+                                                  'R_contact'  : self.R_contact,
+                                                  
+                                                  'AB'         : 1.0           ,
+                                                  'R_cutoff'   : 999.0         ,
+                                                  
+                                                  },
+
+                                          
+                                          'Calpha' : {
+                                                      'ANGLE'      : 0.0       ,
+                                                      'BOND'       : 0.0       ,
+                                                      'DIHED'      : 1.0       ,
+                                                      'EEL'        : 0.0       ,
+                                                      'EELEC'      : 0.0       ,
+                                                      'EGB'        : 0.0       ,
+                                                      'EKtot'      : 0.0       ,
+                                                      'EPtot'      : 0.0       ,
+                                                      'ESURF'      : 0.0       ,
+                                                      'Etot'       : 0.0       ,
+                                                      'NB'         : 0.0       ,
+                                                      'VDWAALS'    : 1.0       ,
+                                                      
+                                                      'cut'        : 999.0     ,
+                                                      'igb'        : 1         ,
+                                                      'saltcon'    : 0.2       ,
+                                                      'gbsa'       : 1         ,
+                                                      'rgbmax'     : 999.00000 ,
+                                                      'surften'    : 0.010     ,
+                                                      
+                                                      'CONTACT'    : 0.0       ,
+                                                      'R_contact'  : self.R_contact       ,
+                                                      
+                                                      'AB'         : 1.0       ,
+                                                      'R_cutoff'   : 999.0     ,
+                                                  
+                                                      },
+                                          
+                                          
+                                          'Contact': {
+                                                      'ANGLE'    : 0.0       ,
+                                                      'BOND'     : 0.0       ,
+                                                      'DIHED'    : 0.001     ,
+                                                      'EEL'      : 0.0       ,
+                                                      'EELEC'    : 0.0       ,
+                                                      'EGB'      : 0.0       ,
+                                                      'EKtot'    : 0.0       ,
+                                                      'EPtot'    : 0.0       ,
+                                                      'ESURF'    : 0.0       ,
+                                                      'Etot'     : 0.0       ,
+                                                      'NB'       : 0.0       ,
+                                                      'VDWAALS'  : 0.001     ,
+                                                      
+                                                      'cut'        : 999.0     ,
+                                                      'igb'        : 1         ,
+                                                      'saltcon'    : 0.2       ,
+                                                      'gbsa'       : 1         ,
+                                                      'rgbmax'     : 999.00000 ,
+                                                      'surften'    : 0.010     ,
+                                                      
+                                                      'CONTACT'    : 1.0       ,
+                                                      'R_contact'  : self.R_contact       ,
+                                                      
+                                                      'AB'         : 0.0      ,
+                                                      'R_cutoff'   : 0.0      ,
+                                                  
+                                                      },
+                                          
+                                          # energy = 1.15 -1.96E-5*energy_list['EEL'] -2.36E-5*energy_list['NB'] - 4.4E-4 *energy_list['DIHED'] + 1.85E-3*energy_list['VDWAALS'] - 7.5E-5*energy_list['EGB'] + 2.66E-5*energy_list['ESURF']
+
+                                          'LSF'    :  {
+                                                      'ANGLE'    : 0.0       ,
+                                                      'BOND'     : 0.0       ,
+                                                      'DIHED'    : -4.4E-4   ,
+                                                      'EEL'      : -1.96E-5  ,
+                                                      'EELEC'    : 0.0       ,
+                                                      'EGB'      : - 7.5E-5  ,
+                                                      'EKtot'    : 0.0       ,
+                                                      'EPtot'    : 0.0       ,
+                                                      'ESURF'    : 2.66E-5   ,
+                                                      'Etot'     : 0.0       ,
+                                                      'NB'       : -2.36E-5  ,
+                                                      'VDWAALS'  : 1.85E-3   ,
+                                                      
+                                                      'cut'        : 999.0     ,
+                                                      'igb'        : 1         ,
+                                                      'saltcon'    : 0.2       ,
+                                                      'gbsa'       : 1         ,
+                                                      'rgbmax'     : 999.00000 ,
+                                                      'surften'    : 0.010     ,
+                                                      
+                                                      'CONTACT'    : 0.0       ,
+                                                      'R_contact'  : self.R_contact      ,
+                                                      
+                                                      'AB'       : 0.0       ,
+                                                      'R_cutoff'   : 999.0     ,
+                                                  
+                                                      }
+
+                                         }
+                                         
+        self.energy_model_parameters = self.default_energy_model_setup['amber']
+
+                                         
+        self.aa_dic = { 
                  'A' : 'ALA',
                  'R' : 'ARG',
                  'N' : 'ASN',
@@ -182,6 +307,30 @@ class Molecule(Atom       ,
                  'Y' : 'TYR',
                  'V' : 'VAL'
                  }
+    def set_energy_model (self, energy_model = 'amber'):
+        """ Function doc """
+
+        if energy_model in self.energy_models:
+            self.energy_model  = energy_model
+            self.energy_model_parameters = self.default_energy_model_setup[energy_model]
+
+        else:
+            print '\nEnergy model not found('+energy_model+'). Please select one of the options:'
+            print self.energy_models
+            print '\n'
+
+    
+    
+    
+    def build_peptide_from_sequence_AMBER (self, sequence = None, force_field = 'ff03ua', overwrite   = True  , NCTER = False):
+        """ 
+        Function doc 
+        source leaprc.ff03ua
+        foo = sequence { ACE ALA NME }
+        saveamberparm foo foo.top foo.crd
+        """
+        
+
         
         if overwrite:
             text  = 'addpath '+PEPDICE+'/Parameters/amber/labio.amber \n'
@@ -202,11 +351,11 @@ class Molecule(Atom       ,
                     else:
                         pass
                 if n2 >= 10:
-                    text += aa_dic[aa] + ' \n'
+                    text += self.aa_dic[aa] + ' \n'
                     n2 = 1
 
                 else:
-                    text += aa_dic[aa] + ' '
+                    text += self.aa_dic[aa] + ' '
                     n2 += 1
                 n += 1
                 
@@ -233,6 +382,7 @@ class Molecule(Atom       ,
         self.import_AMBER_parameters (top       = self.name + '.top' ,
                                       torsions  = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )
 
+    
     def build_peptide_from_sequence (self,
                                      sequence    = 'AAAAAAAAA',
                                      _type       = 'amber'    ,
@@ -256,9 +406,25 @@ class Molecule(Atom       ,
 
         if _type == 'Calpha':
             pass
-            #self.build_peptide_from_sequence_AMBER(sequence    = sequence   , 
-            #                                       force_field = force_field, 
-            #                                       overwrite   = overwrite  )
+            
+            
+            input_sequence = ''
+            for AA in sequence:
+                if AA =='G':
+                    input_sequence += 'G'
+                else:
+                    input_sequence += 'A'
+                    
+            self.build_peptide_from_sequence_AMBER(sequence    = input_sequence, 
+                                                   force_field = force_field   ,
+                                                   overwrite   = overwrite  )
+            n = 0
+            for res in self.residues:
+                res.name = self.aa_dic[sequence[n]]
+                n += 1
+            save_PDB_to_file      (self, self.name + '.pdb')
+            self.energy_model  = 'Calpha'
+        
         
         if _type == 'contact':
             pass
@@ -270,11 +436,6 @@ class Molecule(Atom       ,
             #self.build_peptide_from_sequence_AMBER(sequence    = sequence   , 
             #                                       force_field = force_field, 
             #                                       overwrite   = overwrite  )
-
-        self.energy_model = _type
-
-
-
     def load_PDB_to_system(self, filename = None):
         parser    = PDBParser(QUIET=True)
         structure = parser.get_structure('X', filename)
@@ -468,8 +629,17 @@ class Molecule(Atom       ,
                                           ],
                                }
 
-    def import_CMAP_matrix (self, cmap = None, log = True, p_cmap = False):
+    
+    def import_CMAP (self, cmap = None, log = False, p_cmap = False):
         """ Function doc """
+        
+        self.energy_model_parameters['R_contact'] = cmap.cutoff
+        self.R_contact                            = cmap.cutoff
+        _type                                     = cmap._type 
+        cmap                                      = cmap.cmap 
+        
+        #cmap.number_of_contacts = 0
+        
         if len(cmap) != len(self.residues):
             if log:
                 print 'error - cmap wrong size.' 
@@ -488,45 +658,6 @@ class Molecule(Atom       ,
                     print cmap[index]
 
 
-
-
-
-
-
-    def import_GMX_parameters (self, tpr = None, torsions = None):
-        """ Function doc """
-        self.tpr          = tpr
-        self.ff_type      = 'gmx'
-        #self.torsions     = load_torsion_from_file (torsions)
-        self.FIX_atoms_CHI ={
-                                'CHI1' : ['OT1','OT2','CA','N','H', 'H1', 'H2', 'H3', 'HN','C', 'O','HA'  ],
-
-                                'CHI2' : ['OT1','OT2','CA','N','H', 'H1', 'H2', 'H3', 'HN','C', 'O','HA',
-                                          'CB','HB', 'HB2', 'HB3', 'CG2', 'HG21', 'HG22', 'HG23',
-                                         ],
-
-                                         # 'HB','HB1','HB2','HB3', 'CG2', 'HG21', 'HG22','HG23','HG3'      ],
-
-                                'CHI3' : ['OT1','OT2','CA'  ,'N'  ,'H'  ,'H1'  ,'H2'  ,'H3'  ,'HN','C','O','HA',
-                                          'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23',
-                                          'CG' ,'HG2', 'HG3',
-                                          ],
-
-                                'CHI4' : ['OT1','OT2','CA','N','H', 'H1', 'H2', 'H3', 'HN','C', 'O','HA' ,
-                                          'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23',
-                                          'CG' ,'HD1','HG2','HG3',
-                                          'CD', 'HD1','HD2','HD3'
-                                          ],
-
-                                'CHI5' : ['OT1','OT2','CA','N','H', 'H1', 'H2', 'H3', 'HN','C', 'O','HA' ,
-                                         'CB' ,'HB' , 'HB2','HB3','CG2','HG21','HG22','HG23',
-                                          'CG' ,'HG1','HG2','HG3',
-                                          'CD', 'HD1','HD2','HD3',
-                                          'HE' ,'HE1','HE2','HE3'
-                                          ],
-                               }
-
-
     def import_fixed_from_string(self, fixed=None):
         """ Function doc """
 
@@ -538,24 +669,132 @@ class Molecule(Atom       ,
             n += 1
         #----------------------------------------------------------------------
 
-    def PrintStatus (self, parameters = True, coordinates = True ):
+    def Status (self, parameters = True, coordinates = True ):
         """ Function doc """
-        print 'Bond_Stretching  = ', self.Bond_Stretching
-        print 'Angle_Bending    = ', self.Angle_Bending
-        print 'Improper_Torsion = ', self.Improper_Torsion
-        print 'Torsional_Angle  = ', self.Torsional_Angle
-        print 'Van_der_Waals    = ', self.Van_der_Waals
-        print 'Charge_Charge    = ', self.Charge_Charge
-        print 'Total_Energy     = ', self.Total_Energy
+        #print 'Bond_Stretching  = ', self.Bond_Stretching
+        #print 'Angle_Bending    = ', self.Angle_Bending
+        #print 'Improper_Torsion = ', self.Improper_Torsion
+        #print 'Torsional_Angle  = ', self.Torsional_Angle
+        #print 'Van_der_Waals    = ', self.Van_der_Waals
+        #print 'Charge_Charge    = ', self.Charge_Charge
+        #print 'Total_Energy     = ', self.Total_Energy
 
-        print 'Fixed_residues   = ', self.fixed_residues
-
+        #print 'Fixed_residues   = ', self.fixed_residues
+        n_atoms = 0
         for res in self.residues:
             for atom in res.atoms:
-                print atom.name, atom.pos
+                #print atom.name, atom.pos
+                n_atoms += 1
+        
+        text = '''
+--------------------------------------------------------------------------------
+                        Summary for System "%s"
+--------------------------------------------------------------------------------
+
+---------------------------- Atom Container Summary ----------------------------
+Number of Residues     =  %10d   Number of Atoms      =  %10d
+--------------------------------------------------------------------------------
+
+        '''%(self.name, len(self.residues), n_atoms)
+        
+        
 
 
-    def import_restraints_from_porter (self, filein= None):
+        #for item in self.energy_model_parameters:
+        #    print '%10s = %10.5f' %(item, self.energy_model_parameters[item])
+        
+        
+        
+        
+        text += '''
+-------------------------------------------------------------------------------       
+                        Summary for Energy Model "%s"
+-------------------------------------------------------------------------------       
+ANGLE          =  %19.10f    ESURF           =  %19.10f
+DIHED          =  %19.10f    NB              =  %19.10f
+EEL            =  %19.10f    VDWAALS         =  %19.10f
+EELEC          =  %19.10f    EGB'            =  %19.10f 
+-------------------------------------------------------------------------------       
+        ''' % ( self.energy_model, 
+            self.energy_model_parameters['ANGLE'  ],
+            self.energy_model_parameters['ESURF'  ],
+            self.energy_model_parameters['DIHED'  ],
+
+            self.energy_model_parameters['NB'     ],
+
+            self.energy_model_parameters['EEL'    ],
+            self.energy_model_parameters['VDWAALS'],
+
+            self.energy_model_parameters['EELEC'  ],
+            self.energy_model_parameters['EGB'    ],
+            #self.energy_model_parameters['CONTACT'],
+            #self.energy_model_parameters['AB'     ]
+               ) 
+      
+
+        text += '''
+---------------------- AMBER Single Point Calculations ------------------------
+IGB                              = % 8d  Cutoff            = %8.2f
+Saltcon                          = % 8.5f  GBSA              = %8d
+rgbmax                           = % 8.2f  Surftern          = %8.4f
+------------------------------------------------------------------------------- 
+        '''% (
+               self.energy_model_parameters['igb'    ],
+               self.energy_model_parameters['cut'    ],
+               self.energy_model_parameters['saltcon'],
+               self.energy_model_parameters['gbsa'   ],
+               self.energy_model_parameters['rgbmax' ],
+               self.energy_model_parameters['surften'])
+
+       
+        
+        text += '''
+--------------------------- Calpha Calculations -------------------------------
+AB weight                   = %8.5f  Cutoff            = %8.2f
+Hydrofobic type             = %8s  
+------------------------------------------------------------------------------- 
+        '''% (
+               self.energy_model_parameters['AB'      ],
+               self.energy_model_parameters['R_cutoff'],
+               'simple' , )
+               
+        
+        text += '''
+-------------------- Contact Energy Model Calculations ------------------------
+CONTACT weight              = %8.5f  Cutoff            = %8.2f
+Matrix type                 = %8s  
+------------------------------------------------------------------------------- 
+        '''% (
+               self.energy_model_parameters['CONTACT'      ],
+               self.energy_model_parameters['R_contact'],
+               None , )
+
+
+       
+        print text 
+
+
+    def import_SS_from_string(self, ss = None):
+        # TIDQWLLKNAKEDAIAELKKAGITSDFYFNAINKAKTVEEVNALKNEILKAHA
+        # CCHHHHHHHHHHHHHHHHHHCCCCCHHHHHHHHHCCCHHHHHHHHHHHHHHCC
+        if len(self.residues) != len(ss):
+            return False
+        
+        else:
+           
+            for i in range (0,len(self.residues)):
+                if ss[i] == 'C':
+                    pass
+                
+                if ss[i] == 'H':
+                    from Geometry                 import *
+                    phi_final_angle = set_phi_psi_dihedral( molecule=self, resi=i, bond='PHI',angle = -57 )
+                    psi_final_angle = set_phi_psi_dihedral( molecule=self, resi=i, bond='PSI',angle = -47 )
+                else:
+                    pass
+
+        
+    def import_restraints_from_porter_file (self, filein= None):
         """ Function doc """
         text = open(filein, 'r')
         text =  text.readlines()

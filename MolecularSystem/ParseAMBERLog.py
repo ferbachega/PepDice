@@ -17,13 +17,13 @@ def SaveNaMDConfigFile(coordinates=None,
 
 def ParseAMBERLog(filein, log=True):
     """ Function doc """
-    keys = { "NSTEP": None, 
-          "TIME(PS)": None,
-           "TEMP(K)": None,
-             "PRESS": None,
-              'Etot': None,
-             'EKtot': None,
-             'EPtot': None,
+    keys = { #"NSTEP": None, 
+          #"TIME(PS)": None,
+           #"TEMP(K)": None,
+             #"PRESS": None,
+              #'Etot': None,
+             #'EKtot': None,
+             #'EPtot': None,
               'BOND': None,
              'ANGLE': None,
              'DIHED': None,
@@ -33,7 +33,10 @@ def ParseAMBERLog(filein, log=True):
              'EELEC': None,
                'EGB': None,
          'RESTRAINT': None,
-             'ESURF': None, }  #'ESURF=' ]    
+             'ESURF': None, 
+           'CONTACT': 0.0 ,
+         'AB_ENERGY': 0.0 ,    
+             }  #'ESURF=' ]    
     
     
     NSTEP     = 0

@@ -49,7 +49,8 @@ from SideChainRefine import optimize_side_chain
 from Fragments import build_fragment_library_from_pdbs
 
 
-
+import random
+random.seed(1223)
 
 
 
@@ -130,7 +131,7 @@ system.import_AMBER_parameters(top       = os.path.join(PEPDICE_EXAMPLES , 'PDBs
 #system.AB = 1
 log = False
 
-
+'''
 system.set_energy_model('amber')
 energy =  system.energy(log= log)
 print '\n\n\n'
@@ -156,16 +157,26 @@ energy =  system.energy(log= log)
 print '\n\n\n'
 print 'Elsf  = : ' , energy
 
+'''
 
+
+
+
+
+
+
+
+
+
+#system = Molecule() 
 #system.build_peptide_from_sequence ( sequence    = 'KLPPGWEKRMSRSSGRVYYFNHITNASQWERPSGNSSSG',
-#                                     _type       = 'amber'    ,
 #                                     force_field = 'ff03ua.labio'   ,
 #                                     overwrite   = True       ,
 #                                     )
 #try:
 #    minimize(molecule = system,
 #             imin  = 1        ,
-#             maxcyc= 1000     ,
+#             maxcyc= 100     ,
 #             ncyc  = 100      ,
 #             cut   = 10       ,
 #             rgbmax= 999      ,
@@ -501,20 +512,93 @@ decoys =  {
 #                    AB_energy = True)
 
 
+
+
+
 #from random import random
-'''
-monte_carlo(molecule           = system      ,
-            #random             = random     ,
-            temperature        = 100         ,
-            Kb                 = 1           ,
-            angle_range        = 60          ,
-            nSteps             = 50000       ,
-            fragment_rate      = 0.0         , #between 0  and 1
-            fragment_sidechain = True        ,
-            PhiPsi_rate        = 1.0         ,
-            trajectory         = 'trajectory',
-            pn                 = 1                       )
-'''
+
+
+
+system = Molecule() 
+system.build_peptide_from_sequence ( sequence    = 'TIDQWLLKNAKEDAIAELKKAGITSDFYFNAINKAKTVEEVNALKNEILKAHA'  ,
+                                     _type       = 'Calpha' ,
+                                     force_field = 'ff03ua.labio'   ,
+                                     overwrite   = True       ,
+                                     )
+
+system.energy(log= True)
+#system.import_SS_from_string   (ss   = 'CCHHHHHHHHHHHHHHHHHHCCCCCHHHHHHHHHCCCHHHHHHHHHHHHHHCC')
+#system.import_fixed_from_string(fixed= '00000111111111110000000000011111000000001111111110000')
+system.energy(log= True)
+
+try:
+    minimize(molecule = system,
+             imin  = 1        ,
+             maxcyc= 1000     ,
+             ncyc  = 100      ,
+             cut   = 10       ,
+             rgbmax= 999      ,
+             igb   = 1        ,
+             ntb   = 0        ,
+             ntpr  = 100      ,
+             ntr   = 0        )
+             #restraintmask = ':1-50 & @CA,N,C,O=', 
+             #restraint_wt  =  50.0 
+    #save_PDB_to_file(system, pdbcode+'_estendida_amber_opt.pdb')
+except:
+    print 'amber opt failed'
+
+system.energy(log= True)
+
+
+
+
+
+system.PrintStatus()
+
+import pickle
+#system.fragments = pickle.load( open( "/home/farminf/Programas/pepdice/Examples/data/alpha/1GAB/template_library_1gab_5.pkl", "rb" ) )
+#
+system.fragments = pickle.load( open( "1gab_fragments.p", "rb" ) )
+
+fragments = system.fragments
+#pprint (fragments)
+print len(fragments)
+print len(fragments[0])
+
+
+monte_carlo(molecule            = system      ,
+            random              = random      ,
+            initial_temperature = 10000        ,
+            final_temperature   = 1.00        ,
+            gamma               = 0.01        ,
+            Kb                  = 0.01        ,
+            #Kb                  = 1.38064852E-23,
+            
+            angle_range         = 60           ,
+
+            cycle_size          = 100         ,
+            number_of_cycles    = 10          ,
+
+
+            simulated_annealing = 'exp'                   , # exp, linear
+            fragment_rate       = 3.0         , #between 0  and 1
+            fragment_sidechain  = False       , #       True        ,
+            PhiPsi_rate         = 1.0         ,
+            trajectory          = 'SA_trajectory',
+            pn                  = 1           )
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 '''

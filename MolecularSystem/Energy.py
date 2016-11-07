@@ -8,6 +8,13 @@ import os
 import sys
 
 
+# --------- printing data --------- 
+#if log:
+from pprint import pprint
+#    pprint(energy_list)
+## ---------------------------------
+
+
 '''
 def compute_vdw_ij (atom_i, atom_j):
     """ Function doc """ #-23085572255.9
@@ -49,7 +56,7 @@ def compute_ij_CalphaModel_vdw (atom_i, atom_j, R_ab = False):
         C = -0.5
 
     
-    B = ((atom_i.hydropathic * atom_j.hydropathic))  
+    #B = ((atom_i.hydropathic * atom_j.hydropathic))  
     
     
     sigma_ab = (atom_i.sigma * atom_j.sigma)**0.5
@@ -177,11 +184,14 @@ def compute_AB_energy (molecule = None):
                     atom_j = atom  
                     atom_j.hydropathic = hydropathic_table[name_j]
                     atom_j.AB          = hydropathic_table_AB[name_j]
-            R_ab = distance_ab (atom_i, atom_j)
             
+            R_ab = distance_ab (atom_i, atom_j)
+            E    = compute_ij_CalphaModel_vdw (atom_i, atom_j, R_ab)
             #print index_i, name_i, hydropathic_table[name_i], atom_i.pos , index_j, name_j, hydropathic_table[name_j], atom_j.pos, 'distance_ij: ', distance_ab (atom_i, atom_j), compute_ij_CalphaModel_vdw (atom_i, atom_j, R_ab)
-            #print '%4i %5s %10.6f %4i %5s %10.6f %10.4f %20.15f' %(index_i, name_i, hydropathic_table[name_i],  index_j, name_j, hydropathic_table[name_j], distance_ab (atom_i, atom_j), compute_ij_CalphaModel_vdw (atom_i, atom_j, R_ab))
-            total_E += compute_ij_CalphaModel_vdw (atom_i, atom_j, R_ab)
+            
+            #print '%4i %5s %10.6f %4i %5s %10.6f %10.4f %20.15f' %(index_i, name_i, hydropathic_table[name_i],  index_j, name_j, hydropathic_table[name_j], distance_ab (atom_i, atom_j), E)
+            
+            total_E += E
             
             
     atom_i.sigma = 3.8
@@ -246,43 +256,40 @@ class Energy:
     def compute_AMBER_energy (self, pn = 1, log = None):
         """ Function doc """
         # transformar numa funcao
-        write_AMBER_input_file(molecule = self, Type='energy', pn= pn)
+        write_AMBER_input_file(molecule = self, Type='energy', pn= pn, parameters = self.energy_model_parameters)
         save_CRD_to_file      (molecule = self, filename='SinglePoint'+str(pn)+'.crd')
         
         os.system('sander -O -i SinglePoint'+str(pn)+'.in -c SinglePoint'+str(pn)+'.crd -o SinglePoint'+str(pn)+'.log -p ' + self.top)
         
-        #sander -O -i energy.in  -o   energy.log -p 7tim.top -c 7tim.crd
         
         energy_list = ParseAMBERLog('SinglePoint'+str(pn)+'.log', log=log)
-        #print BOND , ANGLE , DIHED , IMPRP , ELECT , VDW , BOUNDARY
+       
+        #energy += energy_list['Etot'   ] * self.energy_model_parameters['Etot'   ]         
+        #energy += energy_list['EKtot'  ] * self.energy_model_parameters['EKtot'  ] 
+        #energy += energy_list['EPtot'  ] * self.energy_model_parameters['EPtot'  ]         
+        #energy += energy_list["ESURF"]       * self.energy_model_parameters["ESURF"]
+        #energy += energy_list["EGB"]         * self.egb
+        #energy += energy_list["EELEC"]       * self.elect
+        energy_list['ANGLE'  ] = energy_list['ANGLE'  ] * self.energy_model_parameters['ANGLE'  ] 
+        energy_list['BOND'   ] = energy_list['BOND'   ] * self.energy_model_parameters['BOND'   ] 
+        energy_list['DIHED'  ] = energy_list['DIHED'  ] * self.energy_model_parameters['DIHED'  ] 
+        energy_list['EEL'    ] = energy_list['EEL'    ] * self.energy_model_parameters['EEL'    ] 
+        energy_list['EELEC'  ] = energy_list['EELEC'  ] * self.energy_model_parameters['EELEC'  ] 
+        energy_list['EGB'    ] = energy_list['EGB'    ] * self.energy_model_parameters['EGB'    ] 
+        energy_list['ESURF'  ] = energy_list['ESURF'  ] * self.energy_model_parameters['ESURF'  ]         
+        energy_list['NB'     ] = energy_list['NB'     ] * self.energy_model_parameters['NB'     ]         
         
-        energy = 0 
-        energy += energy_list["ESURF"]       * self.esurf
-        #energy += energy_list["RESTRAINT"]
-        energy += energy_list["EGB"]         * self.egb
-        energy += energy_list["EELEC"]       * self.elect
-
         if energy_list["VDWAALS"] == None:
-            #energy_list["VDWAALS"] = 99999999999999999999999
-            #energy += energy_list["VDWAALS"] * vdw
             return None
         else:
-            energy += energy_list["VDWAALS"] * self.vdw
-        
-        #energy += energy_list["EEL"]
-        #energy += energy_list["NB"]
-        energy += energy_list["DIHED"] * self.dihed
-        energy += energy_list["ANGLE"] * self.angle
-        energy += energy_list["BOND"]  * self.bond
+            energy_list['VDWAALS'] = energy_list['VDWAALS'] * self.energy_model_parameters['VDWAALS']                
         
         
-        #if AB_energy:
-        #    ab_energy = compute_AB_energy(molecule = self)*self.AB
-        #    energy +=   ab_energy
-        #    energy_list["AB_energy"]  = ab_energy
+        energy = 0
+        for energy_conponent in energy_list:
+            energy += energy_list[energy_conponent]
         
         return energy, energy_list
-
 
     def compute_CONTACT_energy (self, log = False, cutoff = 6.0):
         """ Function doc """
@@ -327,8 +334,8 @@ class Energy:
                     #print index_i, name_i, index_j, name_j, R_ab, 'NO CONTACT contact', self.cmap[index_i][index_j]
                     pass    
         
-        if log:
-            print 'total E:', energy
+        #if log:
+        #    print 'total E:', energy
         
         return energy
         
@@ -340,132 +347,133 @@ class Energy:
                external_coordinates_file = None , 
                
                # - - - -  novos termos - - - - -
-               AB_energy                 = False,
-               NDRD_energy               = False,
+               AMBER                     = True , 
                return_list               = False,
                ):
                     
     
-        energy_list = {}
+        energy_list = {'AB_ENERGY': 0.0,
+                       'CONTACT'  : 0.0,
+                       'ANGLE'    : 0.0,
+                       'BOND'     : 0.0,
+                       'DIHED'    : 0.0,
+                       'EEL'      : 0.0,
+                       'EELEC'    : 0.0,
+                       'EGB'      : 0.0,
+                       'ESURF'    : 0.0,
+                       'NB'       : 0.0,
+                       'VDWAALS'  : 0.0,}
         
-        if self.energy_model == 'amber':
-            try:
-                energy, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
-            except:
-                return None
-                
-                            
-            if log:
-                from pprint import pprint
-                pprint(energy_list)
+        if self.energy_model == 'FULL':        
+            energy, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
+  
+            
+            AB_energy = compute_AB_energy (molecule = self)
+            energy_list['AB_ENERGY'] = AB_energy * self.energy_model_parameters['AB'    ]
+  
+
+            C_energy = self.compute_CONTACT_energy(log = log, cutoff = self.energy_model_parameters['R_contact'])
+            energy_list['CONTACT']  = C_energy
 
 
-            if return_list:
-                return energy_list
-            else:
-                return energy
-        
+        if self.energy_model == 'amber':        
+            energy, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
+  
         
         if self.energy_model == 'Calpha':
             
             #-----------------------------------------------------------------
             # getting dihedral energies from amber  - temporary function
             # this function will be replaced by a empirical energy function 
-            try:
+            if AMBER:
                 energy_amber, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
-            except:
-                return None
-            backbone = energy_list['DIHED']
+            else:
+                pass
             #-----------------------------------------------------------------
+                       
+            #energy_list['DIHED']     = energy_list['DIHED']   * self.energy_model_parameters['DIHED'  ]
+            #energy_list['VDWAALS']   = energy_list['VDWAALS'] * self.energy_model_parameters['VDWAALS']
+            #energy_list['EELEC']     = energy_list["EELEC"]   * self.energy_model_parameters['EELEC'  ]
             
-            energy_list = {'AB_energy' : 0,
-                           'backbone'  : 0,
-                           'contact'   : 0,}
-
             
             AB_energy = compute_AB_energy (molecule = self)
+            energy_list['AB_ENERGY'] = AB_energy * self.energy_model_parameters['AB'    ]
+
             
-            
-            
-            energy_list['AB_energy'] = AB_energy * 1000
-            energy_list['backbone']  = backbone  * 1
-            energy_list['contact']   = 0
-            
+            if self.energy_model_parameters['CONTACT'  ]:
+                energy_list['CONTACT']   = 0
+                pass
+
             # - - - total energy - - - 
             energy = 0
             for energy_conponent in energy_list:
                 energy += energy_list[energy_conponent]
             # - - - - - - - - - - - - -
-            
-            
-            
-            # --------- printing data --------- 
-            if log:
-                from pprint import pprint
-                pprint(energy_list)
-            # --------------------------------- 
-
-            
-            if return_list:
-                return energy_list
-            else:
-                return energy
-            
-            
         if self.energy_model == 'Contact':
-            
-            energy = self.compute_CONTACT_energy(log = log)
-            
-            try:
+        
+            if AMBER:
                 energy_amber, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
-            except:
-                return None
-            
-            backbone = energy_list['DIHED']   *0.001
-            vdw      = energy_list["VDWAALS"] *0.00001
-            
-            
-            energy_list= {}
-            
-            
-            energy_list['contact']  = energy
-            energy_list['backbone'] = backbone
-            energy_list["VDWAALS"]  = vdw
+            else:
+                pass            
+        
+            C_energy = self.compute_CONTACT_energy(log = log, cutoff = self.energy_model_parameters['R_contact'])
+            energy_list['CONTACT']  = C_energy
+
             
             energy = 0
             for component in energy_list:
                 energy += energy_list[component]
-            
-            # --------- printing data --------- 
-            if log:
-                from pprint import pprint
-                pprint(energy_list)
-            # --------------------------------- 
-
-            if return_list:
-                return energy_list
-            else:
-                return energy
-        
-        
+                
         if self.energy_model == 'LSF':
-            energy, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
-            
-            energy = 1.15 - 1.96E-5*energy_list['EEL'] -2.36E-5*energy_list['NB'] - 4.4E-4 *energy_list['DIHED'] + 1.85E-3*energy_list['VDWAALS'] - 7.5E-5*energy_list['EGB'] + 2.66E-5*energy_list['ESURF']
-            energy = energy**(10.0/3)
-            #RMSD^0.3 = 1.15-1.96  
-            
-            
-            if log:
-                from pprint import pprint
-                pprint(energy_list)
-            
-            
-            if return_list:
-                return energy_list
+            if AMBER:
+                energy_amber, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
             else:
-                return energy            
+                pass  
+                          
+            #energy = 1.15 - 1.96E-5*energy_list['EEL'] -2.36E-5*energy_list['NB'] - 4.4E-4 *energy_list['DIHED'] + 1.85E-3*energy_list['VDWAALS'] - 7.5E-5*energy_list['EGB'] + 2.66E-5*energy_list['ESURF']
+            #energy = energy**(10.0/3)
+            #print energy 0.189230372051
+            
+            energy = 1.15
+            for component in energy_list:
+                energy += energy_list[component]
+            
+            energy = energy**(10.0/3)
 
+        if log:
+            text = '''
+--------------------------------- Summary of Energy Terms --------------------------------
+Potential Energy    =   %20.10f     BOND             =   %20.10f
+EEL                 =   %20.10f     ANGLE            =   %20.10f
+EELEC               =   %20.10f     DIHED            =   %20.10f
+EGB                 =   %20.10f     ESURF            =   %20.10f
+NB                  =   %20.10f     VDWAALS          =   %20.10f
+------------------------------------------------------------------------------------------
+AB_ENERGY           =   %20.10f
+CONTACT             =   %20.10f
+------------------------------------------------------------------------------------------
+     
+            ''' %(energy,
+                  energy_list['BOND'     ],
+                  energy_list['EEL'      ],
+                  energy_list['ANGLE'    ],
+                  energy_list['EELEC'    ],
+                  energy_list['DIHED'    ],
+                  energy_list['EGB'      ],
+                  energy_list['ESURF'    ],
+                  energy_list['NB'       ],
+                  energy_list['VDWAALS'  ],
+                  energy_list['AB_ENERGY'],
+                  energy_list['CONTACT'  ])
+            
+            print text
+      
+        
+        if return_list:
+            return energy_list
+        else:
+            return energy
+        
         
         '''
         if  self.ff_type == 'charmm':
@@ -566,16 +574,42 @@ class Energy:
 
         '''
 
-def write_AMBER_input_file (molecule=None, Type='energy', pn = 1):
+def write_AMBER_input_file (molecule=None, Type='energy', pn = 1, parameters = None):
+    
+    if parameters == None:
+        parameters = {
+                    'cut'     : 999.0    , 
+                    'igb'     : 1        , 
+                    'saltcon' : 0.2      , 
+                    'gbsa'    : 1        , 
+                    'rgbmax'  : 999.00000, 
+                    'surften' : 0.010
+                    }
+        
+        
+    #print parameters
+    #print 'cut= %4.1f , igb= %d , saltcon= %2.1f , gbsa= %d , rgbmax = %10.5f , surften = %6.3f ,' % (parameters['cut'     ],
+    #                                                                                      parameters['igb'     ],
+    #                                                                                      parameters['saltcon' ],
+    #                                                                                      parameters['gbsa'    ],
+    #                                                                                      parameters['rgbmax'  ],
+    #                                                                                      parameters['surften' ])
+    
     text = """  compute single-point energy 
  &cntrl
-   cut=999.0, igb=1, saltcon=0.2, gbsa=1, rgbmax = 999.00000, surften = 0.010,
+   cut=%4.1f, igb=%d, saltcon=%2.1f, gbsa=%d, rgbmax =%10.5f, surften = %6.3f,
    ntpr=1,
    nstlim = 0, dt=0.002,
    ntt=1, tempi=300.0, temp0=300.0, tautp=2.0,
    ntx=1, irest=0, ntb=0,
  &end
-eof"""
+eof""" %(parameters['cut'     ],
+         parameters['igb'     ],
+         parameters['saltcon' ],
+         parameters['gbsa'    ],
+         parameters['rgbmax'  ],
+         parameters['surften' ])
+         
     output_file = open('SinglePoint'+str(pn)+'.in', "w")
     output_file.write(text)
     output_file.close()

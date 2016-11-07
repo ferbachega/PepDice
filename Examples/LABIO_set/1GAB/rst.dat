@@ -1,0 +1,391 @@
+>>-------------------- Decoy set detailed informations --------------------<<
+ID:        1GAB
+Length:   53      Class: Alpha protein
+
+Protein sequence and second structure: (H->helix;E->sheet;C->coil)
+TIDQWLLKNAKEDAIAELKKAGITSDFYFNAINKAKTVEEVNALKNEILKAHA
+CCHHHHCCHHHHHHHHHHHCCCCCCHHHHHHHHCCCCHHHHHHHHHHHHHHCC
+
+EVENNESS:   0.963   npwRMSD:   0.882
+RMSD-BIN  >0<  >1<  >2<  >3<  >4<  >5<  >6<  >7<  >8<  >9< >10< >11<  >12 TOTAL
+N_Decoy    17   24   26   27   27   25   25   23   31   25   24   26    0   300
+
+Name                  RMSD SEC_PCT R_GYRAT CNT_NUM
+native.pdb            0.00   69.81   10.85   3.103
+decoy0_1.pdb          0.30   71.70   10.82   2.926
+decoy1_1.pdb          1.02   67.92   10.55   3.723
+decoy1_7.pdb          0.88   58.49   10.84   3.103
+decoy1_8.pdb          0.95   73.58   10.93   2.748
+decoy1_3.pdb          0.94   69.81   10.57   3.723
+decoy1_4.pdb          0.96   71.70   10.57   3.546
+decoy1_15.pdb         1.05   67.92   10.90   3.014
+decoy1_19.pdb         0.64   67.92   10.89   3.191
+decoy1_9.pdb          0.94   58.49   10.83   2.837
+decoy1_10.pdb         0.91   66.04   10.86   2.748
+decoy1_11.pdb         0.99   58.49   10.85   2.660
+decoy1_12.pdb         0.85   60.38   10.85   3.369
+decoy1_13.pdb         0.76   67.92   10.74   3.014
+decoy1_2.pdb          0.71   71.70   10.70   3.103
+decoy1_5.pdb          0.90   71.70   10.66   3.812
+decoy1_6.pdb          0.99   67.92   10.57   3.812
+decoy1_18.pdb         0.90   66.04   10.81   3.280
+decoy1_14.pdb         1.14   66.04   10.96   2.748
+decoy1_16.pdb         0.86   66.04   10.87   3.103
+decoy1_17.pdb         0.87   58.49   10.97   2.748
+decoy1_41.pdb         1.03   69.81   10.57   3.723
+decoy1_42.pdb         2.03   75.47   10.76   2.216
+decoy1_57.pdb         1.39   67.92   10.90   2.837
+decoy1_59.pdb         1.21   73.58   10.92   2.837
+decoy1_21.pdb         2.01   75.47   10.47   3.635
+decoy1_23.pdb         1.88   77.36   10.48   3.457
+decoy1_24.pdb         1.96   77.36   10.53   3.635
+decoy1_35.pdb         1.97   77.36   10.35   3.635
+decoy1_22.pdb         1.86   77.36   10.41   3.457
+decoy1_27.pdb         1.86   73.58   10.29   3.369
+decoy1_31.pdb         1.89   75.47   10.32   3.546
+decoy1_33.pdb         1.86   73.58   10.36   3.457
+decoy1_34.pdb         1.86   71.70   10.35   3.280
+decoy1_36.pdb         2.03   62.26   10.87   2.128
+decoy1_37.pdb         1.71   66.04   10.42   3.723
+decoy1_39.pdb         1.09   66.04   10.63   3.369
+decoy1_40.pdb         1.10   69.81   10.60   3.280
+decoy1_43.pdb         1.82   66.04   10.36   3.546
+decoy1_48.pdb         1.75   67.92   10.44   3.989
+decoy1_49.pdb         1.71   64.15   10.48   3.546
+decoy1_53.pdb         1.79   66.04   10.56   3.280
+decoy1_62.pdb         1.81   73.58   10.38   4.078
+decoy1_64.pdb         1.16   67.92   10.64   3.723
+decoy1_65.pdb         1.82   66.04   10.39   3.901
+decoy2_12.pdb         4.79   83.02   10.51   2.748
+decoy2_237.pdb       10.49   81.13   10.89   0.887
+decoy2_240.pdb       10.35   83.02   10.70   1.064
+decoy2_241.pdb       10.23   81.13   10.67   1.330
+decoy2_246.pdb       10.51   83.02   10.93   0.798
+decoy2_253.pdb       10.46   83.02   10.77   1.152
+decoy2_254.pdb       10.25   69.81   10.47   1.862
+decoy2_232.pdb       10.39   83.02   10.71   1.152
+decoy2_259.pdb       10.57   84.91   10.83   0.532
+decoy2_316.pdb       11.78   77.36   10.10   1.330
+decoy2_303.pdb       11.64   79.25   10.06   1.330
+decoy2_300.pdb       11.52   73.58    9.91   1.596
+decoy3_1.pdb          2.87   79.25   10.30   2.216
+decoy3_129.pdb        5.79   86.79   10.93   0.975
+decoy3_131.pdb        5.77   86.79   10.40   1.684
+decoy3_158.pdb        5.68   86.79   10.79   0.887
+decoy3_162.pdb        5.87   88.68   10.92   0.887
+decoy3_164.pdb        5.68   88.68   10.30   1.862
+decoy3_166.pdb        5.69   86.79   10.93   0.975
+decoy3_140.pdb        5.67   88.68   10.94   0.975
+decoy3_144.pdb        5.93   88.68   10.32   1.684
+decoy3_155.pdb        5.57   88.68   10.88   0.887
+decoy3_157.pdb        5.87   84.91   10.36   1.684
+decoy3_176.pdb        6.00   86.79   10.44   1.684
+decoy3_179.pdb        6.13   86.79   10.41   1.330
+decoy3_183.pdb        6.00   86.79   10.45   1.330
+decoy3_186.pdb        6.15   88.68   10.43   1.418
+decoy3_187.pdb        6.24   88.68   10.45   1.507
+decoy3_193.pdb        6.20   86.79   10.54   1.330
+decoy3_238.pdb        7.52   88.68   10.50   1.418
+decoy3_235.pdb        7.57   86.79   10.52   1.152
+decoy3_240.pdb        7.76   79.25   10.50   2.482
+decoy3_242.pdb        7.11   88.68   10.64   1.241
+decoy3_276.pdb        8.97   88.68   10.34   1.330
+decoy3_272.pdb        8.61   84.91   10.22   1.152
+decoy3_275.pdb        8.74   81.13   10.45   1.064
+decoy3_282.pdb        8.74   86.79   10.17   1.330
+decoy3_311.pdb        9.16   83.02   10.58   1.152
+decoy3_310.pdb        9.22   88.68   10.59   1.241
+decoy4_5.pdb          5.78   84.91   10.41   1.950
+decoy4_108.pdb        8.16   90.57   10.59   0.887
+decoy4_130.pdb        9.24   81.13   10.91   1.241
+decoy4_136.pdb        9.01   83.02   10.34   1.596
+decoy4_158.pdb        9.02   83.02   10.35   1.507
+decoy4_176.pdb       10.00   81.13   10.55   0.975
+decoy4_197.pdb       10.86   79.25   10.66   2.305
+decoy4_200.pdb       10.26   77.36   10.75   3.369
+decoy4_206.pdb       10.48   71.70   10.10   3.723
+decoy4_228.pdb       11.27   75.47   10.44   1.950
+decoy4_243.pdb       11.32   75.47   10.47   1.950
+decoy4_229.pdb       11.27   75.47   10.28   2.216
+decoy4_235.pdb       11.07   79.25   10.64   1.773
+decoy4_236.pdb       11.02   73.58   10.79   2.926
+decoy4_252.pdb       11.00   73.58   10.77   3.191
+decoy4_226.pdb       11.26   81.13   10.45   2.216
+decoy4_234.pdb       11.36   73.58   10.41   2.128
+decoy4_238.pdb       11.36   69.81   10.29   2.748
+decoy5_19.pdb         6.93   86.79   10.49   2.571
+decoy5_50.pdb         7.01   90.57   10.56   2.305
+decoy5_107.pdb        8.35   92.45   10.55   1.418
+decoy5_119.pdb        9.00   83.02   10.69   2.128
+decoy5_144.pdb        9.25   84.91   10.82   1.596
+decoy6_10.pdb         4.81   77.36   10.68   2.571
+decoy6_276.pdb       10.12   77.36   10.90   1.862
+decoy6_297.pdb       11.48   75.47   10.98   1.950
+decoy6_298.pdb       11.41   79.25   10.99   2.039
+decoy7_2.pdb          6.93   84.91   10.59   1.684
+decoy7_59.pdb         8.79   84.91   10.03   1.241
+decoy7_72.pdb         9.12   86.79   10.43   1.507
+decoy7_134.pdb       10.35   77.36   10.97   1.773
+decoy7_124.pdb       10.28   84.91   10.76   2.305
+decoy7_126.pdb       10.28   84.91   10.94   2.216
+decoy7_121.pdb       10.32   83.02   10.95   1.862
+decoy7_135.pdb       10.32   84.91   10.97   2.305
+decoy7_173.pdb       11.05   77.36   10.29   2.039
+decoy7_175.pdb       11.93   66.04   10.13   3.723
+decoy8_1.pdb          3.98   81.13   10.37   1.596
+decoy9_40.pdb         3.26   84.91   11.07   1.241
+decoy9_170.pdb        8.62   90.57   10.21   1.862
+decoy9_163.pdb        8.65   90.57   10.08   1.862
+decoy9_173.pdb        8.49   90.57   10.15   2.039
+decoy9_179.pdb        8.64   86.79   10.14   2.128
+decoy9_200.pdb        8.16   84.91   10.18   2.216
+decoy9_211.pdb        9.12   86.79   10.53   2.216
+decoy9_209.pdb        9.00   84.91    9.98   1.773
+decoy9_214.pdb        8.96   84.91   10.49   2.216
+decoy9_207.pdb        9.14   77.36   10.59   1.950
+decoy9_234.pdb       10.64   69.81   10.55   2.660
+decoy9_241.pdb       10.70   75.47   10.50   2.482
+decoy9_243.pdb       10.97   79.25   10.53   3.191
+decoy9_250.pdb       10.89   77.36   10.62   3.103
+decoy9_269.pdb       11.29   75.47   10.50   2.305
+decoy9_280.pdb       11.37   79.25   10.67   2.926
+decoy9_281.pdb       11.30   75.47   10.63   2.926
+decoy9_273.pdb       11.41   77.36   10.62   2.748
+decoy9_277.pdb       11.10   75.47   10.26   2.837
+decoy9_270.pdb       11.16   71.70    9.87   3.014
+decoy9_271.pdb       11.22   79.25    9.85   3.103
+decoy9_275.pdb       11.27   73.58    9.75   3.635
+decoy9_296.pdb       11.91   69.81   10.68   3.546
+decoy9_303.pdb       11.98   73.58   10.43   3.901
+decoy10_4.pdb         3.73   86.79   10.65   0.709
+decoy10_86.pdb        5.29   86.79   10.57   1.241
+decoy10_182.pdb       7.61   84.91   10.88   0.621
+decoy10_222.pdb       8.99   84.91   10.66   0.621
+decoy10_272.pdb       9.00   83.02   10.69   0.621
+decoy10_279.pdb       9.15   81.13   10.71   0.443
+decoy11_4.pdb         4.98   86.79   10.68   1.684
+decoy12_5.pdb         6.78   88.68   10.85   0.975
+decoy12_6.pdb         6.80   84.91   10.85   0.975
+decoy12_8.pdb         6.70   88.68   10.85   0.887
+decoy12_35.pdb        7.89   88.68   10.90   2.216
+decoy12_118.pdb       8.91   84.91   10.27   1.773
+decoy13_1.pdb         2.69   56.60   11.09   2.039
+decoy14_14.pdb        3.04   83.02   10.43   1.862
+decoy15_1.pdb         2.89   83.02   10.49   1.950
+decoy16_1.pdb         2.87   77.36   10.51   2.216
+decoy17_18.pdb        2.96   83.02   10.41   2.039
+decoy18_9.pdb         3.01   84.91   10.53   1.862
+decoy19_5.pdb         3.99   83.02   10.74   0.975
+decoy19_172.pdb       7.09   81.13   10.34   1.596
+decoy20_1.pdb         3.89   69.81   10.29   1.596
+decoy21_1.pdb         2.88   67.92   10.51   2.660
+decoy21_147.pdb       6.39   88.68   11.51   1.241
+decoy22_18.pdb        2.67   84.91   10.55   2.571
+decoy23_17.pdb        2.85   84.91   10.42   2.748
+decoy24_22.pdb        2.73   86.79   10.26   3.280
+decoy25_3.pdb         2.93   69.81    9.99   3.191
+decoy25_68.pdb        4.17   86.79   11.10   1.950
+decoy25_162.pdb       6.02   92.45   11.19   1.330
+decoy26_6.pdb         3.41   88.68   10.88   1.596
+decoy26_53.pdb        4.74   86.79   11.33   2.039
+decoy26_55.pdb        4.73   86.79   11.34   2.305
+decoy26_64.pdb        4.83   86.79   11.35   2.039
+decoy27_9.pdb         8.02   88.68   11.57   1.241
+decoy27_10.pdb        8.02   84.91   10.85   0.975
+decoy27_19.pdb        7.95   86.79   10.74   1.418
+decoy27_15.pdb        7.98   88.68   11.55   1.507
+decoy27_4.pdb         7.99   88.68   11.51   1.241
+decoy27_8.pdb         8.01   88.68   11.44   1.330
+decoy27_22.pdb        8.02   86.79   10.87   1.330
+decoy27_24.pdb        7.95   88.68   10.71   1.330
+decoy27_44.pdb        7.93   86.79   11.25   1.418
+decoy27_68.pdb        8.10   79.25   10.93   1.064
+decoy27_78.pdb        8.02   86.79   10.83   1.241
+decoy27_80.pdb        8.80   83.02   11.38   0.887
+decoy28_6.pdb         2.93   86.79   10.35   2.482
+decoy28_8.pdb         2.96   86.79   10.34   2.394
+decoy28_11.pdb        2.93   88.68   10.34   2.394
+decoy28_56.pdb        3.15   86.79   10.20   2.660
+decoy28_64.pdb        3.19   86.79   10.57   1.507
+decoy29_6.pdb         3.02   84.91   10.69   2.216
+decoy29_89.pdb        4.24   88.68   10.76   1.152
+decoy29_94.pdb        4.20   88.68   10.74   1.064
+decoy29_104.pdb       4.25   86.79   10.70   1.152
+decoy29_80.pdb        4.30   88.68   10.71   1.064
+decoy29_81.pdb        4.24   88.68   10.73   0.975
+decoy29_88.pdb        4.16   86.79   10.68   0.975
+decoy29_95.pdb        4.26   86.79   10.75   1.152
+decoy29_96.pdb        4.37   88.68   10.66   1.241
+decoy30_1.pdb         2.94   84.91   10.54   2.394
+decoy31_17.pdb        2.93   77.36   10.85   1.684
+decoy32_16.pdb        4.00   86.79   10.62   1.950
+decoy32_98.pdb        4.55   92.45   10.92   1.773
+decoy33_5.pdb         2.90   73.58   10.04   3.901
+decoy33_140.pdb       5.89   88.68   10.58   0.887
+decoy33_145.pdb       5.96   92.45   10.62   0.975
+decoy33_151.pdb       5.90   84.91   10.61   0.798
+decoy33_143.pdb       5.86   88.68   10.56   0.975
+decoy33_154.pdb       6.04   88.68   10.59   0.798
+decoy33_157.pdb       6.02   88.68   10.52   0.887
+decoy34_1.pdb         4.80   86.79   10.32   2.571
+decoy34_37.pdb        5.73   88.68   11.14   1.773
+decoy34_56.pdb        5.69   88.68   10.90   2.128
+decoy34_98.pdb        7.69   90.57   11.15   0.443
+decoy34_107.pdb       7.66   90.57   11.11   0.887
+decoy34_113.pdb       7.49   88.68   11.14   0.709
+decoy34_88.pdb        7.58   92.45   11.08   0.621
+decoy34_145.pdb       8.98   83.02   11.23   1.330
+decoy34_205.pdb       9.11   90.57   11.29   1.418
+decoy34_193.pdb       9.27   90.57   11.42   1.064
+decoy34_199.pdb       9.41   86.79   11.43   1.152
+decoy34_223.pdb       9.00   88.68   11.42   0.975
+decoy34_226.pdb       9.11   86.79   10.80   1.241
+decoy34_194.pdb       9.08   88.68   11.22   1.330
+decoy34_195.pdb       9.36   83.02   11.15   1.507
+decoy34_202.pdb       9.57   88.68   11.18   1.418
+decoy34_209.pdb       9.16   90.57   11.20   1.330
+decoy34_212.pdb       9.41   84.91   10.24   0.975
+decoy34_238.pdb       9.97   81.13   11.94   0.887
+decoy35_11.pdb        2.92   81.13   10.46   2.305
+decoy36_1.pdb         2.94   67.92   10.97   1.596
+decoy37_22.pdb        3.44   73.58   10.02   2.926
+decoy38_1.pdb         2.93   77.36   10.57   1.950
+decoy39_3.pdb         2.98   81.13   10.45   3.103
+decoy40_5.pdb         7.54   83.02   10.55   1.596
+decoy41_5.pdb         4.65   81.13   11.14   1.507
+decoy41_41.pdb        7.02   90.57   10.07   2.482
+decoy41_30.pdb        6.84   90.57    9.83   3.103
+decoy41_56.pdb        7.57   84.91   11.44   2.039
+decoy41_76.pdb        7.61   88.68   11.49   1.950
+decoy41_82.pdb        7.54   94.34   11.44   1.950
+decoy41_134.pdb      10.44   86.79   11.59   1.152
+decoy42_8.pdb         4.05   73.58   10.65   1.596
+decoy42_50.pdb        4.53   86.79   10.39   1.773
+decoy43_2.pdb         3.96   84.91   10.62   1.330
+decoy44_3.pdb         3.93   81.13   10.59   1.507
+decoy44_88.pdb        5.02   86.79   10.85   0.709
+decoy45_1.pdb         2.96   75.47   10.44   2.748
+decoy46_2.pdb         2.85   88.68   10.65   2.216
+decoy47_6.pdb         3.98   83.02   10.77   1.241
+decoy47_91.pdb        4.49   86.79   11.00   1.064
+decoy47_95.pdb        4.57   83.02   10.98   1.152
+decoy48_29.pdb        3.44   79.25   10.75   1.241
+decoy49_7.pdb         3.79   73.58   10.46   1.596
+decoy49_205.pdb       8.36   92.45   10.81   1.418
+decoy49_220.pdb       8.32   84.91   10.75   1.507
+decoy49_222.pdb       8.35   84.91   10.82   1.330
+decoy49_235.pdb      10.10   83.02   10.87   0.975
+decoy50_3.pdb         2.96   64.15   10.59   2.482
+decoy51_26.pdb        3.39   71.70   10.86   2.660
+decoy52_2.pdb         3.89   84.91   11.09   1.418
+decoy52_68.pdb        5.59   90.57   11.05   1.684
+decoy53_37.pdb        3.47   86.79   10.77   1.773
+decoy53_159.pdb       8.19   92.45   10.64   2.128
+decoy53_164.pdb       8.39   92.45   10.83   2.216
+decoy53_166.pdb       8.24   88.68   10.70   2.128
+decoy54_3.pdb         5.81   73.58   10.37   1.862
+decoy55_22.pdb        3.97   81.13   10.84   1.418
+decoy56_25.pdb        3.85   81.13   10.37   1.773
+decoy57_29.pdb        4.88   84.91   10.80   1.950
+decoy58_6.pdb         4.47   75.47   10.75   2.837
+decoy59_15.pdb        5.79   81.13   10.88   1.596
+decoy59_79.pdb        6.32   84.91   10.86   1.330
+decoy59_62.pdb        6.33   83.02   11.05   1.152
+decoy60_47.pdb        3.73   73.58   10.56   1.950
+decoy61_7.pdb         3.93   71.70   10.54   3.457
+decoy62_1.pdb         3.99   86.79   10.28   2.305
+decoy62_106.pdb       6.77   84.91   10.49   3.103
+decoy63_3.pdb         6.95   83.02   10.86   0.532
+decoy64_2.pdb         4.79   69.81   10.49   1.773
+decoy64_144.pdb       6.53   77.36   10.26   2.039
+decoy65_25.pdb        4.86   58.49   10.19   3.723
+decoy66_2.pdb         3.74   79.25   11.14   1.950
+decoy66_85.pdb        5.90   92.45   10.55   1.950
+decoy66_117.pdb       5.49   83.02   10.96   0.443
+decoy66_121.pdb       6.16   94.34   11.01   0.621
+decoy66_125.pdb       6.13   94.34   10.99   0.709
+decoy66_127.pdb       6.63   92.45   11.09   0.798
+decoy66_137.pdb       6.75   77.36   11.01   0.975
+decoy66_171.pdb       7.84   92.45   10.32   1.684
+decoy66_193.pdb       8.93   90.57   10.78   1.152
+decoy66_201.pdb       8.97   90.57   10.80   1.241
+decoy66_202.pdb       9.09   96.23   10.88   1.064
+decoy67_14.pdb        5.97   32.08   10.76   3.901
+decoy68_18.pdb        3.83   67.92   10.73   3.103
+Average              6.209   81.11   10.67   1.976
+Pcorr-to-dcyRMSD       -      0.33    0.02  -0.367
+Native-rank-in-top1    -        No      No      No
+Native-rank-in-top5    -        No      No      No
+Native-Zscore          -    -1.301   0.499   1.247
+
+>>------------------ Structure Templates used by 3DRobot ------------------<<
+
+No. PDBhit Cov. Ident TMsco  RMSD     --------10--------20--------30--------40--------50---
+                                  Seq.TIDQWLLKNAKEDAIAELKKAGITSDFYFNAINKAKTVEEVNALKNEILKAHA
+1   3t6aA  29   0.17  0.426  1.43     ------------------------AIGIAVDIGCTGTLEDRAATLSKIIQVAL
+2   3trcA  30   0.17  0.448  1.46     -----------------------LLRQITQEVNAAPNLEQALKLVVVRLCEAP
+3   3oovA  27   0.30  0.405  1.51     --------------------------QISSRIQKSIDVDEVLRLCAEGLHDVL
+4   2hdhA  31   0.10  0.396  1.93     ------GLGAGIAQVAAATG----------------KSKGIEESLRKVAKKKF
+5   3ggzD  33   0.06  0.406  1.94     YAQKQQIAKQSRRQVAQLLLTNKEQHYRVET-LD-------------------
+6   4lb8A  29   0.14  0.372  1.94     -----------------------ADGELDKICNQAADKAEFDVLYEKYKH-KY
+7   1ichA  42   0.07  0.541  1.95     ---------P-LRWKEFVKRLGLSDHE-IDRLELNRCLREAQYSMLATWRRRT
+8   3e98A  31   0.13  0.442  1.96     ----------------------LFTRRLVLDLLDATSLEDVVSTVEDSLRHEQ
+9   1nh2D  33   0.09  0.399  1.99     --------------------ELYRSTIGNSLVDALIEASLAMRVLETFDKVVA
+10  2q0oA  30   0.03  0.400  1.99     ----------------------VNLRSLIDMLEAAQDGHMIKIALRSFAH-SC
+11  1rm1C  35   0.09  0.475  1.99     EARVYEVESVVNEVREDFENAGIDEQ-TLQDLKNWQ-----------------
+12  3k70D  43   0.07  0.546  2.01     -------MKLQKQLLE-AVHKQLR-PLDVQFALVAEHPAVTLAAALLH-DAGE
+13  1rp3A  52   0.06  0.596  2.28     EREL-IYLPLVKAIATNIKKHLPVDRDLISYGVIGLIKLRIKGAIYDYLRSLD
+14  2og2A  50   0.06  0.548  2.32     ---NLATDRVLDELEEALLVSDFGIVRIVERLREILSGSEIKDALKESVLEML
+15  2lyiA  51   0.14  0.563  2.34     --KPSAAVIVTSGLKKALGALRIAGSQLTSAVSQAVYAKAIAAPSVQILVSSG
+16  3szrA  53   0.04  0.581  2.37     EAVMLHTDMVRLAFTDVSIKNFLHTKSKIEDIRAQFMLQTYGQQLQKAMLQLL
+17  2j5yA  49   0.88  0.642  2.41     --TDQWLKNAKEDAIAELKKAGITSDFYFNAINKAKTVEEVNALKNEIKA-H-
+18  2dbdA  44   0.09  0.516  2.42     ---------NTQCLVDNLLKNDYFSAEDAEIVCACPTQPDKVRKILDLVQSKG
+19  2gtvX  36   0.08  0.398  2.44     PIND-PEKYIYDRIRKLCKEHNVDENIGIKIFQRLI---N-------------
+20  4bk0A  32   0.09  0.395  2.47     ---------------------RKAVELEHETFRNAKVANLYKASVLKKVADIH
+21  3zf7T  51   0.02  0.576  2.49     R-SL-WRLRILRRLLRKYREEKDRHRELYMKANVFRNKRNLMEHIHKVKNEKK
+22  3ddpD  52   0.06  0.567  2.52     QPDITNRAILVDWLVEVGEEYKLQNE-TLHLAVNILLQLVGTAAMLLASKFEI
+23  1g3nC  52   0.06  0.577  2.67     QQSLTSRKLLGTWMFSVCQEYNLEPN-VVALLLDLLFQKTGSACLLVASKLRL
+24  1aisB  48   0.08  0.514  2.67     -----NLAFALSELDRITAQLKLPRHEEAARLYRAVSISVMAACVYAACRLLK
+25  2iy3A  50   0.12  0.517  2.71     --RI-ELKATLREIRRALMDADVNVRDFVERVREEAVILATVYALKEALGGAR
+26  3be4A  32   0.06  0.396  2.76     -----GDEIVLGLVKEKFDLGV-------------IPQAEGLAKILSEIG---
+27  3a5cA  50   0.12  0.586  2.82     SKKGIMMILAFYKEAEAAIKRGVSIDE-ILLVLRIAYFEEAMKEIQGAK--AL
+28  4ak9A  51   0.06  0.535  2.82     --NLDESESILDELEEVLLVSDFGTLKIVDTIRKILSGPQIKEALKKNIFKLL
+29  1c17M  49   0.06  0.500  2.96     LALVVPADVNVTLSMALGVILLPVSLRLFGNMYAELI-AH--IIITLQAF-IF
+30  3d1bA  48   0.08  0.481  3.01     -IQE-NQ-LEQLMFLSNLEK-QTPKAVGSSIYKLVLSLDFASQILKEASIL-E
+31  1d1dA  44   0.09  0.488  3.01     -----LPHDVTNLMRVILG---PAPYALWMDAWGQLITASALQAFREVAR-LA
+32  1j7kA  52   0.17  0.535  3.03     -PDFYTVKELKEIIKRAASLDVEIEDAAAEMIAKSRTGRIAIRLTKRVRDMLT
+33  2h9dD  38   0.08  0.402  3.07     AIPAPRVAAMLPERARWAEENGLDAPFVEGLFAQIIH--Y-------------
+34  3ecdB  51   0.12  0.477  3.08     DDFTYIVLANAQALGDVLKAGGVDLVI-RLG-TPGTGAAEFREVGRLILEVFE
+35  3s84A  50   0.10  0.521  3.09     LADEFKIDQTVEELRRSLAPYATQKNHQLEGLTFMKNLVQQMEQLRQKLG---
+36  1d3uB  49   0.10  0.477  3.11     TPKFVKPTDYVNKFADELG---LSEK-VRRRAIELTPAGLVAAALYIASLLEG
+37  1cs1A  50   0.10  0.441  3.18     -TPRMLAQRNAQAIVKYLQTQPLVLLL--RISTGIEDGEDLIADLENGFRAAN
+38  2h8oA  46   0.07  0.441  3.22     -----GGRLRPFLVIESVALLGGDAEAGLHVGAALLLLRFACEAGAIIAGS--
+39  3g71N  33   0.03  0.356  3.22     --GNMPYLTGLLAGLRAQEAGVE------------FAIQEGAIDLDI------
+40  4gfqA  39   0.08  0.442  3.29     --MGQQLKFSNEKMEKAVAAYSR------------EDIQKETDKYIAKDEIKN
+41  1z23A  48   0.08  0.452  3.38     PQEPVQLKAAVAAVHGAVHELLMEYQTLVVHGQLDL--DRLVACSRAVED---
+42  2ld3A  50   0.12  0.458  3.42     GSLKVGLKKRLDKFNEVVSALKDGKPEVNRQILSALV-KSSEDLLSALKK--E
+43  1st6A  47   0.04  0.417  3.44     LCAIAKSDEVTRLAKEVAKQCTDKRTNLLQVCEILM--VKTVREAEAAS----
+44  3ljbA  52   0.12  0.482  3.49     FVNYRFETIVKQQIKA-LEPAMLEIRLHFQMEQIVYLMAYHQEASKRISHIPL
+45  2f6lA  53   0.11  0.482  3.61     PIEDSRVEQQLAKLGEDARSQHIDPDYVTRVFDDQITRIDLNRMLSQIWSHWS
+46  4fbzA  47   0.09  0.472  3.64     V-WY--LFTTPLLLLDLGLLAGA-NRNTIATLIGLMIALLALLVLVGTLS-D-
+47  3q4nA  49   0.08  0.436  3.64     EGIEMREKLARDVYLTLYNKWKLQIKNIAESEQHM--TIED-SHMRAFVRM-N
+48  1l2jA  51   0.12  0.472  3.68     EMMLTKADKELVHMISWAKKIGFVQVRLLESW--MEVLMMGLVKAMILLNSLA
+49  1rccA  48   0.02  0.387  3.68     --VRQNFHQCEAGLNR-TVLKSAKAEKLIEYQNQR-SDPHMTDFLESPYSE-T
+50  1ji4L  44   0.16  0.389  3.74     --MKTFLKHLQADAIVLFMKVHYEEADMFDDLARI--EFLA-DQLAKLS----
+51  2k9iA  31   0.10  0.318  3.83     ----YIPQEWHDRLMEIAKEKNLT-L-SD------------V-CRLAIKE---
+52  1t5oA  50   0.14  0.399  3.89     -FADVDLKEHLKKAADLAPALFVGIERALNAALKGVE-VKLALREAELAE-ED
+53  1ouvA  37   0.05  0.335  3.98     ---EKDFTQAKKYFEKACDLKENCF-LGLYYQGQG------------AYSNGC
+54  2yb5A  49   0.18  0.415  4.04     TNDMHKQKFLLNEINDIFKEKDIDISDFITSIDDVLT-K--AEHLLNELK-VY
+55  3zf7w  49   0.08  0.481  4.11     KANAAALKKLAYSRGLKYSREYRLSVRAVYG-TDNQM-IKHDICDIQICFT--
+56  2p9xA  46   0.09  0.364  4.11     -SKGRDLTKTIILALRVAPGL-AVLAHLRSGIELAYD--P-FKEAVSLFGE--
+57  3jycA  45   0.00  0.367  4.13     M-FSAFSWLFGLIFWLIALHGDLNGFVAAFLFSIETQTTIG-GFRCV------
+58  2npuA  39   0.05  0.364  4.15     --ER-NVKGMFEVLEPLHAMMEG-M-AQEWCRMDLT--AWDLYYHV-------
+59  2j9vA  49   0.02  0.456  4.16     -NYNAKQLHLLAELLISINRVTRDDFENRSKLWIQIR-LLL-ELAYKSYA-LL
+60  1aigM  51   0.04  0.366  4.18     AWFLSAWLWL--VWTNNFSLVHGNLFYNPFHGSVTLTGGIGILLSVVWYVWGQ
+61  2a8iA  46   0.07  0.390  4.19     SKAEYKVCKRACQKAIEKLAGALATD-AVTAALELES--G--KN-VSV-NRLC
+62  2oczA  31   0.00  0.304  4.42     -----SSQEYVDIIKEINAYNPD-------KSVFQ--------NLILAPRV--
+63  1eysL  52   0.02  0.365  4.54     FAFSFAGAYL-HLWVSNVGYQFLHFHYNPAHMLAAFWSAVCILISGFWTREWN
+64  2fpeA  31   0.00  0.226  4.66     -----THR--AIF--RF--VPLELE---DP-L-LVE-LQAWYEAY-ARG----
+65  3tb6A  50   0.14  0.370  4.68     MASTLDDVKGGMMAAEHLLSLGHTHMMG-IFKQGVKR--CYNDIALVIDLMLM
+66  2pvoB  36   0.06  0.264  4.70     -N-GDRVRVTSSV--VVYHKKTAF----LQ-GMEGEVLVKF-RFKA-------
+67  3bz5A  46   0.07  0.289  4.81     -L-KAGQTQSFNDWFPD-DNFASEVAAFEM-TISEEQL-AEKLT-GLKLIY-A

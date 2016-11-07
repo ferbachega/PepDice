@@ -39,8 +39,10 @@ def metropolis_acceptance_test (energy = None        ,
     
     else:
         dE = (energy - previous_energy)
-        Px = math.exp(-1 * dE / (temperature))
+        
+        Px = math.exp(-1 * dE / (Kb * temperature))
         X  = random.uniform(0, 1)
+
         return X <= Px
 
 
