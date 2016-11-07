@@ -252,18 +252,55 @@ class Molecule(Atom       ,
                                           # energy = 1.15 -1.96E-5*energy_list['EEL'] -2.36E-5*energy_list['NB'] - 4.4E-4 *energy_list['DIHED'] + 1.85E-3*energy_list['VDWAALS'] - 7.5E-5*energy_list['EGB'] + 2.66E-5*energy_list['ESURF']
 
                                           'LSF'    :  {
-                                                      'ANGLE'    : 0.0       ,
-                                                      'BOND'     : 0.0       ,
-                                                      'DIHED'    : -4.4E-4   ,
-                                                      'EEL'      : -1.96E-5  ,
-                                                      'EELEC'    : 0.0       ,
-                                                      'EGB'      : - 7.5E-5  ,
-                                                      'EKtot'    : 0.0       ,
-                                                      'EPtot'    : 0.0       ,
-                                                      'ESURF'    : 2.66E-5   ,
-                                                      'Etot'     : 0.0       ,
-                                                      'NB'       : -2.36E-5  ,
-                                                      'VDWAALS'  : 1.85E-3   ,
+                                                      
+                                                      'info'       : ''' 
+==============================================================================
+Dep. Variable:                      y   R-squared:                       0.483
+Model:                            OLS   Adj. R-squared:                  0.483
+Method:                 Least Squares   F-statistic:                     1371.
+Date:                Mon, 07 Nov 2016   Prob (F-statistic):               0.00
+Time:                        19:32:29   Log-Likelihood:                -267.19
+No. Observations:               13209   AIC:                             554.4
+Df Residuals:                   13199   BIC:                             629.3
+Df Model:                           9                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [95.0% Conf. Int.]
+------------------------------------------------------------------------------
+const          1.3119      0.017     75.956      0.000         1.278     1.346
+SIZE          -0.0125      0.001    -13.212      0.000        -0.014    -0.011
+CONTACT        0.0070      0.000     56.197      0.000         0.007     0.007
+AB_ENERGY      0.3745      0.033     11.182      0.000         0.309     0.440
+DIHED         -0.0003   5.22e-05     -6.478      0.000        -0.000    -0.000
+EEL        -6.804e-05   7.37e-06     -9.236      0.000     -8.25e-05 -5.36e-05         
+EELEC         -0.0002   1.04e-05    -15.772      0.000        -0.000    -0.000
+EGB           -0.0001   1.01e-05    -13.817      0.000        -0.000    -0.000
+ESURF          0.0317      0.001     60.724      0.000         0.031     0.033
+VDWAALS        0.0479      0.003     15.507      0.000         0.042     0.054
+==============================================================================
+Omnibus:                      318.266   Durbin-Watson:                   1.694
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              581.881
+Skew:                          -0.189   Prob(JB):                    4.43e-127
+Kurtosis:                       3.957   Cond. No.                     9.68e+04
+==============================================================================
+                                                                           ''' , 
+                                                      
+                                                      'CONSTANT'   :     1.3119,
+                                                      'ANGLE'      :          0,
+                                                      'BOND'       :          0,
+                                                      'DIHED'      :    -0.0003,
+                                                      'EEL'        : -6.804E-05,
+                                                      'EELEC'      :    -0.0002,
+                                                      'EGB'        :    -0.0001,
+                                                      'EKtot'      :          0,
+                                                      'EPtot'      :          0,
+                                                      'ESURF'      :     0.0317,
+                                                      'Etot'       :          0,
+                                                      'NB'         :          0,
+                                                      'VDWAALS'    :     0.0479,
+                                                      'SIZE'       :    -0.0125,
+                                                      
+                                                      
                                                       
                                                       'cut'        : 999.0     ,
                                                       'igb'        : 1         ,
@@ -272,14 +309,13 @@ class Molecule(Atom       ,
                                                       'rgbmax'     : 999.00000 ,
                                                       'surften'    : 0.010     ,
                                                       
-                                                      'CONTACT'    : 0.0       ,
-                                                      'R_contact'  : self.R_contact      ,
+                                                      'CONTACT'    :     0.0070,
+                                                      'R_contact'  : self.R_contact,
                                                       
-                                                      'AB'       : 0.0       ,
-                                                      'R_cutoff'   : 999.0     ,
+                                                      'AB'         :     0.3745,
+                                                      'R_cutoff'   :      999.0,
                                                   
                                                       }
-
                                          }
                                          
         self.energy_model_parameters = self.default_energy_model_setup['amber']

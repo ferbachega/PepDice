@@ -15,34 +15,6 @@ from pprint import pprint
 ## ---------------------------------
 
 
-'''
-def compute_vdw_ij (atom_i, atom_j):
-    """ Function doc """ #-23085572255.9
-    A    = 4
-    B    = 1
-    R_ab = distance_ab (atom_i, atom_j)
-    E_ab = A*((R_ab**-12) - B*(atom_i.epsilon*atom_j.epsilon)*(R_ab**-6))
-    return E_ab
-
-
-def compute_AB_vdw_ij (atom_i, atom_j):
-    """ Function doc """ #-23085572255.9
-    
-    A    = 1
-    B    = 1
-    
-    if atom_i.AB + atom_j.AB == 'AA':   # apolares
-        C = 1
-    elif atom_i.AB + atom_j.AB == 'BB': # polares
-        C = 0.5
-    else:
-        C = -0.5
-    
-    R_ab = distance_ab (atom_i, atom_j)
-    E_ab = A*((R_ab**-12) - C*(R_ab**-6))
-    return E_ab
-'''
-
 def compute_ij_CalphaModel_vdw (atom_i, atom_j, R_ab = False):
     """ Function doc """ #-23085572255.9
     A    = 100000
@@ -70,21 +42,7 @@ def compute_ij_CalphaModel_vdw (atom_i, atom_j, R_ab = False):
     #E_ab = A*((R_ab**-12) - B*(atom_i.epsilon * atom_j. epsilon)*(R_ab**-6))
     
     return E_ab
-    
-    
-    #A    = 1
-    #B    = 1
-    #
-    #if atom_i.AB + atom_j.AB == 'AA':   # apolares
-    #    C = 1
-    #elif atom_i.AB + atom_j.AB == 'BB': # polares
-    #    C = 0.5
-    #else:
-    #    C = -0.5
-    #
-    #R_ab = distance_ab (atom_i, atom_j)
-    #E_ab = A*((R_ab**-12) - C*(R_ab**-6))
-    #return E_ab
+
 
 
 
@@ -190,7 +148,6 @@ def compute_AB_energy (molecule = None):
             #print index_i, name_i, hydropathic_table[name_i], atom_i.pos , index_j, name_j, hydropathic_table[name_j], atom_j.pos, 'distance_ij: ', distance_ab (atom_i, atom_j), compute_ij_CalphaModel_vdw (atom_i, atom_j, R_ab)
             
             #print '%4i %5s %10.6f %4i %5s %10.6f %10.4f %20.15f' %(index_i, name_i, hydropathic_table[name_i],  index_j, name_j, hydropathic_table[name_j], distance_ab (atom_i, atom_j), E)
-            
             total_E += E
             
             
@@ -199,44 +156,8 @@ def compute_AB_energy (molecule = None):
 
     
     for distance in range(1,500):
-        #print distance
         pass
-        #print index_i, name_i,  index_j, name_j, distance*0.01, compute_ij_CalphaModel_vdw (atom_i, atom_j, distance*0.01)
- 
-    
-
-    
-    #for residue_i in molecule.residues:
-    #    for atom_i in residue_i.atoms:
-    #        
-    #        if atom_i.name == 'CA':
-    #            
-    #            if residue_i.name in ['ALA','ILE','LEU','MET','VAL','PRO','GLY','CYS']:
-    #                atom_i.AB = 'A'
-    #            else:
-    #                atom_i.AB = 'B'
-    #            
-    #            #------------------- atom j ---------------------#
-    #            for residue_j in molecule.residues:
-    #                if residue_j.id == residue_i:
-    #                    pass
-    #                
-    #                else:
-    #                    for atom_j in  residue_j.atoms:
-    #                        
-    #                        if atom_i.id == atom_j.id:
-    #                            pass
-    #                        
-    #                        else:
-    #                            if atom_j.name == 'CA':
-    #                                if residue_j.name in ['ALA','ILE','LEU','MET','VAL','PRO','GLY','CYS']:
-    #                                    atom_j.AB = 'A'
-    #                                else:
-    #                                    atom_j.AB = 'B'
-    #                                vdw =  compute_AB_vdw_ij (atom_i, atom_j)
-    #                                total_E += vdw
-    #                                #print residue_i.id, residue_i.name,atom_i.name,  residue_j.id, residue_j.name, atom_j.name
-    
+   
     return total_E
 
 
@@ -375,11 +296,9 @@ class Energy:
             C_energy = self.compute_CONTACT_energy(log = log, cutoff = self.energy_model_parameters['R_contact'])
             energy_list['CONTACT']  = C_energy
 
-
         if self.energy_model == 'amber':        
             energy, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
-  
-        
+          
         if self.energy_model == 'Calpha':
             
             #-----------------------------------------------------------------
@@ -424,21 +343,34 @@ class Energy:
             for component in energy_list:
                 energy += energy_list[component]
                 
+        
         if self.energy_model == 'LSF':
             if AMBER:
                 energy_amber, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
             else:
                 pass  
-                          
+            
+            AB_energy = compute_AB_energy (molecule = self)
+            energy_list['AB_ENERGY'] = AB_energy * self.energy_model_parameters['AB'    ]
+  
+            C_energy = self.compute_CONTACT_energy(log = log, cutoff = self.energy_model_parameters['R_contact'])
+            energy_list['CONTACT']  = C_energy *self.energy_model_parameters['CONTACT']
+            
             #energy = 1.15 - 1.96E-5*energy_list['EEL'] -2.36E-5*energy_list['NB'] - 4.4E-4 *energy_list['DIHED'] + 1.85E-3*energy_list['VDWAALS'] - 7.5E-5*energy_list['EGB'] + 2.66E-5*energy_list['ESURF']
             #energy = energy**(10.0/3)
             #print energy 0.189230372051
             
-            energy = 1.15
+            energy = self.energy_model_parameters['CONSTANT']
+            
+            
             for component in energy_list:
+                print component,  energy_list[component]
                 energy += energy_list[component]
             
-            energy = energy**(10.0/3)
+            
+            energy += len(self.residues)*self.energy_model_parameters['SIZE']
+            #energy = energy**(10.0/3)
+
 
         if log:
             text = '''

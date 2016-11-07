@@ -37,14 +37,16 @@ system.import_AMBER_parameters (top      = os.path.join(PEPDICE_EXAMPLES , 'LABI
 
 
 
-energy_models = ['amber', 'Contact', 'Calpha', 'LSF']
+energy_models = ['amber', 'Contact', 'Calpha', 'LSF', 'FULL']
 
 
 for model in energy_models:
     system.set_energy_model(model)
-    
-    if model == 'Contact':
-        system.import_CMAP(cmap = cmap)
+    #system.energy_model_parameters['saltcon'] = 1.0
+    #system.energy_model_parameters['surften'] = 1.0
+    #system.energy_model_parameters['igb'] = 1
+    #if model == 'Contact':
+    system.import_CMAP(cmap = cmap)
     
     system.Status()
     system.energy( log =True)

@@ -173,8 +173,20 @@ for folder in folders:
             try:    
                 cutoff   = 6.0
                 contacts = []
+                
+                
+                #saltcon = 0.00
+                #EGBs = []
+                #
+                #for i in range(0, 6):
+                #    
+                #    system.energy_model_parameters['saltcon'] = saltcon
+                #    energies = system.energy(return_list = True)
+                #    saltcon += 0.1
+                #    EGBs.append(energies['EGB'])
+                
                 energies = system.energy(return_list = True)
-
+                
                 for i in range (0, 6):  
                     cmap = CMAP(pdb = 'native_A_AMBER_minimized.pdb', cutoff = cutoff, log = False)
                     system.import_CMAP(cmap = cmap)
@@ -210,35 +222,7 @@ for folder in folders:
                                                                                                                                                                 energies['VDWAALS'  ],
                                                                                                                                                                 )
 
-                
-                
-                
-                #text = '%-20s %-10s %6s %6d %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f' %( pdb                   ,
-                #text = '%-20s %-10s %6s %6d %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f' %( pdb                   ,
-                #
-                #                                                                                                             folder                ,
-                #                                                                                                             RMSD_list[pdb]        ,
-                #                                                                                                             len(system.residues)  , 
-                #                                                                                                              energies['AB_ENERGY'],
-                #                                                                                                              
-                #                                                                                                              #energies['CONTACT'  ],
-                #                                                                                                              contacts[0],
-                #                                                                                                              contacts[1],
-                #                                                                                                              contacts[2],
-                #                                                                                                              contacts[3],
-                #                                                                                                              contacts[4],
-                #                                                                                                              contacts[5],
-                #                                                                                                              
-                #                                                                                                              #energies['ANGLE'    ],
-                #                                                                                                              #energies['BOND'     ],
-                #                                                                                                              #energies['DIHED'    ],
-                #                                                                                                              #energies['EEL'      ],
-                #                                                                                                              #energies['EELEC'    ],
-                #                                                                                                              #energies['EGB'      ],
-                #                                                                                                              #energies['ESURF'    ],
-                #                                                                                                              #energies['NB'       ],
-                #                                                                                                              #energies['VDWAALS'  ],
-                #                                                                                                              )
+    
                 textlines.append(text)
                 
                 logfile.writelines(text)
