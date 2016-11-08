@@ -91,12 +91,13 @@ class Molecule(Atom       ,
 
     def __init__(self, id=0, name = 'protein'):
         
-        self.energy_model  = 'amber'
+        self.energy_model  = 'FULL'
         
         self.energy_models = {'amber'  ,
                               'Calpha' ,
                               'Contact',
-                              'LSF'    ,
+                              'LABIO'    ,
+                              'iLABIO' ,
                               'FULL'   }
         
         self.id       = id
@@ -161,6 +162,7 @@ class Molecule(Atom       ,
 
                                          'FULL':{
                                                   #         AMBER
+                                                  'CONSTANT'   : 0.0           , 
                                                   'ANGLE'      : 1.0           ,
                                                   'BOND'       : 1.0           ,
                                                   'DIHED'      : 1.0           ,
@@ -251,7 +253,7 @@ class Molecule(Atom       ,
                                           
                                           # energy = 1.15 -1.96E-5*energy_list['EEL'] -2.36E-5*energy_list['NB'] - 4.4E-4 *energy_list['DIHED'] + 1.85E-3*energy_list['VDWAALS'] - 7.5E-5*energy_list['EGB'] + 2.66E-5*energy_list['ESURF']
 
-                                          'LSF'    :  {
+                                          'LABIO'    :  {
                                                       
                                                       'info'       : ''' 
 ==============================================================================
@@ -283,22 +285,176 @@ Prob(Omnibus):                  0.000   Jarque-Bera (JB):              581.881
 Skew:                          -0.189   Prob(JB):                    4.43e-127
 Kurtosis:                       3.957   Cond. No.                     9.68e+04
 ==============================================================================
+                                                                           
+                                                                           
+                                                                           
+Number of Observations:         11210
+Number of Degrees of Freedom:   13
+
+R-squared:         0.5545
+Adj R-squared:     0.5540
+
+Rmse:             22.9843
+
+F-stat (12, 11197):  1161.3723, p-value:     0.0000
+
+Degrees of Freedom: model 12, resid 11197
+
+-----------------------Summary of Estimated Coefficients------------------------
+      Variable       Coef    Std Err     t-stat    p-value    CI 2.5%   CI 97.5%
+--------------------------------------------------------------------------------
+          SIZE    -0.5740     0.1207      -4.75     0.0000    -0.8106    -0.3374
+     contacts0     0.7282     0.0137      53.31     0.0000     0.7015     0.7550
+     AB_ENERGY    32.4391     3.5122       9.24     0.0000    25.5552    39.3230
+         ANGLE    -0.0027     0.0002     -12.28     0.0000    -0.0031    -0.0023
+          BOND     0.0207     0.0051       4.03     0.0001     0.0106     0.0308
+--------------------------------------------------------------------------------
+         DIHED     0.0088     0.0057       1.55     0.1222    -0.0024     0.0199
+           EEL    -0.0131     0.0009     -14.27     0.0000    -0.0149    -0.0113
+         EELEC    -0.0214     0.0012     -17.71     0.0000    -0.0238    -0.0190
+           EGB    -0.0204     0.0012     -16.34     0.0000    -0.0228    -0.0179
+         ESURF     2.6773     0.0574      46.68     0.0000     2.5649     2.7897
+--------------------------------------------------------------------------------
+            NB    -0.1583     0.0129     -12.27     0.0000    -0.1836    -0.1330
+       VDWAALS     0.0708     0.0052      13.63     0.0000     0.0606     0.0809
+     intercept   133.7090     1.7973      74.40     0.0000   130.1863   137.2316
+---------------------------------End of Summary---------------------------------
+
+
+
+
+
+
+
+Number of Observations:         11210
+Number of Degrees of Freedom:   13
+
+R-squared:         0.4934
+Adj R-squared:     0.4928
+
+Rmse:              2.3882
+
+F-stat (12, 11197):   908.7187, p-value:     0.0000
+
+Degrees of Freedom: model 12, resid 11197
+
+-----------------------Summary of Estimated Coefficients------------------------
+      Variable       Coef    Std Err     t-stat    p-value    CI 2.5%   CI 97.5%
+--------------------------------------------------------------------------------
+          SIZE    -0.0610     0.0125      -4.86     0.0000    -0.0856    -0.0364
+     contacts0     0.0683     0.0014      48.13     0.0000     0.0655     0.0711
+     AB_ENERGY     3.2782     0.3649       8.98     0.0000     2.5629     3.9934
+         ANGLE    -0.0003     0.0000     -11.83     0.0000    -0.0003    -0.0002
+          BOND     0.0032     0.0005       5.89     0.0000     0.0021     0.0042
+         DIHED     0.0008     0.0006       1.28     0.2018    -0.0004     0.0019
+           EEL    -0.0009     0.0001      -9.84     0.0000    -0.0011    -0.0008
+         EELEC    -0.0017     0.0001     -13.16     0.0000    -0.0019    -0.0014
+           EGB    -0.0016     0.0001     -12.39     0.0000    -0.0019    -0.0014
+         ESURF     0.2572     0.0060      43.15     0.0000     0.2455     0.2688
+            NB    -0.0132     0.0013      -9.85     0.0000    -0.0158    -0.0106
+       VDWAALS     0.0038     0.0005       7.06     0.0000     0.0028     0.0049
+     intercept     3.4256     0.1867      18.34     0.0000     3.0595     3.7916
+---------------------------------End of Summary---------------------------------
+
+                                                                           
+-------------------------Summary of Regression Analysis-------------------------
+
+Formula: Y ~ <contacts0> + <AB_ENERGY> + <ANGLE> + <BOND> + <DIHED> + <EEL>
+             + <EELEC> + <EGB> + <ESURF> + <NB> + <VDWAALS> + <intercept>
+
+Number of Observations:         11210
+Number of Degrees of Freedom:   12
+
+R-squared:         0.4923
+Adj R-squared:     0.4918
+
+Rmse:              2.3906
+
+F-stat (11, 11198):   987.1860, p-value:     0.0000
+
+Degrees of Freedom: model 11, resid 11198
+
+-----------------------Summary of Estimated Coefficients------------------------
+      Variable       Coef    Std Err     t-stat    p-value    CI 2.5%   CI 97.5%
+--------------------------------------------------------------------------------
+     contacts0     0.0694     0.0014      49.45     0.0000     0.0666     0.0721
+     AB_ENERGY     3.9580     0.3374      11.73     0.0000     3.2967     4.6193
+         ANGLE    -0.0003     0.0000     -12.35     0.0000    -0.0003    -0.0002
+          BOND     0.0030     0.0005       5.69     0.0000     0.0020     0.0041
+         DIHED    -0.0010     0.0005      -2.08     0.0378    -0.0019    -0.0001
+           EEL    -0.0010     0.0001     -10.06     0.0000    -0.0011    -0.0008
+         EELEC    -0.0015     0.0001     -12.44     0.0000    -0.0018    -0.0013
+           EGB    -0.0016     0.0001     -12.04     0.0000    -0.0018    -0.0013
+         ESURF     0.2464     0.0055      44.50     0.0000     0.2355     0.2572
+            NB    -0.0170     0.0011     -15.62     0.0000    -0.0192    -0.0149
+       VDWAALS     0.0046     0.0005       8.99     0.0000     0.0036     0.0056
+     intercept     3.4966     0.1864      18.76     0.0000     3.1314     3.8619
+---------------------------------End of Summary---------------------------------
+
+
+
+
+-------------------------Summary of Regression Analysis-------------------------
+
+Formula: Y ~ <contacts0> + <AB_ENERGY> + <ANGLE> + <BOND> + <DIHED> + <EEL>
+             + <EELEC> + <EGB> + <ESURF> + <NB> + <VDWAALS> + <intercept>
+
+Number of Observations:         11210
+Number of Degrees of Freedom:   12
+
+R-squared:         0.5536
+Adj R-squared:     0.5532
+
+Rmse:              0.2301
+
+F-stat (11, 11198):  1262.4604, p-value:     0.0000
+
+Degrees of Freedom: model 11, resid 11198
+
+-----------------------Summary of Estimated Coefficients------------------------
+      Variable       Coef    Std Err     t-stat    p-value    CI 2.5%   CI 97.5%
+--------------------------------------------------------------------------------
+     contacts0     0.0074     0.0001      54.68     0.0000     0.0071     0.0076
+     AB_ENERGY     0.3884     0.0325      11.96     0.0000     0.3247     0.4520
+         ANGLE    -0.0000     0.0000     -12.80     0.0000    -0.0000    -0.0000
+          BOND     0.0002     0.0001       3.83     0.0001     0.0001     0.0003
+         DIHED    -0.0001     0.0000      -1.66     0.0969    -0.0002     0.0000
+           EEL    -0.0001     0.0000     -14.49     0.0000    -0.0002    -0.0001
+         EELEC    -0.0002     0.0000     -17.10     0.0000    -0.0002    -0.0002
+           EGB    -0.0002     0.0000     -16.00     0.0000    -0.0002    -0.0002
+         ESURF     0.0258     0.0005      48.34     0.0000     0.0247     0.0268
+            NB    -0.0019     0.0001     -18.51     0.0000    -0.0021    -0.0017
+       VDWAALS     0.0008     0.0000      15.85     0.0000     0.0007     0.0009
+     intercept     1.3438     0.0179      74.93     0.0000     1.3086     1.3789
+---------------------------------End of Summary---------------------------------
+
                                                                            ''' , 
-                                                      
-                                                      'CONSTANT'   :     1.3119,
-                                                      'ANGLE'      :          0,
-                                                      'BOND'       :          0,
-                                                      'DIHED'      :    -0.0003,
-                                                      'EEL'        : -6.804E-05,
-                                                      'EELEC'      :    -0.0002,
-                                                      'EGB'        :    -0.0001,
+                                                           'SIZE'  :     0.0,
+                                                        'CONTACT'  :  0.0074,
+                                                             'AB'  :  0.3884,
+                                                          'ANGLE'  : -0.0000,
+                                                           'BOND'  :  0.0002,
+                                                          'DIHED'  : -0.0001,
+                                                            'EEL'  : -0.0001,
+                                                          'EELEC'  : -0.0002,
+                                                            'EGB'  : -0.0002,
+                                                          'ESURF'  :  0.0258,
+                                                             'NB'  : -0.0019,
+                                                        'VDWAALS'  :  0.0008,
+                                                       'CONSTANT'  :  1.3438,
+
+                                                      #'CONSTANT'   :     1.3119,
+                                                      #'DIHED'      :    -0.0003,
+                                                      #'EEL'        : -6.804E-05,
+                                                      #'EELEC'      :    -0.0002,
+                                                      #'EGB'        :    -0.0001,
                                                       'EKtot'      :          0,
                                                       'EPtot'      :          0,
-                                                      'ESURF'      :     0.0317,
+                                                      #'ESURF'      :     0.0317,
                                                       'Etot'       :          0,
-                                                      'NB'         :          0,
-                                                      'VDWAALS'    :     0.0479,
-                                                      'SIZE'       :    -0.0125,
+                                                      #'NB'         :          0,
+                                                      #'VDWAALS'    :     0.0479,
+                                                      #'SIZE'       :    -0.0125,
                                                       
                                                       
                                                       
@@ -309,14 +465,66 @@ Kurtosis:                       3.957   Cond. No.                     9.68e+04
                                                       'rgbmax'     : 999.00000 ,
                                                       'surften'    : 0.010     ,
                                                       
-                                                      'CONTACT'    :     0.0070,
+                                                      'R_contact'  : self.R_contact,
+                                                      'R_cutoff'   :      999.0,
+                                                      },
+                                          
+                                          
+                                          'iLABIO'    :  {
+                                                      
+                                                      'info'       : ''' 
+RMSD^0.3 = 1.15-1.96E-5 EEL-2.36 E-5 NB+4.4E-4  DIEH+1.85E-3 VDWAALS-7.5E⁻5  EGB +2.66  E-5  ESURF
+                                                          
+                                                          ''' , 
+                                                      
+                                                      'CONSTANT' :     1.15  ,
+                                                      'SIZE'     :    -0.0076,
+                                                      'DIHED'    :    +4.4E-4,
+                                                      'EEL'      :   -1.96E-5,
+                                                      'EELEC'    :    -0.0002,
+                                                      'EGB'      :    -7.5E-5,
+                                                      'ESURF'    :    2.66E-5,
+                                                      'NB'       :   -2.36E-5,
+                                                      'VDWAALS'  :    1.85E-3,
+
+
+                                                      #'CONSTANT'   :     1.3119,
+                                                      'ANGLE'      :          0,
+                                                      'BOND'       :          0,
+                                                      #'DIHED'      :    -0.0003,
+                                                      #'EEL'        : -6.804E-05,
+                                                      #'EELEC'      :    -0.0002,
+                                                      #'EGB'        :    -0.0001,
+                                                      'EKtot'      :          0,
+                                                      'EPtot'      :          0,
+                                                      #'ESURF'      :     0.0317,
+                                                      'Etot'       :          0,
+                                                      #'NB'         :          0,
+                                                      #'VDWAALS'    :     0.0479,
+                                                      #'SIZE'       :    -0.0125,
+                                                      
+                                                      
+                                                      
+                                                      'cut'        : 999.0     ,
+                                                      'igb'        : 1         ,
+                                                      'saltcon'    : 0.2       ,
+                                                      'gbsa'       : 1         ,
+                                                      'rgbmax'     : 999.00000 ,
+                                                      'surften'    : 0.010     ,
+                                                      
+                                                      'CONTACT'  :       0.000,
                                                       'R_contact'  : self.R_contact,
                                                       
-                                                      'AB'         :     0.3745,
+                                                      'AB'         :     0.0   ,
                                                       'R_cutoff'   :      999.0,
                                                   
                                                       }
                                          }
+                                                      
+
+                                     
+                                     
+                                     
                                          
         self.energy_model_parameters = self.default_energy_model_setup['amber']
 
@@ -343,6 +551,7 @@ Kurtosis:                       3.957   Cond. No.                     9.68e+04
                  'Y' : 'TYR',
                  'V' : 'VAL'
                  }
+    
     def set_energy_model (self, energy_model = 'amber'):
         """ Function doc """
 
@@ -358,7 +567,7 @@ Kurtosis:                       3.957   Cond. No.                     9.68e+04
     
     
     
-    def build_peptide_from_sequence_AMBER (self, sequence = None, force_field = 'ff03ua', overwrite   = True  , NCTER = False):
+    def build_peptide_from_sequence_AMBER (self, sequence = None, force_field = 'ff03ua', overwrite   = True  , NCTER = True):
         """ 
         Function doc 
         source leaprc.ff03ua
@@ -467,7 +676,7 @@ Kurtosis:                       3.957   Cond. No.                     9.68e+04
             #self.build_peptide_from_sequence_AMBER(sequence    = sequence   , 
             #                                       force_field = force_field, 
             #                                       overwrite   = overwrite  )
-        if _type == 'LSF':
+        if _type == 'LABIO':
             pass
             #self.build_peptide_from_sequence_AMBER(sequence    = sequence   , 
             #                                       force_field = force_field, 
@@ -746,10 +955,10 @@ Number of Residues     =  %10d   Number of Atoms      =  %10d
 -------------------------------------------------------------------------------       
                         Summary for Energy Model "%s"
 -------------------------------------------------------------------------------       
-ANGLE          =  %19.10f    ESURF           =  %19.10f
-DIHED          =  %19.10f    NB              =  %19.10f
-EEL            =  %19.10f    VDWAALS         =  %19.10f
-EELEC          =  %19.10f    EGB'            =  %19.10f 
+w_ANGLE       =  %19.10f    w_ESURF         =  %19.10f
+w_DIHED       =  %19.10f    w_NB            =  %19.10f
+w_EEL         =  %19.10f    w_VDWAALS       =  %19.10f
+w_EELEC       =  %19.10f    w_EGB           =  %19.10f 
 -------------------------------------------------------------------------------       
         ''' % ( self.energy_model, 
             self.energy_model_parameters['ANGLE'  ],

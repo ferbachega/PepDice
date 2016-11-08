@@ -173,7 +173,7 @@ def monte_carlo(molecule            = None                   ,
     #                  Thermalization                 #
     #-------------------------------------------------#
     
-    Temperature_Handling = 'constast'
+    Temperature_Handling = 'constant'
     
     if simulated_annealing == 'exp':
         
@@ -290,15 +290,15 @@ def monte_carlo(molecule            = None                   ,
             #                 FRAGMENTS                    #
             #----------------------------------------------#
             if fragment_rate != 0.0:
-                try:
-                    fragment, fragment_index  = fragment_selection (molecule          = molecule         ,
+                #try:
+                fragment, fragment_index  = fragment_selection (molecule          = molecule         ,
                                                                     previous_fragment = previous_fragment,
                                                                     fragment_rate     = fragment_rate    ,
                                                                     random            = random           )
-                except:
-                    pass
-                    print ' - - - fragment_selection failed - - - '
-                    print 'fragment:', fragment
+                #except:
+                #    pass
+                #    print ' - - - fragment_selection failed - - - '
+                #    print 'fragment:', fragment
                 
                 
             
@@ -313,7 +313,12 @@ def monte_carlo(molecule            = None                   ,
                                  sidechain  = fragment_sidechain)
                 
                 #---------------------------------------------------------------
+                
+                #try:
                 energy = molecule.energy(pn = pn)            
+                #except:
+                #    energy = False
+                #print energy
                 
                 if energy:
 
@@ -379,7 +384,8 @@ def monte_carlo(molecule            = None                   ,
                                                               pn = pn              ,
                                                           random = random          ,
                                                               Kb = Kb              )
-
+                        energy = False
+                        
                         if energy:
                             save_XYZ_to_file (molecule, trajectory)
                             previous_energy      = energy

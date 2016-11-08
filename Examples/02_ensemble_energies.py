@@ -346,10 +346,10 @@ system.import_AMBER_parameters (top      = os.path.join(PEPDICE_EXAMPLES , 'LABI
 
 
 
-energy_models = ['amber', 'Contact', 'Calpha', 'LSF']
+energy_models = ['LABIO']
 energies      = [ ]
  
-print '                 decoy                 RMSD                 amber                    Contact                   Calpha                       LSF'
+print '                 decoy                 RMSD                 amber                    Contact                   Calpha                       LABIO'
       #       decoy13_122_A_AMBER_minimized.pdb 8.0900             8953.8127000               335.8717000               374.7391660                 0.4041721
 for decoy in decoys:
     
@@ -360,8 +360,8 @@ for decoy in decoys:
         system.set_energy_model(model)
 
         system.load_PDB_to_system  (filename = os.path.join(folder, decoy))   
-        if model == 'Contact':
-            system.import_CMAP(cmap = cmap)
+        #if model == 'Contact':
+        system.import_CMAP(cmap = cmap)
         
         text += '%25.7f ' %(system.energy())
         

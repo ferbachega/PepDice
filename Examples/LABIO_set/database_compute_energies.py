@@ -45,7 +45,7 @@ folders = [
         '1CSK',
         '1DV0',
         '1E0L',
-        '1E0N',
+        #'1E0N',
         '1EI0',
         '1ERY',
         '1FME',
@@ -69,11 +69,12 @@ folders = [
 
 
 
-text = '%-20s %-10s %6s  %6s %15s ' %('DECOY',
+text = '%-20s %-10s %6s  %6s %14s %14s' %('DECOY',
                                       'PDB',
                                       'RMSD',
                                       'SIZE',
-                                      'energy',)  
+                                      'E_LABIO',
+                                      'E_iLABIO',)  
 
 
 textlines = []
@@ -92,7 +93,7 @@ for folder in folders:
     
     RMSD_list = import_rmsd_from_file ( filein = 'list.txt')
     system = Molecule()
-    system.set_energy_model('LSF')
+    system.set_energy_model('LABIO')
     system.import_AMBER_parameters (top      = folder+'_A_AMBER.top'                ,   
                                     torsions = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )       
     
@@ -108,7 +109,7 @@ for folder in folders:
         else:
             filename =  pdb.replace('.', '_A_AMBER_minimized.')
             system.load_PDB_to_system      (filename = filename)   
-            system.set_energy_model('LSF')
+            
 
             #pprint(RMSD_list)
             
@@ -130,9 +131,12 @@ for folder in folders:
                 #    EGBs.append(energies['EGB'])
                 
                 #energies = system.energy(return_list = True)
-                
+                system.set_energy_model('LABIO')
                 energy = system.energy()
                 
+                system.set_energy_model('iLABIO')
+                energy2 = system.energy()
+
                 #for i in range (0, 6):  
                 #    cmap = CMAP(pdb = 'native_A_AMBER_minimized.pdb', cutoff = cutoff, log = False)
                 #    system.import_CMAP(cmap = cmap)
@@ -144,11 +148,13 @@ for folder in folders:
                 #print contacts
                 
 
-                text = '%-20s %-10s %6s %6d %15.7f ' %( pdb                   ,
+                text = '%-20s %-10s %6s %6d %15.7f %15.7f ' %( pdb                   ,
                                                         folder                ,
                                                         RMSD_list[pdb]        ,
+                                                        
                                                         len(system.residues)  ,
                                                         energy                ,
+                                                        energy2               ,
                                                         )
 
     

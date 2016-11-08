@@ -36,8 +36,15 @@ system.import_AMBER_parameters (top      = os.path.join(PEPDICE_EXAMPLES , 'LABI
                                 torsions = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )   
 
 
+#cmap = CMAP(pdb = os.path.join(PEPDICE_EXAMPLES ,  'Itasser_set/IT1af7__/native_A_AMBER_minimized.pdb'), cutoff = 6.5, log = True)
+#system.load_PDB_to_system      (filename = os.path.join(PEPDICE_EXAMPLES , 'Itasser_set/IT1af7__/native_A_AMBER_minimized.pdb') )
+#system.import_AMBER_parameters (top      = os.path.join(PEPDICE_EXAMPLES , 'Itasser_set/IT1af7__/native_A_AMBER.top') , 
+#                                torsions = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )   
+#
 
-energy_models = ['amber', 'Contact', 'Calpha', 'LSF', 'FULL']
+
+
+energy_models = ['LABIO']#, 'FULL', 'iLABIO']
 
 
 for model in energy_models:

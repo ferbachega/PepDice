@@ -15,156 +15,6 @@ from pprint import pprint
 ## ---------------------------------
 
 
-def compute_ij_CalphaModel_vdw (atom_i, atom_j, R_ab = False):
-    """ Function doc """ #-23085572255.9
-    A    = 100000
-    B    = 1
-    
-    if atom_i.AB + atom_j.AB == 'AA':   # apolares
-        C = 1
-    elif atom_i.AB + atom_j.AB == 'BB': # polares
-        C = 0.5
-    else:
-        C = -0.5
-
-    
-    #B = ((atom_i.hydropathic * atom_j.hydropathic))  
-    
-    
-    sigma_ab = (atom_i.sigma * atom_j.sigma)**0.5
-    
-    #E_ab = 10*(((sigma_ab**-12)/(R_ab**12)) - B*((sigma_ab**-6)/(R_ab**6)))
-    
-    
-    E_ab = A*( (sigma_ab/R_ab)**12 -  C*(sigma_ab/R_ab)**6)
-    
-    
-    #E_ab = A*((R_ab**-12) - B*(atom_i.epsilon * atom_j. epsilon)*(R_ab**-6))
-    
-    return E_ab
-
-
-
-
-def compute_AB_energy (molecule = None):
-    '''
-    ARG =  -4.5
-    LYS =  -3.9
-    ASN =  -3.5
-    ASP =  -3.5
-    GLU =  -3.5
-    GLN =  -3.5
-    HIS =  -3.2
-    PRO =  -1.6
-    TYR =  -1.3
-    TRP =  -0.9
-    SER =  -0.8
-    THR =  -0.7
-    GLY =  -0.4
-    ALA =   1.8
-    MET =   1.9
-    CYS =   2.5
-    PHE =   2.8
-    LEU =   3.8
-    VAL =   4.2
-    ILE =   4.5
-    
-    Kyte J, Doolittle RF (May 1982). "A simple method for displaying the hydropathic character of a protein". 
-    Journal of Molecular Biology.157.
-    '''
-    hydropathic_table = {
-                        'ARG' : -4.5 / 4.5, #-4.5,
-                        'LYS' : -3.9 / 4.5, #-3.9,
-                        'ASN' : -3.5 / 4.5, #-3.5,
-                        'ASP' : -3.5 / 4.5, #-3.5,
-                        'GLU' : -3.5 / 4.5, #-3.5,
-                        'GLN' : -3.5 / 4.5, #-3.5,
-                        'HIS' : -3.2 / 4.5, #-3.2,
-                        'HIE' : -3.2 / 4.5, #-3.2,
-                        'PRO' : -1.6 / 4.5, #-1.6,
-                        'TYR' : -1.3 / 4.5, #-1.3,
-                        'TRP' : -0.9 / 4.5, #-0.9,
-                        'SER' : -0.8 / 4.5, #-0.8,
-                        'THR' : -0.7 / 4.5, #-0.7,
-                        'GLY' : -0.4 / 4.5, #-0.4,
-                        'ALA' :  1.8 / 4.5, # 1.8,
-                        'MET' :  1.9 / 4.5, # 1.9,
-                        'CYS' :  2.5 / 4.5, # 2.5,
-                        'PHE' :  2.8 / 4.5, # 2.8,
-                        'LEU' :  3.8 / 4.5, # 3.8,
-                        'VAL' :  4.2 / 4.5, # 4.2,
-                        'ILE' :  4.5 / 4.5, # 4.5,
-                        }
-
-
-    hydropathic_table_AB = {
-                        'ARG' : 'B', #-4.5,
-                        'LYS' : 'B', #-3.9,
-                        'ASN' : 'B', #-3.5,
-                        'ASP' : 'B', #-3.5,
-                        'GLU' : 'B', #-3.5,
-                        'GLN' : 'B', #-3.5,
-                        'HIS' : 'B', #-3.2,
-                        'HIE' : 'B', #-3.2,
-
-                        'PRO' : 'B', #-1.6,
-                        'TYR' : 'B', #-1.3,
-                        'TRP' : 'B', #-0.9,
-                        'SER' : 'B', #-0.8,
-                        'THR' : 'B', #-0.7,
-                        'GLY' : 'B', #-0.4,
-                        'ALA' : 'A', # 1.8,
-                        'MET' : 'A', # 1.9,
-                        'CYS' : 'A', # 2.5,
-                        'PHE' : 'A', # 2.8,
-                        'LEU' : 'A', # 3.8,
-                        'VAL' : 'A', # 4.2,
-                        'ILE' : 'A', # 4.5,
-                        }
-
-    total_E = 0
-
-    atom_i = None
-    atom_J = None
-
-    for index_i in range(0, len(molecule.residues)):
-        for index_j in range(index_i+2, len(molecule.residues)):
-            
-            name_i = molecule.residues[index_i].name
-            for atom in molecule.residues[index_i].atoms:
-                if atom.name == 'CA':
-                    atom_i    = atom  
-                    atom_i.hydropathic = hydropathic_table[name_i]
-                    atom_i.AB          = hydropathic_table_AB[name_i]
-            name_j = molecule.residues[index_j].name
-            for atom in molecule.residues[index_j].atoms:
-                if atom.name == 'CA':
-                    atom_j = atom  
-                    atom_j.hydropathic = hydropathic_table[name_j]
-                    atom_j.AB          = hydropathic_table_AB[name_j]
-            
-            R_ab = distance_ab (atom_i, atom_j)
-            E    = compute_ij_CalphaModel_vdw (atom_i, atom_j, R_ab)
-            #print index_i, name_i, hydropathic_table[name_i], atom_i.pos , index_j, name_j, hydropathic_table[name_j], atom_j.pos, 'distance_ij: ', distance_ab (atom_i, atom_j), compute_ij_CalphaModel_vdw (atom_i, atom_j, R_ab)
-            
-            #print '%4i %5s %10.6f %4i %5s %10.6f %10.4f %20.15f' %(index_i, name_i, hydropathic_table[name_i],  index_j, name_j, hydropathic_table[name_j], distance_ab (atom_i, atom_j), E)
-            total_E += E
-            
-            
-    atom_i.sigma = 3.8
-    atom_j.sigma = 3.8
-
-    
-    for distance in range(1,500):
-        pass
-   
-    return total_E
-
-
-
-    
-
-
 
 class Energy:
     """ Class doc """
@@ -173,7 +23,141 @@ class Energy:
         """ Class initialiser """
         pass
 
+    def compute_atomi_atomj_AB_energy (self, atom_i, atom_j, R_ab = False):
+        """ Function doc """ #-23085572255.9
+        A    = 100000
+        B    = 1
+        
+        if atom_i.AB + atom_j.AB == 'AA':   # apolares
+            C = 1
+        elif atom_i.AB + atom_j.AB == 'BB': # polares
+            C = 0.5
+        else:
+            C = -0.5
+    
+        
 
+        sigma_ab = (atom_i.sigma * atom_j.sigma)**0.5
+        E_ab = A*( (sigma_ab/R_ab)**12 -  C*(sigma_ab/R_ab)**6)
+        return E_ab
+
+
+    def compute_AB_energy (self, cutoff = 999):
+        """ Function doc """
+        '''
+        ARG =  -4.5
+        LYS =  -3.9
+        ASN =  -3.5
+        ASP =  -3.5
+        GLU =  -3.5
+        GLN =  -3.5
+        HIS =  -3.2
+        PRO =  -1.6
+        TYR =  -1.3
+        TRP =  -0.9
+        SER =  -0.8
+        THR =  -0.7
+        GLY =  -0.4
+        ALA =   1.8
+        MET =   1.9
+        CYS =   2.5
+        PHE =   2.8
+        LEU =   3.8
+        VAL =   4.2
+        ILE =   4.5
+        
+        Kyte J, Doolittle RF (May 1982). "A simple method for displaying the hydropathic character of a protein". 
+        Journal of Molecular Biology.157.
+        '''
+        hydropathic_table = {
+                            'ARG' : -4.5 / 4.5, #-4.5,
+                            'LYS' : -3.9 / 4.5, #-3.9,
+                            'ASN' : -3.5 / 4.5, #-3.5,
+                            'ASP' : -3.5 / 4.5, #-3.5,
+                            'GLU' : -3.5 / 4.5, #-3.5,
+                            'GLN' : -3.5 / 4.5, #-3.5,
+                            'HIS' : -3.2 / 4.5, #-3.2,
+                            'HIE' : -3.2 / 4.5, #-3.2,
+                            'PRO' : -1.6 / 4.5, #-1.6,
+                            'TYR' : -1.3 / 4.5, #-1.3,
+                            'TRP' : -0.9 / 4.5, #-0.9,
+                            'SER' : -0.8 / 4.5, #-0.8,
+                            'THR' : -0.7 / 4.5, #-0.7,
+                            'GLY' : -0.4 / 4.5, #-0.4,
+                            'ALA' :  1.8 / 4.5, # 1.8,
+                            'MET' :  1.9 / 4.5, # 1.9,
+                            'CYS' :  2.5 / 4.5, # 2.5,
+                            'PHE' :  2.8 / 4.5, # 2.8,
+                            'LEU' :  3.8 / 4.5, # 3.8,
+                            'VAL' :  4.2 / 4.5, # 4.2,
+                            'ILE' :  4.5 / 4.5, # 4.5,
+                            }
+
+
+        hydropathic_table_AB = {
+                            'ARG' : 'B', #-4.5,
+                            'LYS' : 'B', #-3.9,
+                            'ASN' : 'B', #-3.5,
+                            'ASP' : 'B', #-3.5,
+                            'GLU' : 'B', #-3.5,
+                            'GLN' : 'B', #-3.5,
+                            'HIS' : 'B', #-3.2,
+                            'HIE' : 'B', #-3.2,
+
+                            'PRO' : 'B', #-1.6,
+                            'TYR' : 'B', #-1.3,
+                            'TRP' : 'B', #-0.9,
+                            'SER' : 'B', #-0.8,
+                            'THR' : 'B', #-0.7,
+                            'GLY' : 'B', #-0.4,
+                            'ALA' : 'A', # 1.8,
+                            'MET' : 'A', # 1.9,
+                            'CYS' : 'A', # 2.5,
+                            'PHE' : 'A', # 2.8,
+                            'LEU' : 'A', # 3.8,
+                            'VAL' : 'A', # 4.2,
+                            'ILE' : 'A', # 4.5,
+                            }
+
+        total_E = 0
+
+        atom_i = None
+        atom_J = None
+
+        for index_i in range(0, len(self.residues)):
+            for index_j in range(index_i+2, len(self.residues)):
+                
+                name_i = self.residues[index_i].name
+                for atom in self.residues[index_i].atoms:
+                    if atom.name == 'CA':
+                        atom_i    = atom  
+                        atom_i.hydropathic = hydropathic_table[name_i]
+                        atom_i.AB          = hydropathic_table_AB[name_i]
+                name_j = self.residues[index_j].name
+                for atom in self.residues[index_j].atoms:
+                    if atom.name == 'CA':
+                        atom_j = atom  
+                        atom_j.hydropathic = hydropathic_table[name_j]
+                        atom_j.AB          = hydropathic_table_AB[name_j]
+                
+                R_ab = distance_ab (atom_i, atom_j)
+                E    = self.compute_atomi_atomj_AB_energy (atom_i, atom_j, R_ab)
+                #print index_i, name_i, hydropathic_table[name_i], atom_i.pos , index_j, name_j, hydropathic_table[name_j], atom_j.pos, 'distance_ij: ', distance_ab (atom_i, atom_j), compute_ij_CalphaModel_vdw (atom_i, atom_j, R_ab)
+                
+                #print '%4i %5s %10.6f %4i %5s %10.6f %10.4f %20.15f' %(index_i, name_i, hydropathic_table[name_i],  index_j, name_j, hydropathic_table[name_j], distance_ab (atom_i, atom_j), E)
+                total_E += E
+                
+                
+        #atom_i.sigma = 3.8
+        #atom_j.sigma = 3.8
+        #
+        #
+        #for distance in range(1,500):
+        #    pass
+       
+        return total_E
+
+    
     def compute_AMBER_energy (self, pn = 1, log = None):
         """ Function doc """
         # transformar numa funcao
@@ -184,27 +168,13 @@ class Energy:
         
         
         energy_list = ParseAMBERLog('SinglePoint'+str(pn)+'.log', log=log)
+
        
-        #energy += energy_list['Etot'   ] * self.energy_model_parameters['Etot'   ]         
-        #energy += energy_list['EKtot'  ] * self.energy_model_parameters['EKtot'  ] 
-        #energy += energy_list['EPtot'  ] * self.energy_model_parameters['EPtot'  ]         
-        #energy += energy_list["ESURF"]       * self.energy_model_parameters["ESURF"]
-        #energy += energy_list["EGB"]         * self.egb
-        #energy += energy_list["EELEC"]       * self.elect
-        energy_list['ANGLE'  ] = energy_list['ANGLE'  ] * self.energy_model_parameters['ANGLE'  ] 
-        energy_list['BOND'   ] = energy_list['BOND'   ] * self.energy_model_parameters['BOND'   ] 
-        energy_list['DIHED'  ] = energy_list['DIHED'  ] * self.energy_model_parameters['DIHED'  ] 
-        energy_list['EEL'    ] = energy_list['EEL'    ] * self.energy_model_parameters['EEL'    ] 
-        energy_list['EELEC'  ] = energy_list['EELEC'  ] * self.energy_model_parameters['EELEC'  ] 
-        energy_list['EGB'    ] = energy_list['EGB'    ] * self.energy_model_parameters['EGB'    ] 
-        energy_list['ESURF'  ] = energy_list['ESURF'  ] * self.energy_model_parameters['ESURF'  ]         
-        energy_list['NB'     ] = energy_list['NB'     ] * self.energy_model_parameters['NB'     ]         
         
         if energy_list["VDWAALS"] == None:
             return None
         else:
-            energy_list['VDWAALS'] = energy_list['VDWAALS'] * self.energy_model_parameters['VDWAALS']                
-        
+            pass
         
         energy = 0
         for energy_conponent in energy_list:
@@ -212,6 +182,7 @@ class Energy:
         
         return energy, energy_list
 
+    
     def compute_CONTACT_energy (self, log = False, cutoff = 6.0):
         """ Function doc """
         energy = 0.0
@@ -260,6 +231,7 @@ class Energy:
         
         return energy
         
+    
     def energy(self, 
                log                       = False, 
                pn                        = 1    ,  #process number # used in multiprocess 
@@ -285,91 +257,147 @@ class Energy:
                        'NB'       : 0.0,
                        'VDWAALS'  : 0.0,}
         
-        if self.energy_model == 'FULL':        
-            energy, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
-  
-            
-            AB_energy = compute_AB_energy (molecule = self)
-            energy_list['AB_ENERGY'] = AB_energy * self.energy_model_parameters['AB'    ]
-  
-
-            C_energy = self.compute_CONTACT_energy(log = log, cutoff = self.energy_model_parameters['R_contact'])
-            energy_list['CONTACT']  = C_energy
-
-        if self.energy_model == 'amber':        
-            energy, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
-          
-        if self.energy_model == 'Calpha':
-            
-            #-----------------------------------------------------------------
-            # getting dihedral energies from amber  - temporary function
-            # this function will be replaced by a empirical energy function 
-            if AMBER:
-                energy_amber, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
-            else:
-                pass
-            #-----------------------------------------------------------------
-                       
-            #energy_list['DIHED']     = energy_list['DIHED']   * self.energy_model_parameters['DIHED'  ]
-            #energy_list['VDWAALS']   = energy_list['VDWAALS'] * self.energy_model_parameters['VDWAALS']
-            #energy_list['EELEC']     = energy_list["EELEC"]   * self.energy_model_parameters['EELEC'  ]
-            
-            
-            AB_energy = compute_AB_energy (molecule = self)
-            energy_list['AB_ENERGY'] = AB_energy * self.energy_model_parameters['AB'    ]
-
-            
-            if self.energy_model_parameters['CONTACT'  ]:
-                energy_list['CONTACT']   = 0
-                pass
-
-            # - - - total energy - - - 
-            energy = 0
-            for energy_conponent in energy_list:
-                energy += energy_list[energy_conponent]
-            # - - - - - - - - - - - - -
-        if self.energy_model == 'Contact':
         
-            if AMBER:
-                energy_amber, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
-            else:
-                pass            
-        
-            C_energy = self.compute_CONTACT_energy(log = log, cutoff = self.energy_model_parameters['R_contact'])
-            energy_list['CONTACT']  = C_energy
+        # AMBER energy
+        #----------------------------------------------------------------------------------------
+        energy, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
+        #----------------------------------------------------------------------------------------
 
-            
-            energy = 0
+        # AB energy 
+        #----------------------------------------------------------------------------------------
+        if self.energy_model_parameters['AB'] != 0.0:
+            energy_list['AB_ENERGY'] = self.compute_AB_energy ()
+            #energy_list['AB_ENERGY'] = energy_list['AB_ENERGY'] * self.energy_model_parameters['AB']
+        #----------------------------------------------------------------------------------------
+
+        # CONTACT energy  
+        #----------------------------------------------------------------------------------------
+        if self.energy_model_parameters['CONTACT'] != 0.0:
+            energy_list['CONTACT'] = self.compute_CONTACT_energy(log = log, cutoff = self.energy_model_parameters['R_contact'])
+        #energy_list['CONTACT'] = energy_list['CONTACT']*self.energy_model_parameters['CONTACT']
+        #----------------------------------------------------------------------------------------
+    
+
+        if self.energy_model == 'FULL':
+
+            energy = self.energy_model_parameters['CONSTANT']
+            # sum of the components
             for component in energy_list:
+                #print component,  energy_list[component]
                 energy += energy_list[component]
-                
-        
-        if self.energy_model == 'LSF':
-            if AMBER:
-                energy_amber, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
-            else:
-                pass  
+
+        if self.energy_model == 'LABIO':
+            # AMBER energy modification
+            #----------------------------------------------------------------------------------------
+            if log:
+                print 'PARAMETER          RAW          Coef.'# %( energy_list['ANGLE'  ] ,  self.energy_model_parameters['ANGLE'  ])
+                print 'ANGLE     = %14.7f %14.7f' %( energy_list['ANGLE'  ] ,  self.energy_model_parameters['ANGLE'  ])
+                print 'BOND      = %14.7f %14.7f' %( energy_list['BOND'   ] ,  self.energy_model_parameters['BOND'   ])
+                print 'DIHED     = %14.7f %14.7f' %( energy_list['DIHED'  ] ,  self.energy_model_parameters['DIHED'  ])
+                print 'EEL       = %14.7f %14.7f' %( energy_list['EEL'    ] ,  self.energy_model_parameters['EEL'    ])
+                print 'EELEC     = %14.7f %14.7f' %( energy_list['EELEC'  ] ,  self.energy_model_parameters['EELEC'  ])
+                print 'EGB       = %14.7f %14.7f' %( energy_list['EGB'    ] ,  self.energy_model_parameters['EGB'    ])
+                print 'ESURF     = %14.7f %14.7f' %( energy_list['ESURF'  ] ,  self.energy_model_parameters['ESURF'  ])        
+                print 'NB        = %14.7f %14.7f' %( energy_list['NB'     ] ,  self.energy_model_parameters['NB'     ])             
+                print 'VDWAALS   = %14.7f %14.7f' %( energy_list['VDWAALS'] ,  self.energy_model_parameters['VDWAALS'])
             
-            AB_energy = compute_AB_energy (molecule = self)
-            energy_list['AB_ENERGY'] = AB_energy * self.energy_model_parameters['AB'    ]
-  
-            C_energy = self.compute_CONTACT_energy(log = log, cutoff = self.energy_model_parameters['R_contact'])
-            energy_list['CONTACT']  = C_energy *self.energy_model_parameters['CONTACT']
+            energy_list['ANGLE'  ] = energy_list['ANGLE'  ] * self.energy_model_parameters['ANGLE'  ] 
+            energy_list['BOND'   ] = energy_list['BOND'   ] * self.energy_model_parameters['BOND'   ] 
+            energy_list['DIHED'  ] = energy_list['DIHED'  ] * self.energy_model_parameters['DIHED'  ] 
+            energy_list['EEL'    ] = energy_list['EEL'    ] * self.energy_model_parameters['EEL'    ] 
+            energy_list['EELEC'  ] = energy_list['EELEC'  ] * self.energy_model_parameters['EELEC'  ] 
+            energy_list['EGB'    ] = energy_list['EGB'    ] * self.energy_model_parameters['EGB'    ] 
+            energy_list['ESURF'  ] = energy_list['ESURF'  ] * self.energy_model_parameters['ESURF'  ]         
+            energy_list['NB'     ] = energy_list['NB'     ] * self.energy_model_parameters['NB'     ]              
+            energy_list['VDWAALS'] = energy_list['VDWAALS'] * self.energy_model_parameters['VDWAALS']                
+            #----------------------------------------------------------------------------------------
             
-            #energy = 1.15 - 1.96E-5*energy_list['EEL'] -2.36E-5*energy_list['NB'] - 4.4E-4 *energy_list['DIHED'] + 1.85E-3*energy_list['VDWAALS'] - 7.5E-5*energy_list['EGB'] + 2.66E-5*energy_list['ESURF']
-            #energy = energy**(10.0/3)
-            #print energy 0.189230372051
             
+            # AB energy modification
+            #----------------------------------------------------------------------------------------
+            if log:
+                print 'AB_ENERGY = %14.7f %14.7f' %( energy_list['AB_ENERGY'] , self.energy_model_parameters['AB'])
+
+            #print 'AB_ENERGY'  , energy_list['AB_ENERGY'] , self.energy_model_parameters['AB']
+            energy_list['AB_ENERGY'] = energy_list['AB_ENERGY'] * self.energy_model_parameters['AB']
+            #----------------------------------------------------------------------------------------
+            
+            
+            # CONTACT energy modification 
+            #----------------------------------------------------------------------------------------
+            if log:
+                print 'CONTACT   = %14.7f %14.7f' %(energy_list['CONTACT'],self.energy_model_parameters['CONTACT'])
+            energy_list['CONTACT']  = energy_list['CONTACT'] *self.energy_model_parameters['CONTACT']
+            #----------------------------------------------------------------------------------------
+
+            # sum of total pseudo energy - starts with a constant:
+            if log:
+                print 'CONSTANT  = %14.7f' %(self.energy_model_parameters['CONSTANT'])
+            energy_list['CONSTANT'] = self.energy_model_parameters['CONSTANT']
+            
+            if log:
+                print ''' 
+                Energy ~ <SIZE> + <CONTACT> + <AB_ENERGY> + <ANGLE> + <BOND> + <DIHED>
+                        + <EEL> + <EELEC> + <EGB> + <ESURF> + <NB> + <VDWAALS> + <CONSTANT>
+                 '''
+            #Y ~ <SIZE> + <contacts0> + <AB_ENERGY> + <ANGLE> + <BOND> + <DIHED>
+            # + <EEL> + <EELEC> + <EGB> + <ESURF> + <NB> + <VDWAALS> + <CONSTANT>
+            SIZE      = len(self.residues)*self.energy_model_parameters['SIZE']
+            CONTACT = energy_list['CONTACT']
+            AB_ENERGY = energy_list['AB_ENERGY']
+            ANGLE     = energy_list['ANGLE']
+            BOND      = energy_list['BOND']
+            DIHED     = energy_list['DIHED']
+            EEL       = energy_list['EEL']
+            EELEC     = energy_list['EELEC']
+            EGB       = energy_list['EGB']
+            ESURF     = energy_list['ESURF']
+            NB        = energy_list['NB']
+            VDWAALS   = energy_list['VDWAALS']
+            intercept = energy_list['CONSTANT']
+            
+            energy = SIZE + CONTACT + AB_ENERGY + ANGLE + BOND + DIHED + EEL + EELEC + EGB + ESURF + NB + VDWAALS + intercept
+            energy = energy**(10.0/3)
+
+
+        if self.energy_model == 'iLABIO':
+            # AMBER components modification
+            #----------------------------------------------------------------------------------------
+            energy_list['ANGLE'  ] = energy_list['ANGLE'  ] * self.energy_model_parameters['ANGLE'  ] 
+            energy_list['BOND'   ] = energy_list['BOND'   ] * self.energy_model_parameters['BOND'   ] 
+            energy_list['DIHED'  ] = energy_list['DIHED'  ] * self.energy_model_parameters['DIHED'  ] 
+            energy_list['EEL'    ] = energy_list['EEL'    ] * self.energy_model_parameters['EEL'    ] 
+            energy_list['EELEC'  ] = energy_list['EELEC'  ] * self.energy_model_parameters['EELEC'  ] 
+            energy_list['EGB'    ] = energy_list['EGB'    ] * self.energy_model_parameters['EGB'    ] 
+            energy_list['ESURF'  ] = energy_list['ESURF'  ] * self.energy_model_parameters['ESURF'  ]         
+            energy_list['NB'     ] = energy_list['NB'     ] * self.energy_model_parameters['NB'     ]              
+            energy_list['VDWAALS'] = energy_list['VDWAALS'] * self.energy_model_parameters['VDWAALS']                
+            #----------------------------------------------------------------------------------------
+            
+            # AB energy modification
+            #----------------------------------------------------------------------------------------
+            energy_list['AB_ENERGY'] = energy_list['AB_ENERGY'] * self.energy_model_parameters['AB']
+            #----------------------------------------------------------------------------------------
+            
+
+            # CONTACT energy modification 
+            #----------------------------------------------------------------------------------------
+            energy_list['CONTACT'] = energy_list['CONTACT']*self.energy_model_parameters['CONTACT']
+            #----------------------------------------------------------------------------------------
+
+
+            # sum of total pseudo energy - starts with a constant:
             energy = self.energy_model_parameters['CONSTANT']
             
-            
+            # sum of the components
             for component in energy_list:
-                print component,  energy_list[component]
+                #print component,  energy_list[component]
                 energy += energy_list[component]
             
-            
+            # final component - SIZE
             energy += len(self.residues)*self.energy_model_parameters['SIZE']
-            #energy = energy**(10.0/3)
+            energy = energy**(10.0/3)
+
 
 
         if log:
@@ -396,7 +424,9 @@ CONTACT             =   %20.10f
                   energy_list['NB'       ],
                   energy_list['VDWAALS'  ],
                   energy_list['AB_ENERGY'],
-                  energy_list['CONTACT'  ])
+                  energy_list['CONTACT'  ],
+                  #energy_list['SIZE'     ],
+                  )
             
             print text
       
@@ -406,105 +436,7 @@ CONTACT             =   %20.10f
         else:
             return energy
         
-        
-        '''
-        if  self.ff_type == 'charmm':
-            write_NaMD_input_file (molecule = self, Type='energy', pn = pn)
-            save_PDB_to_file      (molecule = self, filename='SinglePoint'+str(pn)+'.pdb')
-       
-            os.system('namd2 SinglePoint.namd > SinglePoint'+str(pn)+'.log')
-            
-            BOND , ANGLE , DIHED , IMPRP , ELECT , VDW , BOUNDARY = ParseNaMDLog('SinglePoint'+str(pn)+'.log', log=log)
-            energy = (BOND*bond + ANGLE*angle + DIHED*dihed + 
-                      IMPRP*imprp + ELECT*elect + VDW*vdw + BOUNDARY*boundary)
-            
-            return energy
 
-        
-        if  self.ff_type == 'amber':
-            # transformar numa funcao
-            pn  = pn
-            
-            write_AMBER_input_file(molecule = self, Type='energy', pn= pn)
-            save_CRD_to_file      (molecule = self, filename='SinglePoint'+str(pn)+'.crd')
-            
-            os.system('sander -O -i SinglePoint'+str(pn)+'.in -c SinglePoint'+str(pn)+'.crd -o SinglePoint'+str(pn)+'.log -p ' + self.top)
-            
-            #sander -O -i energy.in  -o   energy.log -p 7tim.top -c 7tim.crd
-            
-            energy_list = ParseAMBERLog('SinglePoint'+str(pn)+'.log', log=log)
-            #print BOND , ANGLE , DIHED , IMPRP , ELECT , VDW , BOUNDARY
-            
-            energy = 0 
-            energy += energy_list["ESURF"]       * esurf
-            #energy += energy_list["RESTRAINT"]
-            energy += energy_list["EGB"]         * egb
-            energy += energy_list["EELEC"]       * elect
-
-            if energy_list["VDWAALS"] == None:
-                #energy_list["VDWAALS"] = 99999999999999999999999
-                #energy += energy_list["VDWAALS"] * vdw
-                return None
-            else:
-                energy += energy_list["VDWAALS"] * vdw
-            
-            #energy += energy_list["EEL"]
-            #energy += energy_list["NB"]
-            energy += energy_list["DIHED"] * dihed
-            energy += energy_list["ANGLE"] * angle
-            energy += energy_list["BOND"]  * bond
-            
-            
-            if AB_energy:
-                ab_energy = compute_AB_energy(molecule = self)*self.AB
-                energy +=   ab_energy
-                energy_list["AB_energy"]  = ab_energy
-            
-            
-            
-            #print 'energy_AB:', energy_AB 
-            
-            if log:
-                from pprint import pprint
-                pprint(energy_list)
-            
-            
-            if return_list:
-                return energy_list
-            else:
-                return energy
-
-
-        if  self.ff_type == 'Calpha_model':
-            total_E = 0
-            total_E = compute_AB_energy (molecule = self)
-            return total_E
-
-        '''
-        
-        '''
-        if self.ff_type == 'gmx':
-            import subprocess
-            
-            pn  = pn
-            if external_coordinates:
-                command1   = 'mdrun -s '+ self.tpr+' -rerun '+ external_coordinates_file +' -e ener_'+str(pn)
-                
-                #os.system('mdrun -s '+ self.tpr+' -rerun '+ external_coordinates_file +' -e ener_'+str(pn))
-                #mdrun -s test.tpr -rerun complex_2.pdb
-                command2   = 'echo 1 2 3 4 5 8 33 | g_energy -f ener_'+str(pn)+'.edr -s '+ self.tpr + ' -o SP_'+str(pn)
-                #print command2
-                
-                null_file = open(os.devnull, 'w')
-                subprocess.call(command1.split(), stdout = null_file, stderr = null_file)
-                os.system('echo 1 2 3 4 5 6 10 | g_energy -f ener_'+str(pn)+'.edr -s '+ self.tpr + ' -o SP_'+str(pn))
-                #subprocess.call(command2.split(), stdout = null_file, stderr = null_file)
-                energy_list = ParseGMXLog('SP_'+str(pn)+'.xvg', log=log)
-                
-                os.system('rm *#')
-                return energy_list['Potential']
-
-        '''
 
 def write_AMBER_input_file (molecule=None, Type='energy', pn = 1, parameters = None):
     
@@ -678,10 +610,4 @@ def write_NaMD_input_file(molecule=None, Type='energy', parameters = None, pn = 
             output_file.write(text)
             output_file.close()
             
-        #if _type == 'dynamics':
-        #text += 'minimize 100                                                             \n'    
-       #text += 'minimize            1000                                                 \n'
 
-    #output_file = open('SinglePoint.namd', "w")
-    #output_file.write(text)
-    #output_file.close()

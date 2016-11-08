@@ -36,7 +36,7 @@ for line in filein:
             else:
                 DECOY     .append(line2[0] )
                 PDB       .append(line2[1] )
-                RMSD      .append(float(line2[2] ))
+                RMSD      .append(float(line2[2] )**.3)
                 SIZE      .append(float(line2[3] ))
                 AB_ENERGY .append(float(line2[4] ))
                 CONTACT   .append(float(line2[5] ))
@@ -93,9 +93,9 @@ for line in filein:
 #print NB
 x = np.column_stack((
                      #RMSD      ,
-                     SIZE      ,
+                     SIZE       ,
                      AB_ENERGY ,
-                     #CONTACT   ,
+                     CONTACT    ,
                      #ANGLE     ,
                      #BOND      ,
                      DIHED     ,
@@ -103,7 +103,7 @@ x = np.column_stack((
                      EELEC     ,
                      EGB       ,
                      ESURF     ,
-                      NB        ,
+                     #NB        ,
                      VDWAALS   ))
 
 #x = np.column_stack((x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13))  #Agrupa as variaveis preditorass

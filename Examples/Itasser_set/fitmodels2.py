@@ -63,7 +63,7 @@ for line in filein:
             else:
                 DECOY     .append(line2[0] )
                 PDB       .append(line2[1] )
-                RMSD      .append(float(line2[2] ))
+                RMSD      .append(float(line2[2] )**0.3)
                 SIZE      .append(float(line2[3] ))
                 contacts_0.append(float(line2[4] ))
                 contacts_1.append(float(line2[5] ))
@@ -146,14 +146,14 @@ x = np.column_stack((
                     #PDB        ,
                     SIZE       ,
                     contacts_0 ,
-                    contacts_1 ,
-                    contacts_2 ,
-                    contacts_3 ,
-                    contacts_4 ,
-                    contacts_5 ,
+                    #contacts_1 ,
+                    #contacts_2 ,
+                    #contacts_3 ,
+                    #contacts_4 ,
+                    #contacts_5 ,
                     AB_ENERGY  ,
-                    ANGLE      ,
-                    BOND       ,
+                    #ANGLE      ,
+                    #BOND       ,
                     DIHED      ,
                     EEL        ,
                     EELEC      ,
@@ -165,6 +165,51 @@ x = np.column_stack((
 
 
 
+
+
+'''
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                      y   R-squared:                       0.483
+Model:                            OLS   Adj. R-squared:                  0.482
+Method:                 Least Squares   F-statistic:                     1231.
+Date:                Mon, 07 Nov 2016   Prob (F-statistic):               0.00
+Time:                        22:45:26   Log-Likelihood:                -274.40
+No. Observations:               13209   AIC:                             570.8
+Df Residuals:                   13198   BIC:                             653.2
+Df Model:                          10                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [95.0% Conf. Int.]
+------------------------------------------------------------------------------
+const          1.1271      0.013     85.611      0.000         1.101     1.153
+SIZE          -0.0076      0.001     -6.274      0.000        -0.010    -0.005
+CONTACT        0.0070      0.000     56.105      0.000         0.007     0.007
+AB_ENERGY      0.4084      0.034     11.855      0.000         0.341     0.476
+DIHED         -0.0004   5.29e-05     -6.952      0.000        -0.000    -0.000
+EEL        -7.833e-05   7.79e-06    -10.052      0.000     -9.36e-05 -6.31e-05
+EELEC         -0.0002   1.07e-05    -16.442      0.000        -0.000    -0.000
+EGB           -0.0002   1.06e-05    -14.364      0.000        -0.000    -0.000
+ESURF          0.0310      0.001     56.210      0.000         0.030     0.032
+NB            -0.0005      0.000     -3.730      0.000        -0.001    -0.000
+VDWAALS        0.0007   4.45e-05     15.026      0.000         0.001     0.001
+==============================================================================
+Omnibus:                      315.901   Durbin-Watson:                   1.703
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              565.916
+Skew:                          -0.194   Prob(JB):                    1.30e-123
+Kurtosis:                       3.937   Cond. No.                     9.96e+04
+==============================================================================
+'''
+# SIZE       
+# CONTACT 
+# AB_ENERGY  
+# DIHED      
+# EEL        
+# EELEC      
+# EGB        
+# ESURF      
+# NB         
+# VDWAALS    
 
 
 
@@ -185,8 +230,8 @@ res = sm.OLS(RMSD,x).fit() #Cria e ajusta o modelo
 
 
 
-print res.params
+#print res.params
 
-print res.bse
+#print res.bse
 
 print res.summary()

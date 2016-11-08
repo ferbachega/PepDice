@@ -136,7 +136,9 @@ for folder in folders:
             
             try:
                 energies = system.energy(return_list = True)
-            
+                
+                
+                
                 text = '%-20s %-10s %6s %6d %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f %15.7f' %( pdb                   ,
                                                                                                                              folder                ,
                                                                                                                              RMSD_list[pdb]        ,
@@ -153,13 +155,14 @@ for folder in folders:
                                                                                                                               energies['NB'       ],
                                                                                                                               energies['VDWAALS'  ],
                                                                                                                               )
-                textlines.append(text)
                 
-                logfile.writelines(text)
-                logfile.write('\n')    
-                
-                print text                                                                                           
-            
+                if 'nan' in text:
+                    pass
+                else:
+                    textlines.append(text)
+                    logfile.writelines(text)
+                    logfile.write('\n')    
+                    print text                                                                                           
             except:
                 pass
             

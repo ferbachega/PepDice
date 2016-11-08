@@ -50,80 +50,50 @@ PEPDICE_PARAMETER= os.path.join(PEPDICE, 'Parameters')
 #-------------------------------------------------------------------------------
 #/home/farminf/Programas/PepDice/Examples/outputs/1gab_amber_example04_extended.pdb
 
+system = Molecule()
+system.build_peptide_from_sequence (self,
+                                     sequence    = 'KLPPGWEKRMSRSSGRVYYFNHITNASQWERPSGNSSSG',
+                                     _type       = 'amber'       ,
+                                     force_field = 'ff03ua.labio',
+                                     overwrite   = True          ,
+                                     )
 
-#-----------------------------------------------------------------------------------------------------------------------------------#
-system = Molecule()                                                                                                                 #
-system.load_PDB_to_system      (filename = os.path.join(PEPDICE_EXAMPLES , 'data/alpha/1GAB/1gab_ff03ua_AMBER_extended.pdb'   )   ) #
-system.import_AMBER_parameters(top       = os.path.join(PEPDICE_EXAMPLES , 'data/alpha/1GAB/1gab_ff03ua_AMBER_extended.prmtop')   , #
-                                torsions = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )                            #
 
-TRAJECTORY = os.path.join(PEPDICE_EXAMPLES , 'outputs/example10_n'   )   
-try:                                                                                                                                #
-    os.remove(TRAJECTORY)                                                                                                           #
-except:                                                                                                                             #
-    pass                                                                                                                            #
-#-----------------------------------------------------------------------------------------------------------------------------------#
-#system.energy(log = True) /home/farminf/Programas/pepdice/Examples/data/alpha/1GAB/template_library_1gab_5.pkl
+minimize(
+        molecule=system,
+        imin  =   1,
+        maxcyc=1000,
+        ncyc  = 100,
+        cut   =  10,
+        rgbmax= 999,
+        igb   =   1,
+        ntb   =   0,
+        ntpr  = 100,
+        ntr   =   0,
+            )
+        save_PDB_to_file(system, code+'estendida_A_AMBER_minimized.pdb')
 
-    
 
 import pickle
-system.fragments = pickle.load( open( "/home/farminf/Programas/pepdice/Examples/data/alpha/1GAB/template_library_1gab_5.pkl", "rb" ) )
+system.fragments = pickle.load( open( os.path.join(PEPDICE_EXAMPLES,'1gab_fragments3.p', "rb" ) )
 
 fragments = system.fragments
 #pprint (fragments)
 print len(fragments)
 print len(fragments[0])
 n = 0 
-#for resi in fragments:
-#    k = 0
-#    if resi == []:
-#        print n, resi
-#    for frag in resi: 
-#        print 'Position: ',n , 'fragment index: ',k, 'Number of fragments : ',len(resi), 'fragment size : ', len(frag)
-#        k += 1
-#    n += 1
+
+for resi in fragments:
+    k = 0
+    if resi == []:
+        print n, resi
+    for frag in resi: 
+        print 'Position: ',n , 'fragment index: ',k, 'Number of fragments : ',len(resi), 'fragment size : ', len(frag)
+        k += 1
+    n += 1
 
 
-
-
-#
-#for i in range(1,11):
-#    system.bond      = 1.0
-#    system.angle     = 1.0
-#    system.dihed     = 1.0
-#    system.imprp     = 1.0
-#    system.elect     = 1.0
-#    system.vdw       = 1.0
-#    system.boundary  = 1.0
-#    system.esurf     = 1.0 * i
-#    system.egb       = 1.0
-#
-#
-#    monte_carlo(molecule           = system      ,
-#                temperature        = 1000        ,
-#                Kb                 = 0.0019872041,
-#                angle_range        = 5           ,
-#                nSteps             = 5000        ,
-#                fragment_rate      = 1.0         , #between 0  and 1
-#                fragment_sidechain = True        ,
-#                PhiPsi_rate        = 0.3         ,
-#                trajectory         = TRAJECTORY+str(i)+'.xyz')
-#
-
-system.bond      = 1.0
-system.angle     = 1.0
-system.dihed     = 1.0
-system.imprp     = 1.0
-system.elect     = 1.0
-system.vdw       = 1.0
-system.boundary  = 1.0
-system.esurf     = 1.0
-system.egb       = 1.0
-
-
-# usando o arquivo geran
-#system.load_PDB_to_system      (filename = '/home/farminf/Documents/1GAB/1gab_pymol_refmac2.pdb') 
+'''
 run_MC_replica_exchange (
                         molecule           = system                 ,
                         N_replicas         = 8                      , # >= number of CPUs
@@ -142,17 +112,4 @@ run_MC_replica_exchange (
                         #filelog            = 'MC_1GAB_replica_'
                         fragment_sidechain = False                   ,
                         )
-
-#'''
-#
-#monte_carlo(    molecule           = system                     ,
-#                temperature        = 1000                       ,
-#                Kb                 = 0.0019872041               , # 0.0083144621               ,
-#                angle_range        = 1                          ,
-#                nSteps             = 10000                      ,
-#                fragment_rate      = 1.0                        , #between 0  and 1
-#                fragment_sidechain = False                      ,
-#                PhiPsi_rate        = 0.0                        ,
-#                trajectory         = 'MonteCarlo_trajectory.xyz',
-#                pn                 = 1                          )
-#'''
+'''
