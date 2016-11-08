@@ -1,0 +1,1 @@
+PDB                 decoy   SIZE     RMSD         CONTACT      R_GYRATION       AB_ENERGY           ANGLE            BOND           DIHED             EEL           EELEC             EGB           ESURF              NB         VDWAALS

@@ -188,7 +188,7 @@ class Molecule(Atom       ,
                                                   
                                                   'AB'         : 1.0           ,
                                                   'R_cutoff'   : 999.0         ,
-                                                  
+                                                  'R_GYRATION' : 1.0           ,
                                                   },
 
                                           
@@ -218,7 +218,8 @@ class Molecule(Atom       ,
                                                       
                                                       'AB'         : 1.0       ,
                                                       'R_cutoff'   : 999.0     ,
-                                                  
+                                                        'R_GYRATION' : 1.0     ,
+        
                                                       },
                                           
                                           
@@ -248,7 +249,8 @@ class Molecule(Atom       ,
                                                       
                                                       'AB'         : 0.0      ,
                                                       'R_cutoff'   : 0.0      ,
-                                                  
+                                                      'R_GYRATION' : 1.0      ,
+
                                                       },
                                           
                                           # energy = 1.15 -1.96E-5*energy_list['EEL'] -2.36E-5*energy_list['NB'] - 4.4E-4 *energy_list['DIHED'] + 1.85E-3*energy_list['VDWAALS'] - 7.5E-5*energy_list['EGB'] + 2.66E-5*energy_list['ESURF']
@@ -467,6 +469,8 @@ Degrees of Freedom: model 11, resid 11198
                                                       
                                                       'R_contact'  : self.R_contact,
                                                       'R_cutoff'   :      999.0,
+                                                      'R_GYRATION' : 1.0       ,
+
                                                       },
                                           
                                           
@@ -1019,7 +1023,51 @@ Matrix type                 = %8s
         print text 
 
 
-    def import_SS_from_string(self, ss = None):
+    
+    
+    def import_SS_restraints_from_string (self, ss = '' , w_ss  = None, log= False):
+        """ Function doc """
+        if len(self.residues) != len(ss):
+            return False
+        
+        if len(self.residues) != len(w_ss):
+            return False
+        
+        
+        
+        else:
+            for i in range (0,len(self.residues)):
+                if ss[i] == 'C':
+                    pass
+                
+                
+                if ss[i] == 'H':
+                    from Geometry                 import *
+                    
+                    self.residues[i].ss_restraint[0] = -57
+                    self.residues[i].ss_restraint[1] = -47
+                    self.residues[i].ss_restraint[2] = -180
+                    
+                    self.residues[i].w_ss_restraint[0] = int(w_ss[i])
+                    self.residues[i].w_ss_restraint[1] = int(w_ss[i])
+                    self.residues[i].w_ss_restraint[2] = int(w_ss[i])
+                    
+                    
+                    #phi_final_angle = set_phi_psi_dihedral( molecule=self, resi=i, bond='PHI',angle = -57 )
+                    #psi_final_angle = set_phi_psi_dihedral( molecule=self, resi=i, bond='PSI',angle = -47 )
+
+                else:
+                    pass
+        
+            if log:
+                for res in  self.residues:
+                    print res.name, res.ss_restraint, res.w_ss_restraint
+
+    
+    
+    
+    
+    def set_SS_from_string(self, ss = None):
         # TIDQWLLKNAKEDAIAELKKAGITSDFYFNAINKAKTVEEVNALKNEILKAHA
         # CCHHHHHHHHHHHHHHHHHHCCCCCHHHHHHHHHCCCHHHHHHHHHHHHHHCC
         if len(self.residues) != len(ss):

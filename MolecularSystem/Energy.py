@@ -2,7 +2,7 @@ from ParseNaMDLog import ParseNaMDLog
 from ParseGMXLog  import ParseGMXLog
 from ParseAMBERLog import ParseAMBERLog
 from CRDFiles      import save_CRD_to_file
-from Geometry    import  distance_ab
+from Geometry    import  distance_ab, computePhiPsi
 import math 
 import os
 import sys
@@ -15,14 +15,13 @@ from pprint import pprint
 ## ---------------------------------
 
 
-
-class Energy:
+class AB_ENERGY:
     """ Class doc """
     
     def __init__ (self):
         """ Class initialiser """
         pass
-
+                        
     def compute_atomi_atomj_AB_energy (self, atom_i, atom_j, R_ab = False):
         """ Function doc """ #-23085572255.9
         A    = 100000
@@ -69,6 +68,9 @@ class Energy:
         Kyte J, Doolittle RF (May 1982). "A simple method for displaying the hydropathic character of a protein". 
         Journal of Molecular Biology.157.
         '''
+
+        
+        
         hydropathic_table = {
                             'ARG' : -4.5 / 4.5, #-4.5,
                             'LYS' : -3.9 / 4.5, #-3.9,
@@ -95,7 +97,7 @@ class Energy:
 
 
         hydropathic_table_AB = {
-                            'ARG' : 'B', #-4.5,
+                            'ARG' : 'B', #-4.5,  
                             'LYS' : 'B', #-3.9,
                             'ASN' : 'B', #-3.5,
                             'ASP' : 'B', #-3.5,
@@ -123,7 +125,6 @@ class Energy:
 
         atom_i = None
         atom_J = None
-
         for index_i in range(0, len(self.residues)):
             for index_j in range(index_i+2, len(self.residues)):
                 
@@ -133,12 +134,22 @@ class Energy:
                         atom_i    = atom  
                         atom_i.hydropathic = hydropathic_table[name_i]
                         atom_i.AB          = hydropathic_table_AB[name_i]
+                        
+                        #mass_i = mass_table[name_i]
+                        
+                        
+                
                 name_j = self.residues[index_j].name
                 for atom in self.residues[index_j].atoms:
                     if atom.name == 'CA':
                         atom_j = atom  
                         atom_j.hydropathic = hydropathic_table[name_j]
                         atom_j.AB          = hydropathic_table_AB[name_j]
+                
+                        #mass_j = mass_table[name_j]
+
+
+
                 
                 R_ab = distance_ab (atom_i, atom_j)
                 E    = self.compute_atomi_atomj_AB_energy (atom_i, atom_j, R_ab)
@@ -157,7 +168,14 @@ class Energy:
        
         return total_E
 
+
+class AMBER_ENERGY:
+    """ Class doc """
     
+    def __init__ (self):
+        """ Class initialiser """
+        pass
+
     def compute_AMBER_energy (self, pn = 1, log = None):
         """ Function doc """
         # transformar numa funcao
@@ -172,17 +190,114 @@ class Energy:
        
         
         if energy_list["VDWAALS"] == None:
-            return None
+            energy_list["VDWAALS"] = None
+            return None, energy_list
+        
         else:
             pass
         
         energy = 0
+        
         for energy_conponent in energy_list:
-            energy += energy_list[energy_conponent]
+            if energy_list[energy_conponent] == None:
+                return None, energy_list
+            else:
+                energy += energy_list[energy_conponent]
         
         return energy, energy_list
 
     
+class RG_GIRATION:
+    """ Class doc """
+    
+    def __init__ (self):
+        """ Class initialiser """
+        pass
+
+    
+    def compute_center_of_mass (self):
+        mass_table= {
+                        'ALA'  :  71.03711 ,
+                        'ARG'  :  156.10111,
+                        'ASN'  :  114.04293,
+                        'ASP'  :  115.02694,
+                        'CYS'  :  103.00919,
+                        'GLU'  :  129.04259,
+                        'GLN'  :  128.05858,
+                        'GLY'  :  57.02146 ,
+                        'HIS'  :  137.05891,
+                        'ILE'  :  113.08406,
+                        'LEU'  :  113.08406,
+                        'LYS'  :  128.09496,
+                        'MET'  :  131.04049,
+                        'PHE'  :  147.06841,
+                        'PRO'  :  97.05276 ,
+                        'SER'  :  87.03203 ,
+                        'THR'  :  101.04768,
+                        'TRP'  :  186.07931,
+                        'TYR'  :  163.06333,
+                        'VAL'  :  99.06841 }
+        total_E = 0
+        atom_i = None
+        atom_J = None
+        mass_center = [0.0, 0.0, 0.0]
+        mass_sum    =  0.0
+        
+        for index_i in range(0, len(self.residues)):
+            
+            name_i = self.residues[index_i].name
+            for atom in self.residues[index_i].atoms:
+                if atom.name == 'CA':
+                    atom_i = atom  
+                    mass_i = mass_table[name_i]
+                    self.residues[index_i].mass = mass_i
+                    
+            mass_center[0] += mass_i*atom_i.pos[0]
+            mass_center[1] += mass_i*atom_i.pos[1]
+            mass_center[2] += mass_i*atom_i.pos[2]
+            mass_sum   += mass_i
+        
+        mass_center[0] = mass_center[0]/mass_sum
+        mass_center[1] = mass_center[1]/mass_sum
+        mass_center[2] = mass_center[2]/mass_sum
+        return mass_center
+    
+
+    def compute_R_gy_Calpha (self):
+        """ """
+        energy = 0.0
+        mass_center =  self.compute_center_of_mass()
+        
+        Rc = ((mass_center[0]**2+mass_center[1]**2 + mass_center[2]**2)**0.5)
+        
+        Rg = 0.0
+        mass_sum = 0
+        for index_i in range(0, len(self.residues)):
+            
+            name_i = self.residues[index_i].name
+            
+            for atom in self.residues[index_i].atoms:
+                
+                if atom.name == 'CA':
+                
+                    atom_i = atom  
+            
+            
+            Ra        = ((atom_i.pos[0]**2 + atom_i.pos[1]**2 + atom_i.pos[2]**2)**0.5)
+            
+            Rg       += self.residues[index_i].mass * ((Ra - Rc)**2)
+            mass_sum += self.residues[index_i].mass
+            
+        Rg = Rg/mass_sum
+        return Rg
+        
+        
+class CONTACT_ENERGY:
+    """ Class doc """
+    
+    def __init__ (self):
+        """ Class initialiser """
+        pass
     def compute_CONTACT_energy (self, log = False, cutoff = 6.0):
         """ Function doc """
         energy = 0.0
@@ -231,7 +346,105 @@ class Energy:
         
         return energy
         
+
+class SECONDARY_STRUCTURE_ENERGY:
+    """ Class doc """
     
+    def __init__ (self):
+        """ Class initialiser """
+        pass
+    
+    def compute_SS_energy (self, log = False):
+        """ Function doc """
+        
+        
+        for i in range (0, len(self.residues)):
+            phi_final_angle = computePhiPsi (molecule=self, resi=i, bond='PHI')
+            psi_final_angle = computePhiPsi (molecule=self, resi=i, bond='PSI')
+            ome_final_angle = computePhiPsi (molecule=self, resi=i, bond='OMEGA')
+
+            if phi_final_angle == None:
+                phi_final_angle = 0
+
+            if psi_final_angle == None:
+                psi_final_angle = 0
+                
+            if ome_final_angle == None:
+                ome_final_angle = 0
+            
+            
+            if self.residues[i].ss_restraint[0] != None:
+                phi = self.residues[i].ss_restraint[0] - phi_final_angle
+            
+            else:
+                phi = 0
+            
+            if self.residues[i].ss_restraint[1] != None:
+                psi = self.residues[i].ss_restraint[1] - psi_final_angle
+            else:
+                psi = 0
+            
+            
+            #print self.residues[i].ss_restraint
+            
+            if log:
+
+                print "%s  %15.5f  %15.5f  %15.5f %15.5f %15.5f" %(self.residues[i].name , 
+                                                                          phi_final_angle, 
+                                                                          psi_final_angle, 
+                                                                          ome_final_angle,
+                                                                                      phi, 
+                                                                                      psi)
+
+                
+
+                #print "%s  %15.5f  %15.5f  %15.5f" %(self.residues[i].name , 
+                #                                                          phi_final_angle, 
+                #                                                          psi_final_angle, 
+                #                                                          ome_final_angle)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+class Energy(AB_ENERGY, AMBER_ENERGY, RG_GIRATION, CONTACT_ENERGY, SECONDARY_STRUCTURE_ENERGY):
+    """ Class doc """
+
+        
+    
+    
+    def __init__ (self):
+        """ Class initialiser """
+    
+        self.mass_table= {
+                        'ALA'  :  71.03711 ,
+                        'ARG'  :  156.10111,
+                        'ASN'  :  114.04293,
+                        'ASP'  :  115.02694,
+                        'CYS'  :  103.00919,
+                        'GLU'  :  129.04259,
+                        'GLN'  :  128.05858,
+                        'GLY'  :  57.02146 ,
+                        'HIS'  :  137.05891,
+                        'ILE'  :  113.08406,
+                        'LEU'  :  113.08406,
+                        'LYS'  :  128.09496,
+                        'MET'  :  131.04049,
+                        'PHE'  :  147.06841,
+                        'PRO'  :  97.05276 ,
+                        'SER'  :  87.03203 ,
+                        'THR'  :  101.04768,
+                        'TRP'  :  186.07931,
+                        'TYR'  :  163.06333,
+                        'VAL'  :  99.06841 }
+
+
+
     def energy(self, 
                log                       = False, 
                pn                        = 1    ,  #process number # used in multiprocess 
@@ -245,22 +458,26 @@ class Energy:
                ):
                     
     
-        energy_list = {'AB_ENERGY': 0.0,
-                       'CONTACT'  : 0.0,
-                       'ANGLE'    : 0.0,
-                       'BOND'     : 0.0,
-                       'DIHED'    : 0.0,
-                       'EEL'      : 0.0,
-                       'EELEC'    : 0.0,
-                       'EGB'      : 0.0,
-                       'ESURF'    : 0.0,
-                       'NB'       : 0.0,
-                       'VDWAALS'  : 0.0,}
+        energy_list = {'AB_ENERGY' : 0.0,
+                       'CONTACT'   : 0.0,
+                       'ANGLE'     : 0.0,
+                       'BOND'      : 0.0,
+                       'DIHED'     : 0.0,
+                       'EEL'       : 0.0,
+                       'EELEC'     : 0.0,
+                       'EGB'       : 0.0,
+                       'ESURF'     : 0.0,
+                       'NB'        : 0.0,
+                       'VDWAALS'   : 0.0,
+                       'R_GYRATION': 0.0,}
         
         
         # AMBER energy
         #----------------------------------------------------------------------------------------
         energy, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
+        if energy == None:
+            return None 
+            
         #----------------------------------------------------------------------------------------
 
         # AB energy 
@@ -276,6 +493,10 @@ class Energy:
             energy_list['CONTACT'] = self.compute_CONTACT_energy(log = log, cutoff = self.energy_model_parameters['R_contact'])
         #energy_list['CONTACT'] = energy_list['CONTACT']*self.energy_model_parameters['CONTACT']
         #----------------------------------------------------------------------------------------
+         
+        if self.energy_model_parameters['R_GYRATION'] > 0.0:
+            Rg = self.compute_R_gy_Calpha()
+            energy_list['R_GYRATION'] = Rg
     
 
         if self.energy_model == 'FULL':
@@ -334,6 +555,7 @@ class Energy:
             if log:
                 print 'CONSTANT  = %14.7f' %(self.energy_model_parameters['CONSTANT'])
             energy_list['CONSTANT'] = self.energy_model_parameters['CONSTANT']
+            
             
             if log:
                 print ''' 
@@ -411,21 +633,22 @@ NB                  =   %20.10f     VDWAALS          =   %20.10f
 ------------------------------------------------------------------------------------------
 AB_ENERGY           =   %20.10f
 CONTACT             =   %20.10f
+R_GYRATION          =   %20.10f
 ------------------------------------------------------------------------------------------
      
             ''' %(energy,
-                  energy_list['BOND'     ],
-                  energy_list['EEL'      ],
-                  energy_list['ANGLE'    ],
-                  energy_list['EELEC'    ],
-                  energy_list['DIHED'    ],
-                  energy_list['EGB'      ],
-                  energy_list['ESURF'    ],
-                  energy_list['NB'       ],
-                  energy_list['VDWAALS'  ],
-                  energy_list['AB_ENERGY'],
-                  energy_list['CONTACT'  ],
-                  #energy_list['SIZE'     ],
+                  energy_list['BOND'      ],
+                  energy_list['EEL'       ],
+                  energy_list['ANGLE'     ],
+                  energy_list['EELEC'     ],
+                  energy_list['DIHED'     ],
+                  energy_list['EGB'       ],
+                  energy_list['ESURF'     ],
+                  energy_list['NB'        ],
+                  energy_list['VDWAALS'   ],
+                  energy_list['AB_ENERGY' ],
+                  energy_list['CONTACT'   ],
+                  energy_list['R_GYRATION'],
                   )
             
             print text
@@ -436,6 +659,17 @@ CONTACT             =   %20.10f
         else:
             return energy
         
+
+
+
+
+
+
+
+
+
+
+
 
 
 def write_AMBER_input_file (molecule=None, Type='energy', pn = 1, parameters = None):

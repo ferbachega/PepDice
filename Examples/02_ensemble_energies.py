@@ -344,30 +344,52 @@ system.load_PDB_to_system      (filename = os.path.join(PEPDICE_EXAMPLES , 'LABI
 system.import_AMBER_parameters (top      = os.path.join(PEPDICE_EXAMPLES , 'LABIO_set/1I6C/1I6C_A_AMBER.top')   ,   
                                 torsions = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )   
 
+system.set_energy_model('FULL')
+
 
 
 energy_models = ['LABIO']
 energies      = [ ]
  
-print '                 decoy                 RMSD                 amber                    Contact                   Calpha                       LABIO'
+print '%-35s%8s %15s %15s %15s %15s %15s %15s %15s %15s %15s %15s %15s %15s' %( 'decoy','RMSD','CONTACT','R_GYRATION', 'AB_ENERGY','ANGLE','BOND','DIHED','EEL','EELEC','EGB','ESURF','NB','VDWAALS')
       #       decoy13_122_A_AMBER_minimized.pdb 8.0900             8953.8127000               335.8717000               374.7391660                 0.4041721
 for decoy in decoys:
     
-    text = '%33s %8.4f' %(decoy, decoys[decoy])
     
-    for model in energy_models:
-        
-        system.set_energy_model(model)
+    text = '%-35s %8.4f' %(decoy, decoys[decoy])
+    
+    system.load_PDB_to_system  (filename = os.path.join(folder, decoy))   
+    
+    system.import_CMAP(cmap = cmap)
+    
+    energy_list = system.energy(return_list =True)
+    
+    text += '%15.7f ' %(energy_list['CONTACT'])
+    text += '%15.7f ' %(energy_list['R_GYRATION'])
+    text += '%15.7f ' %(energy_list['AB_ENERGY'])
+    text += '%15.7f ' %(energy_list['ANGLE'    ])
+    text += '%15.7f ' %(energy_list['BOND'     ])
+    text += '%15.7f ' %(energy_list['DIHED'    ])
+    text += '%15.7f ' %(energy_list['EEL'      ])
+    text += '%15.7f ' %(energy_list['EELEC'    ])
+    text += '%15.7f ' %(energy_list['EGB'      ])
+    text += '%15.7f ' %(energy_list['ESURF'    ])
+    text += '%15.7f ' %(energy_list['NB'       ])
+    text += '%15.7f ' %(energy_list['VDWAALS'  ])
 
-        system.load_PDB_to_system  (filename = os.path.join(folder, decoy))   
-        #if model == 'Contact':
-        system.import_CMAP(cmap = cmap)
-        
-        text += '%25.7f ' %(system.energy())
-        
-        #system.Status()
-        #system.energy( log =True)
+
+
+
+
+
+
+
+
+
+
+
+
+
     print text    
-    #print 'energy:', model, decoy ,system.energy()
         
 

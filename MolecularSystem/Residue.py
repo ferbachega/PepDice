@@ -39,3 +39,6 @@ class Residue(object):
         self.CHI3 = None
         self.CHI4 = None
         self.CHI5 = None
+        
+        self.ss_restraint   = [None, None, None]
+        self.w_ss_restraint = [0.0 , 0.0,  0.0 ]
