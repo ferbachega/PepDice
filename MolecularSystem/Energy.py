@@ -378,23 +378,36 @@ class SECONDARY_STRUCTURE_ENERGY:
             
             else:
                 phi = 0
-            
+                self.residues[i].ss_restraint[0] = 0
+                
             if self.residues[i].ss_restraint[1] != None:
                 psi = self.residues[i].ss_restraint[1] - psi_final_angle
             else:
                 psi = 0
-            
+                self.residues[i].ss_restraint[1] = 0
             
             #print self.residues[i].ss_restraint
             
             if log:
 
-                print "%s  %15.5f  %15.5f  %15.5f %15.5f %15.5f" %(self.residues[i].name , 
-                                                                          phi_final_angle, 
-                                                                          psi_final_angle, 
-                                                                          ome_final_angle,
-                                                                                      phi, 
-                                                                                      psi)
+                text = '%s '    %(self.residues[i].name)
+                text+= '%15.5f' %(phi_final_angle)  
+                text+= '%15.5f' %(self.residues[i].ss_restraint[0])  
+                text+= '%15.5f' %(phi)  
+                
+                text+= '%15.5f' %(psi_final_angle)  
+                text+= '%15.5f' %(self.residues[i].ss_restraint[0])  
+                text+= '%15.5f' %(psi)  
+
+                
+                
+                print text
+                #print "%s  %15.5f  %15.5f  %15.5f %15.5f %15.5f" %(self.residues[i].name , 
+                #                                                          phi_final_angle, 
+                #                                                          psi_final_angle, 
+                #                                                          ome_final_angle,
+                #                                                                      phi, 
+                #                                                                      psi)
 
                 
 
