@@ -3,7 +3,7 @@ import numpy as np
 
 import pandas as pd
  
-train_df = pd.read_csv('energies.csv')
+train_df = pd.read_csv('energies_gyration.csv')
 
 example_series =  pd.Series([1,5,10,30,50,30,15,40,45])
 print(train_df['NB'].median())
@@ -11,6 +11,7 @@ print(train_df.cov())
 
 print(train_df.corr())
 
+train_df['R_GYRATION'] = train_df['R_GYRATION']**2
 
 
 print(train_df.columns)
@@ -35,7 +36,7 @@ pdbs = [
         'IT1gpt_'  ,
         'IT1gyvA'  ,
         'IT1itpA'  ,
-        'IT1kjs_'  ,
+        #'IT1kjs_'  ,
         'IT1kviA'  ,
         'IT1mkyA3' ,
         'IT1mla_2' ,
@@ -61,32 +62,32 @@ pdbs = [
 
 #r2 = []
 
+
+
 for pdb in pdbs:
 
     #dfols=train_df[train_df['SIZE']==72] # Apenas para 1990
     #dfols=train_df
-    try:
-        
-        dfols=train_df[train_df['PDB']!= 'IT2cr7A']
-        dfols=dfols[train_df['PDB']!= 'IT1af7__']
-        dfols=dfols[train_df['PDB']!= 'IT1b72A']
-        dfols=dfols[train_df['PDB']!= 'IT1of9A']
-        dfols=dfols[train_df['PDB']!= 'IT2cr7A']
-        #dfols=dfols[train_df['PDB']!= '']
-        dfols=dfols[train_df['PDB']!= 'IT1ne3A']
-        
-        
-        
-        #dfols=dfols[train_df['PDB']!= pdb] # Apenas para 1990
-        
-        
-        ols=pd.ols(y=dfols['RMSD']**.3, x=dfols[['contacts0','AB_ENERGY','ANGLE','BOND','DIHED','EEL','EELEC','EGB','ESURF','NB','VDWAALS']])
+   
+    dfols=train_df[train_df['PDB']!= pdb]
+    #dfols=dfols[train_df['PDB']!= 'IT1af7__']
+    #dfols=dfols[train_df['PDB']!= 'IT1b72A']
+    #dfols=dfols[train_df['PDB']!= 'IT1of9A']
+    #dfols=dfols[train_df['PDB']!= 'IT2cr7A']
+    #dfols=dfols[train_df['PDB']!= '']
+    #dfols= dfols[train_df['PDB']!= pdb]
+    
+    
+    
+    #dfols=dfols[train_df['PDB']!= pdb] # Apenas para 1990
+    
+    
+    ols=pd.ols(y=dfols['RMSD']**.3, x=dfols[['SIZE','CONTACT','R_GYRATION','AB_ENERGY','ANGLE','BOND','DIHED','EEL','EELEC','EGB','ESURF','NB','VDWAALS']])
 
-        print '%-12s %14.7f %14.7f ' %(pdb, ols.r2, ols.r2_adj)  
+    print '%-12s %14.7f %14.7f ' %(pdb, ols.r2, ols.r2_adj)  
 
-    except:
-        pass
 
 print (ols)
 
+#PDB                 decoy   SIZE     RMSD         CONTACT      R_GYRATION       AB_ENERGY           ANGLE            BOND           DIHED             EEL           EELEC             EGB           ESURF              NB         VDWAALS
 
