@@ -347,7 +347,7 @@ class CONTACT_ENERGY:
         return energy
         
 
-class SECONDARY_STRUCTURE_ENERGY:
+class GEOMETRY_ENERGY:
     """ Class doc """
     
     def __init__ (self):
@@ -357,8 +357,31 @@ class SECONDARY_STRUCTURE_ENERGY:
     def compute_SS_energy (self, log = False):
         """ Function doc """
         
+        if log:
+            text = '%-14s ' %('RESIDUE')
+            text+= '%-7s  ' %('PHI')  
+            text+= '%-14s  ' %('Restrainted-PHI')  
+            text+= '%-14s  ' %('DELTA PHI')  
+            text+= '%-14s  ' %('weight')  
+            text+= '%-14s  ' %('phi_energy')  
+
+            
+            text+= '%-7s  ' %('PSI')  
+            text+= '%-14s  ' %('Restrainted-PSI')  
+            text+= '%-14s  ' %('DELTA PSI') 
+            text+= '%-14s  ' %('weight')  
+            text+= '%-14s  ' %('psi_energy')  
+            
+            text+= '%-14s  ' %('TOTAL ENERGY')  
+
+            print text
+
+        total_energy = 0
+        
+        energy_list  = []
         
         for i in range (0, len(self.residues)):
+            
             phi_final_angle = computePhiPsi (molecule=self, resi=i, bond='PHI')
             psi_final_angle = computePhiPsi (molecule=self, resi=i, bond='PSI')
             ome_final_angle = computePhiPsi (molecule=self, resi=i, bond='OMEGA')
@@ -372,65 +395,112 @@ class SECONDARY_STRUCTURE_ENERGY:
             if ome_final_angle == None:
                 ome_final_angle = 0
             
+
+
+            #self.residues[i].phi_restraint_angle
+            #self.residues[i].psi_restraint_angle
             
-            if self.residues[i].ss_restraint[0] != None:
-                phi = self.residues[i].ss_restraint[0] - phi_final_angle
+            
+            if self.residues[i].phi_restraint_angle != None:
+                delta_phi = self.residues[i].phi_restraint_angle - phi_final_angle
             
             else:
-                phi = 0
-                self.residues[i].ss_restraint[0] = 0
+                delta_phi = 0
+                self.residues[i].phi_restraint_angle = 0
                 
-            if self.residues[i].ss_restraint[1] != None:
-                psi = self.residues[i].ss_restraint[1] - psi_final_angle
+
+            if self.residues[i].psi_restraint_angle != None:
+                delta_psi = self.residues[i].psi_restraint_angle - psi_final_angle
             else:
-                psi = 0
-                self.residues[i].ss_restraint[1] = 0
+                delta_psi = 0
+                self.residues[i].psi_restraint_angle = 0
             
-            #print self.residues[i].ss_restraint
+            
+            Kb = 0.12184/9 #kcal/mol/deg2
+            phi_energy =  ((delta_phi)**2) * self.residues[i].phi_restraint_weight * Kb
+            psi_energy =  ((delta_psi)**2) * self.residues[i].psi_restraint_weight * Kb
+            energy     =  phi_energy + psi_energy
+            
+            total_energy += energy
+            
+            energy_list.append([self.residues[i].name, phi_energy, psi_energy, energy])
+            
             
             if log:
 
                 text = '%s '    %(self.residues[i].name)
                 text+= '%15.5f' %(phi_final_angle)  
-                text+= '%15.5f' %(self.residues[i].ss_restraint[0])  
-                text+= '%15.5f' %(phi)  
-                
+                text+= '%15.5f' %(self.residues[i].phi_restraint_angle)  
+                text+= '%15.5f' %(delta_phi)  
+                text+= '%15.5f' %(self.residues[i].phi_restraint_weight)  
+                text+= '%15.5f' %(phi_energy)  
+
+               
                 text+= '%15.5f' %(psi_final_angle)  
-                text+= '%15.5f' %(self.residues[i].ss_restraint[0])  
-                text+= '%15.5f' %(psi)  
-
+                text+= '%15.5f' %(self.residues[i].psi_restraint_angle)  
+                text+= '%15.5f' %(delta_psi)  
+                text+= '%15.5f' %(self.residues[i].psi_restraint_weight)  
+                text+= '%15.5f' %(psi_energy)  
                 
-                
+                text+= '%15.5f' %(energy)  
+               
                 print text
-                #print "%s  %15.5f  %15.5f  %15.5f %15.5f %15.5f" %(self.residues[i].name , 
-                #                                                          phi_final_angle, 
-                #                                                          psi_final_angle, 
-                #                                                          ome_final_angle,
-                #                                                                      phi, 
-                #                                                                      psi)
-
-                
-
-                #print "%s  %15.5f  %15.5f  %15.5f" %(self.residues[i].name , 
-                #                                                          phi_final_angle, 
-                #                                                          psi_final_angle, 
-                #                                                          ome_final_angle)
+            
+        if log:
+            print 'TOTAL ENERGY = ', total_energy
+            print energy_list
+        
+        return total_energy
     
     
-    
-    
-    
-    
-    
-    
-    
-
-class Energy(AB_ENERGY, AMBER_ENERGY, RG_GIRATION, CONTACT_ENERGY, SECONDARY_STRUCTURE_ENERGY):
-    """ Class doc """
+    def compute_harmonical_restraint_energies (self, log = False):
+        """ Function doc """
+        
+        restraint = {
+                    'Kd'            : 40.0,
+                    'resi_i'        : 1   , #starts at ZERO
+                    'resi_j'        : 5   , 
+                    'atom_name_i'   : 'CA',
+                    'atom_name_j'   : 'CA',
+                    'distance'      : 10.0,
+                    }
+        if log:
+            print '------------------------------- Harmonical Restraint Energies -----------------------------------'
+            print 'Id(i)     name      id(j)     name         Rij        R restraint        delta R         Energy'    
 
         
-    
-    
+        for restraint in self.hamonical_potential_restraint_list:
+            name_i = self.residues[restraint['resi_i']].name          
+            for atom in self.residues[restraint['resi_i']].atoms:
+                if atom.name == restraint['atom_name_j']:
+                    atom_i    = atom  
+
+            
+            name_j = self.residues[restraint['resi_j']].name
+            for atom in self.residues[restraint['resi_j']].atoms:
+                if atom.name == restraint['atom_name_j']:
+                    atom_j = atom  
+            
+            R_ab    = distance_ab (atom_i, atom_j)
+            delta_R = (R_ab - restraint['distance'])
+            
+            energy  = (delta_R**2)*restraint['Kd']
+            
+            if log:
+                print '%-3s       %-3s        %s        %-3s %15.7f %15.7f %15.7f %15.7f ' %(restraint['resi_i'], name_i , restraint['resi_j'], name_j , R_ab, restraint['distance'], delta_R, energy)
+                
+                #print restraint['resi_i'], name_i , restraint['resi_j'], name_j , R_ab, restraint['distance'], delta_R, energy
+        
+        if log:
+            print '-------------------------------------------------------------------------------------------------'
+
+        return energy 
+
+
+
+class Energy(AB_ENERGY, AMBER_ENERGY, RG_GIRATION, CONTACT_ENERGY, GEOMETRY_ENERGY):
+    """ Class doc """
+
     def __init__ (self):
         """ Class initialiser """
     
@@ -471,18 +541,19 @@ class Energy(AB_ENERGY, AMBER_ENERGY, RG_GIRATION, CONTACT_ENERGY, SECONDARY_STR
                ):
                     
     
-        energy_list = {'AB_ENERGY' : 0.0,
-                       'CONTACT'   : 0.0,
-                       'ANGLE'     : 0.0,
-                       'BOND'      : 0.0,
-                       'DIHED'     : 0.0,
-                       'EEL'       : 0.0,
-                       'EELEC'     : 0.0,
-                       'EGB'       : 0.0,
-                       'ESURF'     : 0.0,
-                       'NB'        : 0.0,
-                       'VDWAALS'   : 0.0,
-                       'R_GYRATION': 0.0,}
+        energy_list = {'AB_ENERGY'   : 0.0,
+                       'CONTACT'     : 0.0,
+                       'ANGLE'       : 0.0,
+                       'BOND'        : 0.0,
+                       'DIHED'       : 0.0,
+                       'EEL'         : 0.0,
+                       'EELEC'       : 0.0,
+                       'EGB'         : 0.0,
+                       'ESURF'       : 0.0,
+                       'NB'          : 0.0,
+                       'VDWAALS'     : 0.0,
+                       'R_GYRATION'  : 0.0,
+                       'SS_RESTRAINT': 0.0}
         
         
         # AMBER energy
@@ -506,11 +577,22 @@ class Energy(AB_ENERGY, AMBER_ENERGY, RG_GIRATION, CONTACT_ENERGY, SECONDARY_STR
             energy_list['CONTACT'] = self.compute_CONTACT_energy(log = log, cutoff = self.energy_model_parameters['R_contact'])
         #energy_list['CONTACT'] = energy_list['CONTACT']*self.energy_model_parameters['CONTACT']
         #----------------------------------------------------------------------------------------
-         
+        
+        #----------------------------------------------------------------------------------------         
         if self.energy_model_parameters['R_GYRATION'] > 0.0:
             Rg = self.compute_R_gy_Calpha()
             energy_list['R_GYRATION'] = Rg
-    
+        #----------------------------------------------------------------------------------------    
+
+
+        #----------------------------------------------------------------------------------------         
+        if self.energy_model_parameters['SS_RESTRAINT'] > 0.0:
+            ss_restraint = self.compute_SS_energy()
+            energy_list['SS_RESTRAINT'] = ss_restraint
+        #----------------------------------------------------------------------------------------
+
+
+
 
         if self.energy_model == 'FULL':
 

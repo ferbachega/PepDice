@@ -112,10 +112,13 @@ class Molecule(Atom       ,
         self.torsions       = None
         self.FIX_atoms_CHI  = None
         
-        # Parameters
-        self.fixed_residues = []
-        self.fragments      = []
-        self.cmap           = None 
+        # Parameters and Restraints
+        self.fixed_residues                     = []
+        self.fragments                          = []
+        self.cmap                               = None 
+        
+        self.hamonical_potential_restraint_list = []
+        
         
         
         # MC important atributes
@@ -525,14 +528,8 @@ RMSD^0.3 = 1.15-1.96E-5 EEL-2.36 E-5 NB+4.4E-4  DIEH+1.85E-3 VDWAALS-7.5E⁻5  E
                                                       }
                                          }
                                                       
-
-                                     
-                                     
-                                     
-                                         
+                           
         self.energy_model_parameters = self.default_energy_model_setup['amber']
-
-                                         
         self.aa_dic = { 
                  'A' : 'ALA',
                  'R' : 'ARG',
@@ -1033,38 +1030,34 @@ Matrix type                 = %8s
         if len(self.residues) != len(w_ss):
             return False
         
-        
-        
         else:
             for i in range (0,len(self.residues)):
                 if ss[i] == 'C':
                     pass
-                
-                
-                if ss[i] == 'H':
-                    from Geometry                 import *
-                    
-                    self.residues[i].ss_restraint[0] = -57
-                    self.residues[i].ss_restraint[1] = -47
-                    self.residues[i].ss_restraint[2] = -180
-                    
-                    self.residues[i].w_ss_restraint[0] = int(w_ss[i])
-                    self.residues[i].w_ss_restraint[1] = int(w_ss[i])
-                    self.residues[i].w_ss_restraint[2] = int(w_ss[i])
-                    
-                    
-                    #phi_final_angle = set_phi_psi_dihedral( molecule=self, resi=i, bond='PHI',angle = -57 )
-                    #psi_final_angle = set_phi_psi_dihedral( molecule=self, resi=i, bond='PSI',angle = -47 )
 
+                if ss[i] == 'H':
+                    self.residues[i].phi_restraint_angle   = -57
+                    self.residues[i].psi_restraint_angle   = -47
+                    self.residues[i].omega_restraint_angle = -180
+                    
+                    self.residues[i].phi_restraint_weight   = int(w_ss[i])
+                    self.residues[i].psi_restraint_weight   = int(w_ss[i])
+                    self.residues[i].omega_restraint_weight = int(w_ss[i])
+
+
+                    
+                if ss[i] == 'E':
+                    self.residues[i].phi_restraint_angle   = -135
+                    self.residues[i].psi_restraint_angle   =  135
+                    self.residues[i].omega_restraint_angle = -180
+                    
+                    self.residues[i].phi_restraint_weight   = int(w_ss[i])
+                    self.residues[i].psi_restraint_weight   = int(w_ss[i])
+                    self.residues[i].omega_restraint_weight = int(w_ss[i])
                 else:
                     pass
         
-            if log:
-                for res in  self.residues:
-                    print res.name, res.ss_restraint, res.w_ss_restraint
 
-    
-    
     
     
     def set_SS_from_string(self, ss = None):
