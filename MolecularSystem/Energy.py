@@ -24,28 +24,45 @@ class AB_ENERGY:
                         
     def compute_atomi_atomj_AB_energy (self, atom_i, atom_j, R_ab = False):
         """ Function doc """ #-23085572255.9
-        A    = 100000
-        B    = 1
+        #A    = self.AB_model_energy_parameters['epsilon'][0]
+        #B    = 1
         
         if atom_i.AB + atom_j.AB == 'AA':   # apolares
-            C = 1
-        elif atom_i.AB + atom_j.AB == 'BB': # polares
-            C = 0.5
-        else:
-            C = -0.5
-    
-        
+            #C = 1.0
+            #A = 10.0
+            
+            A = self.AB_model_energy_parameters['epsilon'][0]
+            C = self.AB_model_energy_parameters['C'][0]
 
-        sigma_ab = (atom_i.sigma * atom_j.sigma)**0.5
+        
+        elif atom_i.AB + atom_j.AB == 'BB': # polares
+            #C = 1.0
+            #A = 5
+            
+            A = self.AB_model_energy_parameters['epsilon'][2]
+            C = self.AB_model_energy_parameters['C'][0]
+        
+        else:
+            #C = -0.5
+            #A = 5
+            
+            C = self.AB_model_energy_parameters['C'][1]
+            A = self.AB_model_energy_parameters['epsilon'][2]
+
+            
+        #atom_i.sigma = 3.8
+        #atom_j.sigma = 3.8
+
+        sigma_ab = (atom_i.sigma_ab * atom_j.sigma_ab)**0.5
         E_ab = A*( (sigma_ab/R_ab)**12 -  C*(sigma_ab/R_ab)**6)
         return E_ab
 
 
     def compute_AB_energy (self, cutoff = 999):
-        """ Function doc """
+        """ Function doc """ 
         '''
         ARG =  -4.5
-        LYS =  -3.9
+        LYS =  -3.9  AB_ENERGY        =     -0.0000496
         ASN =  -3.5
         ASP =  -3.5
         GLU =  -3.5
@@ -179,7 +196,7 @@ class AMBER_ENERGY:
     def compute_AMBER_energy (self, pn = 1, log = None):
         """ Function doc """
         # transformar numa funcao
-        write_AMBER_input_file(molecule = self, Type='energy', pn= pn, parameters = self.energy_model_parameters)
+        write_AMBER_input_file(molecule = self, Type='energy', pn= pn, parameters = self.amber_single_point_parammeters)
         save_CRD_to_file      (molecule = self, filename='SinglePoint'+str(pn)+'.crd')
         
         os.system('sander -O -i SinglePoint'+str(pn)+'.in -c SinglePoint'+str(pn)+'.crd -o SinglePoint'+str(pn)+'.log -p ' + self.top)
@@ -455,15 +472,9 @@ class GEOMETRY_ENERGY:
     
     def compute_harmonical_restraint_energies (self, log = False):
         """ Function doc """
+
+        energy = 0
         
-        restraint = {
-                    'Kd'            : 40.0,
-                    'resi_i'        : 1   , #starts at ZERO
-                    'resi_j'        : 5   , 
-                    'atom_name_i'   : 'CA',
-                    'atom_name_j'   : 'CA',
-                    'distance'      : 10.0,
-                    }
         if log:
             print '------------------------------- Harmonical Restraint Energies -----------------------------------'
             print 'Id(i)     name      id(j)     name         Rij        R restraint        delta R         Energy'    
@@ -541,179 +552,191 @@ class Energy(AB_ENERGY, AMBER_ENERGY, RG_GIRATION, CONTACT_ENERGY, GEOMETRY_ENER
                ):
                     
     
-        energy_list = {'AB_ENERGY'   : 0.0,
-                       'CONTACT'     : 0.0,
-                       'ANGLE'       : 0.0,
-                       'BOND'        : 0.0,
-                       'DIHED'       : 0.0,
-                       'EEL'         : 0.0,
-                       'EELEC'       : 0.0,
-                       'EGB'         : 0.0,
-                       'ESURF'       : 0.0,
-                       'NB'          : 0.0,
-                       'VDWAALS'     : 0.0,
-                       'R_GYRATION'  : 0.0,
-                       'SS_RESTRAINT': 0.0}
+        energy_list = {'AB_ENERGY'     : 0.0,
+                       'CONTACT'       : 0.0,
+                       'ANGLE'         : 0.0,
+                       'BOND'          : 0.0,
+                       'DIHED'         : 0.0,
+                       'EEL'           : 0.0,
+                       'EELEC'         : 0.0,
+                       'EGB'           : 0.0,
+                       'ESURF'         : 0.0,
+                       'NB'            : 0.0,
+                       'VDWAALS'       : 0.0,
+                       'R_GYRATION'    : 0.0,
+                       'SS_RESTRAINT'  : 0.0,
+                       'DIST_RESTRAINT': 0.0,}
         
         
         # AMBER energy
         #----------------------------------------------------------------------------------------
-        energy, energy_list = self.compute_AMBER_energy(pn = pn, log= log)
+        energy, amber_energy_list = self.compute_AMBER_energy(pn = pn, log= log)
         if energy == None:
             return None 
+        
+        for key in  amber_energy_list:
+            energy_list[key] = amber_energy_list[key]
+         
             
         #----------------------------------------------------------------------------------------
 
         # AB energy 
         #----------------------------------------------------------------------------------------
-        if self.energy_model_parameters['AB'] != 0.0:
+        if self.energy_components['AB_ENERGY'] != 0.0:
             energy_list['AB_ENERGY'] = self.compute_AB_energy ()
-            #energy_list['AB_ENERGY'] = energy_list['AB_ENERGY'] * self.energy_model_parameters['AB']
+            #energy_list['AB_ENERGY'] = energy_list['AB_ENERGY'] * self.energy_components['AB']
         #----------------------------------------------------------------------------------------
 
         # CONTACT energy  
         #----------------------------------------------------------------------------------------
-        if self.energy_model_parameters['CONTACT'] != 0.0:
-            energy_list['CONTACT'] = self.compute_CONTACT_energy(log = log, cutoff = self.energy_model_parameters['R_contact'])
-        #energy_list['CONTACT'] = energy_list['CONTACT']*self.energy_model_parameters['CONTACT']
+        if self.energy_components['CONTACT'] != 0.0:
+            energy_list['CONTACT'] = self.compute_CONTACT_energy(log = log, cutoff = self.contact_energy_parameters['R_cutoff'])
+        #energy_list['CONTACT'] = energy_list['CONTACT']*self.energy_components['CONTACT']
         #----------------------------------------------------------------------------------------
         
         #----------------------------------------------------------------------------------------         
-        if self.energy_model_parameters['R_GYRATION'] > 0.0:
+        if self.energy_components['R_GYRATION'] != 0.0:
             Rg = self.compute_R_gy_Calpha()
+            #print '\n\n\n\n',Rg, self.energy_components['R_GYRATION']
             energy_list['R_GYRATION'] = Rg
+        else:
+            pass
+            #print '\n\n\n\n fail'
         #----------------------------------------------------------------------------------------    
 
 
         #----------------------------------------------------------------------------------------         
-        if self.energy_model_parameters['SS_RESTRAINT'] > 0.0:
+        if self.energy_components['SS_RESTRAINT'] != 0.0:
             ss_restraint = self.compute_SS_energy()
             energy_list['SS_RESTRAINT'] = ss_restraint
+        else:
+            energy_list['SS_RESTRAINT'] = 0
+        #----------------------------------------------------------------------------------------
+
+        
+        #----------------------------------------------------------------------------------------         
+        if self.energy_components['DIST_RESTRAINT'] != 0.0:
+            dist_restraint = self.compute_harmonical_restraint_energies()
+            energy_list['DIST_RESTRAINT'] = dist_restraint
         #----------------------------------------------------------------------------------------
 
 
-
-
+        
+        
+        
+        
+        
+        
         if self.energy_model == 'FULL':
-
-            energy = self.energy_model_parameters['CONSTANT']
+            energy = self.energy_components['CONSTANT']
             # sum of the components
             for component in energy_list:
                 #print component,  energy_list[component]
-                energy += energy_list[component]
+                energy += energy_list[component] # *self.energy_components[ component  ]
+ 
 
         if self.energy_model == 'LABIO':
-            # AMBER energy modification
             #----------------------------------------------------------------------------------------
             if log:
-                print 'PARAMETER          RAW          Coef.'# %( energy_list['ANGLE'  ] ,  self.energy_model_parameters['ANGLE'  ])
-                print 'ANGLE     = %14.7f %14.7f' %( energy_list['ANGLE'  ] ,  self.energy_model_parameters['ANGLE'  ])
-                print 'BOND      = %14.7f %14.7f' %( energy_list['BOND'   ] ,  self.energy_model_parameters['BOND'   ])
-                print 'DIHED     = %14.7f %14.7f' %( energy_list['DIHED'  ] ,  self.energy_model_parameters['DIHED'  ])
-                print 'EEL       = %14.7f %14.7f' %( energy_list['EEL'    ] ,  self.energy_model_parameters['EEL'    ])
-                print 'EELEC     = %14.7f %14.7f' %( energy_list['EELEC'  ] ,  self.energy_model_parameters['EELEC'  ])
-                print 'EGB       = %14.7f %14.7f' %( energy_list['EGB'    ] ,  self.energy_model_parameters['EGB'    ])
-                print 'ESURF     = %14.7f %14.7f' %( energy_list['ESURF'  ] ,  self.energy_model_parameters['ESURF'  ])        
-                print 'NB        = %14.7f %14.7f' %( energy_list['NB'     ] ,  self.energy_model_parameters['NB'     ])             
-                print 'VDWAALS   = %14.7f %14.7f' %( energy_list['VDWAALS'] ,  self.energy_model_parameters['VDWAALS'])
+                print 'PARAMETER              RAW             Coef.'# %( energy_list['ANGLE'  ] ,  self.energy_components['ANGLE'  ])
+                print 'ANGLE            = %14.7f %15.8f' %( energy_list['ANGLE'  ] ,  self.energy_components['ANGLE'  ])
+                print 'BOND             = %14.7f %15.8f' %( energy_list['BOND'   ] ,  self.energy_components['BOND'   ])
+                print 'DIHED            = %14.7f %15.8f' %( energy_list['DIHED'  ] ,  self.energy_components['DIHED'  ])
+                print 'EEL              = %14.7f %15.8f' %( energy_list['EEL'    ] ,  self.energy_components['EEL'    ])
+                print 'EELEC            = %14.7f %15.8f' %( energy_list['EELEC'  ] ,  self.energy_components['EELEC'  ])
+                print 'EGB              = %14.7f %15.8f' %( energy_list['EGB'    ] ,  self.energy_components['EGB'    ])
+                print 'ESURF            = %14.7f %15.8f' %( energy_list['ESURF'  ] ,  self.energy_components['ESURF'  ])        
+                print 'NB               = %14.7f %15.8f' %( energy_list['NB'     ] ,  self.energy_components['NB'     ])             
+                print 'VDWAALS          = %14.7f %15.8f' %( energy_list['VDWAALS'] ,  self.energy_components['VDWAALS'])
             
-            energy_list['ANGLE'  ] = energy_list['ANGLE'  ] * self.energy_model_parameters['ANGLE'  ] 
-            energy_list['BOND'   ] = energy_list['BOND'   ] * self.energy_model_parameters['BOND'   ] 
-            energy_list['DIHED'  ] = energy_list['DIHED'  ] * self.energy_model_parameters['DIHED'  ] 
-            energy_list['EEL'    ] = energy_list['EEL'    ] * self.energy_model_parameters['EEL'    ] 
-            energy_list['EELEC'  ] = energy_list['EELEC'  ] * self.energy_model_parameters['EELEC'  ] 
-            energy_list['EGB'    ] = energy_list['EGB'    ] * self.energy_model_parameters['EGB'    ] 
-            energy_list['ESURF'  ] = energy_list['ESURF'  ] * self.energy_model_parameters['ESURF'  ]         
-            energy_list['NB'     ] = energy_list['NB'     ] * self.energy_model_parameters['NB'     ]              
-            energy_list['VDWAALS'] = energy_list['VDWAALS'] * self.energy_model_parameters['VDWAALS']                
+            energy_list['ANGLE'  ] = energy_list['ANGLE'  ] * self.energy_components['ANGLE'  ] 
+            energy_list['BOND'   ] = energy_list['BOND'   ] * self.energy_components['BOND'   ] 
+            energy_list['DIHED'  ] = energy_list['DIHED'  ] * self.energy_components['DIHED'  ] 
+            energy_list['EEL'    ] = energy_list['EEL'    ] * self.energy_components['EEL'    ] 
+            energy_list['EELEC'  ] = energy_list['EELEC'  ] * self.energy_components['EELEC'  ] 
+            energy_list['EGB'    ] = energy_list['EGB'    ] * self.energy_components['EGB'    ] 
+            energy_list['ESURF'  ] = energy_list['ESURF'  ] * self.energy_components['ESURF'  ]         
+            energy_list['NB'     ] = energy_list['NB'     ] * self.energy_components['NB'     ]              
+            energy_list['VDWAALS'] = energy_list['VDWAALS'] * self.energy_components['VDWAALS']                
             #----------------------------------------------------------------------------------------
             
             
             # AB energy modification
             #----------------------------------------------------------------------------------------
             if log:
-                print 'AB_ENERGY = %14.7f %14.7f' %( energy_list['AB_ENERGY'] , self.energy_model_parameters['AB'])
-
-            #print 'AB_ENERGY'  , energy_list['AB_ENERGY'] , self.energy_model_parameters['AB']
-            energy_list['AB_ENERGY'] = energy_list['AB_ENERGY'] * self.energy_model_parameters['AB']
+                print 'AB_ENERGY        = %14.7f %14.7f' %( energy_list['AB_ENERGY'] , self.energy_components['AB_ENERGY'])
+            #print 'AB_ENERGY'  , energy_list['AB_ENERGY'] , self.energy_components['AB']
+            energy_list['AB_ENERGY'] = energy_list['AB_ENERGY'] * self.energy_components['AB_ENERGY']
             #----------------------------------------------------------------------------------------
             
             
             # CONTACT energy modification 
             #----------------------------------------------------------------------------------------
             if log:
-                print 'CONTACT   = %14.7f %14.7f' %(energy_list['CONTACT'],self.energy_model_parameters['CONTACT'])
-            energy_list['CONTACT']  = energy_list['CONTACT'] *self.energy_model_parameters['CONTACT']
+                print 'CONTACT          = %14.7f %14.7f' %(energy_list['CONTACT'],self.energy_components['CONTACT'])
+            energy_list['CONTACT']  = energy_list['CONTACT'] *self.energy_components['CONTACT']
             #----------------------------------------------------------------------------------------
+
+            #----------------------------------------------------------------------------------------         
+            if log:
+                print 'R_GYRATION       =  %14.7f %14.7f' %(energy_list['R_GYRATION'],self.energy_components['R_GYRATION'])
+            energy_list['R_GYRATION'] = energy_list['R_GYRATION'] *self.energy_components['R_GYRATION']
+            #----------------------------------------------------------------------------------------    
+           
+            
+            #pprint(self.energy_components)
+            #pprint(energy_list)
+           
+            #----------------------------------------------------------------------------------------         
+            if log:
+                print 'SS_RESTRAINT     = %14.7f %14.7f' %(energy_list['SS_RESTRAINT'],self.energy_components['SS_RESTRAINT'])
+            energy_list['SS_RESTRAINT'] = energy_list['SS_RESTRAINT'] *self.energy_components['SS_RESTRAINT']
+            #----------------------------------------------------------------------------------------    
+           
+            #----------------------------------------------------------------------------------------         
+            if log:
+                print 'DIST_RESTRAINT   =  %14.7f %14.7f' %(energy_list['DIST_RESTRAINT'],self.energy_components['DIST_RESTRAINT'])
+            energy_list['DIST_RESTRAINT'] = energy_list['DIST_RESTRAINT'] *self.energy_components['DIST_RESTRAINT']
+            #----------------------------------------------------------------------------------------    
+
 
             # sum of total pseudo energy - starts with a constant:
             if log:
-                print 'CONSTANT  = %14.7f' %(self.energy_model_parameters['CONSTANT'])
-            energy_list['CONSTANT'] = self.energy_model_parameters['CONSTANT']
+                print 'CONSTANT         = %14.7f' %(self.energy_components['CONSTANT'])
+            energy_list['CONSTANT'] = self.energy_components['CONSTANT']
+                        
             
             
-            if log:
-                print ''' 
-                Energy ~ <SIZE> + <CONTACT> + <AB_ENERGY> + <ANGLE> + <BOND> + <DIHED>
-                        + <EEL> + <EELEC> + <EGB> + <ESURF> + <NB> + <VDWAALS> + <CONSTANT>
-                 '''
+
             #Y ~ <SIZE> + <contacts0> + <AB_ENERGY> + <ANGLE> + <BOND> + <DIHED>
             # + <EEL> + <EELEC> + <EGB> + <ESURF> + <NB> + <VDWAALS> + <CONSTANT>
-            SIZE      = len(self.residues)*self.energy_model_parameters['SIZE']
-            CONTACT = energy_list['CONTACT']
-            AB_ENERGY = energy_list['AB_ENERGY']
-            ANGLE     = energy_list['ANGLE']
-            BOND      = energy_list['BOND']
-            DIHED     = energy_list['DIHED']
-            EEL       = energy_list['EEL']
-            EELEC     = energy_list['EELEC']
-            EGB       = energy_list['EGB']
-            ESURF     = energy_list['ESURF']
-            NB        = energy_list['NB']
-            VDWAALS   = energy_list['VDWAALS']
-            intercept = energy_list['CONSTANT']
+            #SIZE      = len(self.residues)*self.energy_components['SIZE']
+            #CONTACT = energy_list['CONTACT']
+            #AB_ENERGY = energy_list['AB_ENERGY']
+            #ANGLE     = energy_list['ANGLE']
+            #BOND      = energy_list['BOND']
+            #DIHED     = energy_list['DIHED']
+            #EEL       = energy_list['EEL']
+            #EELEC     = energy_list['EELEC']
+            #EGB       = energy_list['EGB']
+            #ESURF     = energy_list['ESURF']
+            #NB        = energy_list['NB']
+            #VDWAALS   = energy_list['VDWAALS']
+            #intercept = energy_list['CONSTANT']
             
-            energy = SIZE + CONTACT + AB_ENERGY + ANGLE + BOND + DIHED + EEL + EELEC + EGB + ESURF + NB + VDWAALS + intercept
-            energy = energy**(10.0/3)
-
-
-        if self.energy_model == 'iLABIO':
-            # AMBER components modification
-            #----------------------------------------------------------------------------------------
-            energy_list['ANGLE'  ] = energy_list['ANGLE'  ] * self.energy_model_parameters['ANGLE'  ] 
-            energy_list['BOND'   ] = energy_list['BOND'   ] * self.energy_model_parameters['BOND'   ] 
-            energy_list['DIHED'  ] = energy_list['DIHED'  ] * self.energy_model_parameters['DIHED'  ] 
-            energy_list['EEL'    ] = energy_list['EEL'    ] * self.energy_model_parameters['EEL'    ] 
-            energy_list['EELEC'  ] = energy_list['EELEC'  ] * self.energy_model_parameters['EELEC'  ] 
-            energy_list['EGB'    ] = energy_list['EGB'    ] * self.energy_model_parameters['EGB'    ] 
-            energy_list['ESURF'  ] = energy_list['ESURF'  ] * self.energy_model_parameters['ESURF'  ]         
-            energy_list['NB'     ] = energy_list['NB'     ] * self.energy_model_parameters['NB'     ]              
-            energy_list['VDWAALS'] = energy_list['VDWAALS'] * self.energy_model_parameters['VDWAALS']                
-            #----------------------------------------------------------------------------------------
+            #energy = SIZE + CONTACT + AB_ENERGY + ANGLE + BOND + DIHED + EEL + EELEC + EGB + ESURF + NB + VDWAALS + intercept
+            #energy = energy**(10.0/3)
             
-            # AB energy modification
-            #----------------------------------------------------------------------------------------
-            energy_list['AB_ENERGY'] = energy_list['AB_ENERGY'] * self.energy_model_parameters['AB']
-            #----------------------------------------------------------------------------------------
+            energy = 0
             
-
-            # CONTACT energy modification 
-            #----------------------------------------------------------------------------------------
-            energy_list['CONTACT'] = energy_list['CONTACT']*self.energy_model_parameters['CONTACT']
-            #----------------------------------------------------------------------------------------
-
-
-            # sum of total pseudo energy - starts with a constant:
-            energy = self.energy_model_parameters['CONSTANT']
-            
-            # sum of the components
             for component in energy_list:
                 #print component,  energy_list[component]
-                energy += energy_list[component]
+                print component , energy_list[component]
+                energy += energy_list[component] # *self.energy_components[ component  ]
             
-            # final component - SIZE
-            energy += len(self.residues)*self.energy_model_parameters['SIZE']
-            energy = energy**(10.0/3)
+            #energy = energy**(10.0/3)
+            
+
 
 
 
@@ -726,9 +749,9 @@ EELEC               =   %20.10f     DIHED            =   %20.10f
 EGB                 =   %20.10f     ESURF            =   %20.10f
 NB                  =   %20.10f     VDWAALS          =   %20.10f
 ------------------------------------------------------------------------------------------
-AB_ENERGY           =   %20.10f
-CONTACT             =   %20.10f
-R_GYRATION          =   %20.10f
+DIST_RESTRAINT      =   %20.10f     SS_RESTRAINT     =   %20.10f
+AB_ENERGY           =   %20.10f     CONTACT          =   %20.10f
+R_GYRATION          =   %20.10f     
 ------------------------------------------------------------------------------------------
      
             ''' %(energy,
@@ -741,9 +764,15 @@ R_GYRATION          =   %20.10f
                   energy_list['ESURF'     ],
                   energy_list['NB'        ],
                   energy_list['VDWAALS'   ],
+                  
+                  energy_list['DIST_RESTRAINT'],
+                  energy_list['SS_RESTRAINT']  ,
+                  
                   energy_list['AB_ENERGY' ],
                   energy_list['CONTACT'   ],
+
                   energy_list['R_GYRATION'],
+
                   )
             
             print text
@@ -754,8 +783,6 @@ R_GYRATION          =   %20.10f
         else:
             return energy
         
-
-
 
 
 
@@ -939,4 +966,124 @@ def write_NaMD_input_file(molecule=None, Type='energy', parameters = None, pn = 
             output_file.write(text)
             output_file.close()
             
-
+            
+            
+            
+#        '''
+#        if self.energy_model == 'LABIO':
+#            # AMBER energy modification
+#            #----------------------------------------------------------------------------------------
+#            if log:
+#                print 'PARAMETER          RAW          Coef.'# %( energy_list['ANGLE'  ] ,  self.energy_components['ANGLE'  ])
+#                print 'ANGLE     = %14.7f %14.7f' %( energy_list['ANGLE'  ] ,  self.energy_components['ANGLE'  ])
+#                print 'BOND      = %14.7f %14.7f' %( energy_list['BOND'   ] ,  self.energy_components['BOND'   ])
+#                print 'DIHED     = %14.7f %14.7f' %( energy_list['DIHED'  ] ,  self.energy_components['DIHED'  ])
+#                print 'EEL       = %14.7f %14.7f' %( energy_list['EEL'    ] ,  self.energy_components['EEL'    ])
+#                print 'EELEC     = %14.7f %14.7f' %( energy_list['EELEC'  ] ,  self.energy_components['EELEC'  ])
+#                print 'EGB       = %14.7f %14.7f' %( energy_list['EGB'    ] ,  self.energy_components['EGB'    ])
+#                print 'ESURF     = %14.7f %14.7f' %( energy_list['ESURF'  ] ,  self.energy_components['ESURF'  ])        
+#                print 'NB        = %14.7f %14.7f' %( energy_list['NB'     ] ,  self.energy_components['NB'     ])             
+#                print 'VDWAALS   = %14.7f %14.7f' %( energy_list['VDWAALS'] ,  self.energy_components['VDWAALS'])
+#            
+#            energy_list['ANGLE'  ] = energy_list['ANGLE'  ] * self.energy_components['ANGLE'  ] 
+#            energy_list['BOND'   ] = energy_list['BOND'   ] * self.energy_components['BOND'   ] 
+#            energy_list['DIHED'  ] = energy_list['DIHED'  ] * self.energy_components['DIHED'  ] 
+#            energy_list['EEL'    ] = energy_list['EEL'    ] * self.energy_components['EEL'    ] 
+#            energy_list['EELEC'  ] = energy_list['EELEC'  ] * self.energy_components['EELEC'  ] 
+#            energy_list['EGB'    ] = energy_list['EGB'    ] * self.energy_components['EGB'    ] 
+#            energy_list['ESURF'  ] = energy_list['ESURF'  ] * self.energy_components['ESURF'  ]         
+#            energy_list['NB'     ] = energy_list['NB'     ] * self.energy_components['NB'     ]              
+#            energy_list['VDWAALS'] = energy_list['VDWAALS'] * self.energy_components['VDWAALS']                
+#            #----------------------------------------------------------------------------------------
+#            
+#            
+#            # AB energy modification
+#            #----------------------------------------------------------------------------------------
+#            if log:
+#                print 'AB_ENERGY = %14.7f %14.7f' %( energy_list['AB_ENERGY'] , self.energy_components['AB'])
+#
+#            #print 'AB_ENERGY'  , energy_list['AB_ENERGY'] , self.energy_components['AB']
+#            energy_list['AB_ENERGY'] = energy_list['AB_ENERGY'] * self.energy_components['AB']
+#            #----------------------------------------------------------------------------------------
+#            
+#            
+#            # CONTACT energy modification 
+#            #----------------------------------------------------------------------------------------
+#            if log:
+#                print 'CONTACT   = %14.7f %14.7f' %(energy_list['CONTACT'],self.energy_components['CONTACT'])
+#            energy_list['CONTACT']  = energy_list['CONTACT'] *self.energy_components['CONTACT']
+#            #----------------------------------------------------------------------------------------
+#
+#            # sum of total pseudo energy - starts with a constant:
+#            if log:
+#                print 'CONSTANT  = %14.7f' %(self.energy_components['CONSTANT'])
+#            energy_list['CONSTANT'] = self.energy_components['CONSTANT']
+#            
+#            
+#            
+#            
+#            
+#            if log:
+#                print ''' 
+#                #Energy ~ <SIZE> + <CONTACT> + <AB_ENERGY> + <ANGLE> + <BOND> + <DIHED>
+#                #        + <EEL> + <EELEC> + <EGB> + <ESURF> + <NB> + <VDWAALS> + <CONSTANT>
+#                 '''
+#            #Y ~ <SIZE> + <contacts0> + <AB_ENERGY> + <ANGLE> + <BOND> + <DIHED>
+#            # + <EEL> + <EELEC> + <EGB> + <ESURF> + <NB> + <VDWAALS> + <CONSTANT>
+#            SIZE      = len(self.residues)*self.energy_components['SIZE']
+#            CONTACT = energy_list['CONTACT']
+#            AB_ENERGY = energy_list['AB_ENERGY']
+#            ANGLE     = energy_list['ANGLE']
+#            BOND      = energy_list['BOND']
+#            DIHED     = energy_list['DIHED']
+#            EEL       = energy_list['EEL']
+#            EELEC     = energy_list['EELEC']
+#            EGB       = energy_list['EGB']
+#            ESURF     = energy_list['ESURF']
+#            NB        = energy_list['NB']
+#            VDWAALS   = energy_list['VDWAALS']
+#            intercept = energy_list['CONSTANT']
+#            
+#            energy = SIZE + CONTACT + AB_ENERGY + ANGLE + BOND + DIHED + EEL + EELEC + EGB + ESURF + NB + VDWAALS + intercept
+#            energy = energy**(10.0/3)
+#
+#
+#        if self.energy_model == 'iLABIO':
+#            # AMBER components modification
+#            #----------------------------------------------------------------------------------------
+#            energy_list['ANGLE'  ] = energy_list['ANGLE'  ] * self.energy_components['ANGLE'  ] 
+#            energy_list['BOND'   ] = energy_list['BOND'   ] * self.energy_components['BOND'   ] 
+#            energy_list['DIHED'  ] = energy_list['DIHED'  ] * self.energy_components['DIHED'  ] 
+#            energy_list['EEL'    ] = energy_list['EEL'    ] * self.energy_components['EEL'    ] 
+#            energy_list['EELEC'  ] = energy_list['EELEC'  ] * self.energy_components['EELEC'  ] 
+#            energy_list['EGB'    ] = energy_list['EGB'    ] * self.energy_components['EGB'    ] 
+#            energy_list['ESURF'  ] = energy_list['ESURF'  ] * self.energy_components['ESURF'  ]         
+#            energy_list['NB'     ] = energy_list['NB'     ] * self.energy_components['NB'     ]              
+#            energy_list['VDWAALS'] = energy_list['VDWAALS'] * self.energy_components['VDWAALS']                
+#            #----------------------------------------------------------------------------------------
+#            
+#            # AB energy modification
+#            #----------------------------------------------------------------------------------------
+#            energy_list['AB_ENERGY'] = energy_list['AB_ENERGY'] * self.energy_components['AB']
+#            #----------------------------------------------------------------------------------------
+#            
+#
+#            # CONTACT energy modification 
+#            #----------------------------------------------------------------------------------------
+#            energy_list['CONTACT'] = energy_list['CONTACT']*self.energy_components['CONTACT']
+#            #----------------------------------------------------------------------------------------
+#
+#
+#            # sum of total pseudo energy - starts with a constant:
+#            energy = self.energy_components['CONSTANT']
+#            
+#            # sum of the components
+#            for component in energy_list:
+#                #print component,  energy_list[component]
+#                energy += energy_list[component]
+#            
+#            # final component - SIZE
+#            energy += len(self.residues)*self.energy_components['SIZE']
+#            energy = energy**(10.0/3)
+#        '''
+#

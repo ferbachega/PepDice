@@ -3,7 +3,7 @@ import numpy as np
 
 import pandas as pd
  
-train_df = pd.read_csv('energies_gyration.csv')
+train_df = pd.read_csv('energies_gyration_AB_energy_new.csv')
 
 example_series =  pd.Series([1,5,10,30,50,30,15,40,45])
 print(train_df['NB'].median())
@@ -11,7 +11,21 @@ print(train_df.cov())
 
 print(train_df.corr())
 
-train_df['R_GYRATION'] = train_df['R_GYRATION']**2
+allkeys = []
+keys    = [] 
+wkeys   = []
+
+for key in train_df:
+    print key 
+    if key == 'PDB' or key == 'decoy' or key =='RMSD':
+        pass
+    else:
+        train_df['W_'+key] = train_df[key]/train_df['SIZE']
+        allkeys.append('W_'+key)
+        allkeys.append(key)
+        
+        keys.append(key)
+        wkeys.append('W_'+key)
 
 
 print(train_df.columns)
@@ -36,7 +50,7 @@ pdbs = [
         'IT1gpt_'  ,
         'IT1gyvA'  ,
         'IT1itpA'  ,
-        #'IT1kjs_'  ,
+        'IT1kjs_'  ,
         'IT1kviA'  ,
         'IT1mkyA3' ,
         'IT1mla_2' ,
@@ -63,7 +77,7 @@ pdbs = [
 #r2 = []
 
 
-
+'''
 for pdb in pdbs:
 
     #dfols=train_df[train_df['SIZE']==72] # Apenas para 1990
@@ -85,9 +99,37 @@ for pdb in pdbs:
     ols=pd.ols(y=dfols['RMSD']**.3, x=dfols[['SIZE','CONTACT','R_GYRATION','AB_ENERGY','ANGLE','BOND','DIHED','EEL','EELEC','EGB','ESURF','NB','VDWAALS']])
 
     print '%-12s %14.7f %14.7f ' %(pdb, ols.r2, ols.r2_adj)  
+'''
 
+
+
+dfols=train_df[train_df['PDB']!= 'IT1kjs_']
+#ols=pd.ols(y=dfols['RMSD']**.3, x=dfols[['SIZE','CONTACT','R_GYRATION','R_GYRATION2', 'AB_ENERGY','ANGLE','BOND','DIHED','EEL','EELEC','EGB','ESURF','NB','VDWAALS']])
+#ols=pd.ols(y=dfols['RMSD']**.3, x=dfols[keys])
+ols=pd.ols(y=dfols['RMSD']**.3, x=dfols[allkeys])
+#ols=pd.ols(y=dfols['RMSD']**.3, x=dfols[wkeys])
 
 print (ols)
 
-#PDB                 decoy   SIZE     RMSD         CONTACT      R_GYRATION       AB_ENERGY           ANGLE            BOND           DIHED             EEL           EELEC             EGB           ESURF              NB         VDWAALS
+y = []
+yf= []
+
+for i in ols.y:
+    y.append(i)
+
+for i in ols.y_predict:
+    yf.append(i)
+
+
+logfile = open('panda_fit.log', 'w')
+text = ''
+
+for i in range(0, len(y)):
+    text +='%15.7f  %15.7f \n' % (y[i], yf[i])
+    #print text
+logfile.write(text)
+
+print ols.beta
+
+
 

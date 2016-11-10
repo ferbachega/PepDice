@@ -58,3 +58,6 @@ class Atom(object):
         # coordinates and energy
         self.pos = pos
         self.actual_energy = 0
+        self.sigma_ab = 4.5
+        
+        

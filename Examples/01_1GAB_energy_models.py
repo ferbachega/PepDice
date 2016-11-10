@@ -50,16 +50,16 @@ system.import_SS_restraints_from_string (      ss = 'CCHHHHHHHHHHHHHHHHHHCCCCCHH
                                             w_ss  = '00000123345553221111000000001234432100012342335556110', log= True)
 print system.compute_SS_energy(log = True)
 
-restraint = {
-                    'Kd'            : 40.0,
-                    'resi_i'        : 1   , #starts at ZERO
-                    'resi_j'        : 5   , 
-                    'atom_name_i'   : 'CA',
-                    'atom_name_j'   : 'CA',
-                    'distance'      : 10.0,
-                    }
-
-system.hamonical_potential_restraint_list.append(restraint)
+#restraint = {
+#                    'Kd'            : 40.0,
+#                    'resi_i'        : 1   , #starts at ZERO
+#                    'resi_j'        : 5   , 
+#                    'atom_name_i'   : 'CA',
+#                    'atom_name_j'   : 'CA',
+#                    'distance'      : 10.0,
+#                    }
+#
+#system.hamonical_potential_restraint_list.append(restraint)
 
 print system.compute_harmonical_restraint_energies(log = True)
 

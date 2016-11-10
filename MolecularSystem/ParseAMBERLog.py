@@ -32,7 +32,7 @@ def ParseAMBERLog(filein, log=True):
            'VDWAALS': None,
              'EELEC': None,
                'EGB': None,
-         'RESTRAINT': None,
+         #'RESTRAINT': None,
              'ESURF': None, 
            'CONTACT': 0.0 ,
          'AB_ENERGY': 0.0 ,    
