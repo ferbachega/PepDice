@@ -552,20 +552,7 @@ class Energy(AB_ENERGY, AMBER_ENERGY, RG_GIRATION, CONTACT_ENERGY, GEOMETRY_ENER
                ):
                     
     
-        energy_list = {'AB_ENERGY'     : 0.0,
-                       'CONTACT'       : 0.0,
-                       'ANGLE'         : 0.0,
-                       'BOND'          : 0.0,
-                       'DIHED'         : 0.0,
-                       'EEL'           : 0.0,
-                       'EELEC'         : 0.0,
-                       'EGB'           : 0.0,
-                       'ESURF'         : 0.0,
-                       'NB'            : 0.0,
-                       'VDWAALS'       : 0.0,
-                       'R_GYRATION'    : 0.0,
-                       'SS_RESTRAINT'  : 0.0,
-                       'DIST_RESTRAINT': 0.0,}
+
         
         
         # AMBER energy
@@ -575,214 +562,186 @@ class Energy(AB_ENERGY, AMBER_ENERGY, RG_GIRATION, CONTACT_ENERGY, GEOMETRY_ENER
             return None 
         
         for key in  amber_energy_list:
-            energy_list[key] = amber_energy_list[key]
-         
+            self.energy_components[key][0] = amber_energy_list[key]
             
         #----------------------------------------------------------------------------------------
-
         # AB energy 
         #----------------------------------------------------------------------------------------
-        if self.energy_components['AB_ENERGY'] != 0.0:
-            energy_list['AB_ENERGY'] = self.compute_AB_energy ()
-            #energy_list['AB_ENERGY'] = energy_list['AB_ENERGY'] * self.energy_components['AB']
+        if self.energy_components['AB_ENERGY'][1] != 0.0:
+            self.energy_components['AB_ENERGY'][0] = self.compute_AB_energy ()
         #----------------------------------------------------------------------------------------
 
+        
         # CONTACT energy  
         #----------------------------------------------------------------------------------------
-        if self.energy_components['CONTACT'] != 0.0:
-            energy_list['CONTACT'] = self.compute_CONTACT_energy(log = log, cutoff = self.contact_energy_parameters['R_cutoff'])
-        #energy_list['CONTACT'] = energy_list['CONTACT']*self.energy_components['CONTACT']
+        if self.energy_components['CONTACT'][1] != 0.0:
+            self.energy_components['CONTACT'][0] = self.compute_CONTACT_energy(log = log, cutoff = self.contact_energy_parameters['R_cutoff'])
+        
         #----------------------------------------------------------------------------------------
         
+        # R_GYRATION
         #----------------------------------------------------------------------------------------         
-        if self.energy_components['R_GYRATION'] != 0.0:
+        if self.energy_components['R_GYRATION'][1] != 0.0:
             Rg = self.compute_R_gy_Calpha()
-            #print '\n\n\n\n',Rg, self.energy_components['R_GYRATION']
-            energy_list['R_GYRATION'] = Rg
+            self.energy_components['R_GYRATION'][0]= Rg
         else:
             pass
-            #print '\n\n\n\n fail'
         #----------------------------------------------------------------------------------------    
 
-
+        # SS_RESTRAINT
         #----------------------------------------------------------------------------------------         
-        if self.energy_components['SS_RESTRAINT'] != 0.0:
-            ss_restraint = self.compute_SS_energy()
-            energy_list['SS_RESTRAINT'] = ss_restraint
+        if self.energy_components['SS_RESTRAINT'][1] != 0.0:
+            self.energy_components['SS_RESTRAINT'][0] = self.compute_SS_energy()
         else:
-            energy_list['SS_RESTRAINT'] = 0
+            pass
         #----------------------------------------------------------------------------------------
 
-        
+        # DIST_RESTRAINT
         #----------------------------------------------------------------------------------------         
-        if self.energy_components['DIST_RESTRAINT'] != 0.0:
-            dist_restraint = self.compute_harmonical_restraint_energies()
-            energy_list['DIST_RESTRAINT'] = dist_restraint
+        if self.energy_components['DIST_RESTRAINT'][1] != 0.0:
+            self.energy_components['DIST_RESTRAINT'][0] = self.compute_harmonical_restraint_energies()
         #----------------------------------------------------------------------------------------
 
 
+        operators = {}
+        
+        for key in self.energy_components:
+            #print key
+            if '/'  in key:
+                
+                key2 = key.split('/')
+                component1  = key2[0]
+                component2  = key2[1]
+                self.energy_components[key][0] = self.energy_components[component1][0] / self.energy_components[component2.upper()][0]
+            
+            if '*'  in key:
+                
+                key2 = key.split('*')
+                component1  = key2[0]
+                component2  = key2[1]
+                self.energy_components[key][0] = self.energy_components[component1][0] ** self.energy_components[component2.upper()][0]
+            
+            if '**'  in key:
+                key2 = key.split('**')
+                component1  = key2[0]
+                component2  = key2[1]
+                self.energy_components[key][0] = self.energy_components[component1][0] ** self.energy_components[component2.upper()][0]
         
         
-        
-        
-        
-        
+        '''
         if self.energy_model == 'FULL':
-            energy = self.energy_components['CONSTANT']
+            # energy = self.energy_components['CONSTANT']
             # sum of the components
-            for component in energy_list:
+            for component in self.energy_components:
                 #print component,  energy_list[component]
-                energy += energy_list[component] # *self.energy_components[ component  ]
+                energy += self.energy_components[component][0] # *self.energy_components[ component  ]
  
 
+        
+        
+        
+        
         if self.energy_model == 'LABIO':
             #----------------------------------------------------------------------------------------
-            if log:
-                print 'PARAMETER              RAW             Coef.'# %( energy_list['ANGLE'  ] ,  self.energy_components['ANGLE'  ])
-                print 'ANGLE            = %14.7f %15.8f' %( energy_list['ANGLE'  ] ,  self.energy_components['ANGLE'  ])
-                print 'BOND             = %14.7f %15.8f' %( energy_list['BOND'   ] ,  self.energy_components['BOND'   ])
-                print 'DIHED            = %14.7f %15.8f' %( energy_list['DIHED'  ] ,  self.energy_components['DIHED'  ])
-                print 'EEL              = %14.7f %15.8f' %( energy_list['EEL'    ] ,  self.energy_components['EEL'    ])
-                print 'EELEC            = %14.7f %15.8f' %( energy_list['EELEC'  ] ,  self.energy_components['EELEC'  ])
-                print 'EGB              = %14.7f %15.8f' %( energy_list['EGB'    ] ,  self.energy_components['EGB'    ])
-                print 'ESURF            = %14.7f %15.8f' %( energy_list['ESURF'  ] ,  self.energy_components['ESURF'  ])        
-                print 'NB               = %14.7f %15.8f' %( energy_list['NB'     ] ,  self.energy_components['NB'     ])             
-                print 'VDWAALS          = %14.7f %15.8f' %( energy_list['VDWAALS'] ,  self.energy_components['VDWAALS'])
-            
-            energy_list['ANGLE'  ] = energy_list['ANGLE'  ] * self.energy_components['ANGLE'  ] 
-            energy_list['BOND'   ] = energy_list['BOND'   ] * self.energy_components['BOND'   ] 
-            energy_list['DIHED'  ] = energy_list['DIHED'  ] * self.energy_components['DIHED'  ] 
-            energy_list['EEL'    ] = energy_list['EEL'    ] * self.energy_components['EEL'    ] 
-            energy_list['EELEC'  ] = energy_list['EELEC'  ] * self.energy_components['EELEC'  ] 
-            energy_list['EGB'    ] = energy_list['EGB'    ] * self.energy_components['EGB'    ] 
-            energy_list['ESURF'  ] = energy_list['ESURF'  ] * self.energy_components['ESURF'  ]         
-            energy_list['NB'     ] = energy_list['NB'     ] * self.energy_components['NB'     ]              
-            energy_list['VDWAALS'] = energy_list['VDWAALS'] * self.energy_components['VDWAALS']                
-            #----------------------------------------------------------------------------------------
-            
-            
-            # AB energy modification
-            #----------------------------------------------------------------------------------------
-            if log:
-                print 'AB_ENERGY        = %14.7f %14.7f' %( energy_list['AB_ENERGY'] , self.energy_components['AB_ENERGY'])
-            #print 'AB_ENERGY'  , energy_list['AB_ENERGY'] , self.energy_components['AB']
-            energy_list['AB_ENERGY'] = energy_list['AB_ENERGY'] * self.energy_components['AB_ENERGY']
-            #----------------------------------------------------------------------------------------
-            
-            
-            # CONTACT energy modification 
-            #----------------------------------------------------------------------------------------
-            if log:
-                print 'CONTACT          = %14.7f %14.7f' %(energy_list['CONTACT'],self.energy_components['CONTACT'])
-            energy_list['CONTACT']  = energy_list['CONTACT'] *self.energy_components['CONTACT']
-            #----------------------------------------------------------------------------------------
+            for key in self.energy_components:
+                self.energy_components[key][0] = self.energy_components[key][0] * self.energy_components[key][1] 
+                
+                if log:
+                    print '%-14s  = %15.7f    %15.8f' %(key, self.energy_components[key][0], self.energy_components[key][1])
+        '''
+        
 
-            #----------------------------------------------------------------------------------------         
-            if log:
-                print 'R_GYRATION       =  %14.7f %14.7f' %(energy_list['R_GYRATION'],self.energy_components['R_GYRATION'])
-            energy_list['R_GYRATION'] = energy_list['R_GYRATION'] *self.energy_components['R_GYRATION']
-            #----------------------------------------------------------------------------------------    
-           
+        for key in self.energy_components:
+            self.energy_components[key][0] = self.energy_components[key][0] * self.energy_components[key][1] 
             
-            #pprint(self.energy_components)
-            #pprint(energy_list)
-           
-            #----------------------------------------------------------------------------------------         
-            if log:
-                print 'SS_RESTRAINT     = %14.7f %14.7f' %(energy_list['SS_RESTRAINT'],self.energy_components['SS_RESTRAINT'])
-            energy_list['SS_RESTRAINT'] = energy_list['SS_RESTRAINT'] *self.energy_components['SS_RESTRAINT']
-            #----------------------------------------------------------------------------------------    
-           
-            #----------------------------------------------------------------------------------------         
-            if log:
-                print 'DIST_RESTRAINT   =  %14.7f %14.7f' %(energy_list['DIST_RESTRAINT'],self.energy_components['DIST_RESTRAINT'])
-            energy_list['DIST_RESTRAINT'] = energy_list['DIST_RESTRAINT'] *self.energy_components['DIST_RESTRAINT']
-            #----------------------------------------------------------------------------------------    
 
 
-            # sum of total pseudo energy - starts with a constant:
-            if log:
-                print 'CONSTANT         = %14.7f' %(self.energy_components['CONSTANT'])
-            energy_list['CONSTANT'] = self.energy_components['CONSTANT']
-                        
-            
-            
 
-            #Y ~ <SIZE> + <contacts0> + <AB_ENERGY> + <ANGLE> + <BOND> + <DIHED>
-            # + <EEL> + <EELEC> + <EGB> + <ESURF> + <NB> + <VDWAALS> + <CONSTANT>
-            #SIZE      = len(self.residues)*self.energy_components['SIZE']
-            #CONTACT = energy_list['CONTACT']
-            #AB_ENERGY = energy_list['AB_ENERGY']
-            #ANGLE     = energy_list['ANGLE']
-            #BOND      = energy_list['BOND']
-            #DIHED     = energy_list['DIHED']
-            #EEL       = energy_list['EEL']
-            #EELEC     = energy_list['EELEC']
-            #EGB       = energy_list['EGB']
-            #ESURF     = energy_list['ESURF']
-            #NB        = energy_list['NB']
-            #VDWAALS   = energy_list['VDWAALS']
-            #intercept = energy_list['CONSTANT']
-            
-            #energy = SIZE + CONTACT + AB_ENERGY + ANGLE + BOND + DIHED + EEL + EELEC + EGB + ESURF + NB + VDWAALS + intercept
-            #energy = energy**(10.0/3)
-            
-            energy = 0
-            
-            for component in energy_list:
-                #print component,  energy_list[component]
-                print component , energy_list[component]
-                energy += energy_list[component] # *self.energy_components[ component  ]
-            
-            #energy = energy**(10.0/3)
-            
+
+        energy = 0      
+        for component in self.energy_components:
+            energy += self.energy_components[component][0] # *self.energy_components[ component  ]
+
 
 
 
 
         if log:
-            text = '''
---------------------------------- Summary of Energy Terms --------------------------------
-Potential Energy    =   %20.10f     BOND             =   %20.10f
-EEL                 =   %20.10f     ANGLE            =   %20.10f
-EELEC               =   %20.10f     DIHED            =   %20.10f
-EGB                 =   %20.10f     ESURF            =   %20.10f
-NB                  =   %20.10f     VDWAALS          =   %20.10f
-------------------------------------------------------------------------------------------
-DIST_RESTRAINT      =   %20.10f     SS_RESTRAINT     =   %20.10f
-AB_ENERGY           =   %20.10f     CONTACT          =   %20.10f
-R_GYRATION          =   %20.10f     
-------------------------------------------------------------------------------------------
-     
-            ''' %(energy,
-                  energy_list['BOND'      ],
-                  energy_list['EEL'       ],
-                  energy_list['ANGLE'     ],
-                  energy_list['EELEC'     ],
-                  energy_list['DIHED'     ],
-                  energy_list['EGB'       ],
-                  energy_list['ESURF'     ],
-                  energy_list['NB'        ],
-                  energy_list['VDWAALS'   ],
-                  
-                  energy_list['DIST_RESTRAINT'],
-                  energy_list['SS_RESTRAINT']  ,
-                  
-                  energy_list['AB_ENERGY' ],
-                  energy_list['CONTACT'   ],
+            #print '%-20s  = %15.7f   ( %15.8f )' %(key, self.energy_components[key][0], self.energy_components[key][1])
 
-                  energy_list['R_GYRATION'],
-
-                  )
+    
+            text = ''
+            text += '\n'
+            text += '----------------------------------------------------------------------------------\n'       
+            text += '                    Summary for Model "%s" ENERGY        \n' %(self.energy_model)
+            text += '----------------------------------------------------------------------------------\n' 
             
+            n = 1
+            for key in self.energy_components:
+                
+                text += '%-20s = %15.7f      ' %(key, self.energy_components[key][0])#, self.energy_components[key][1])
+                n +=1            
+                
+                if n >= 2:
+                
+                    text += '\n'
+                
+                    n = 0
+
+            text += '----------------------------------------------------------------------------------\n'        
+            text += '\n\n'
+
             print text
-      
+
         
         if return_list:
-            return energy_list
+            return self.energy_components
         else:
             return energy
         
+
+
+
+
+
+            #energy = energy**(10.0/3)
+            
+
+
+
+
+#        if log:
+#            text = '''
+#--------------------------------- Summary of Energy Terms --------------------------------
+#Potential Energy    =   %20.10f     BOND             =   %20.10f
+#EEL                 =   %20.10f     ANGLE            =   %20.10f
+#EELEC               =   %20.10f     DIHED            =   %20.10f
+#EGB                 =   %20.10f     ESURF            =   %20.10f
+#NB                  =   %20.10f     VDWAALS          =   %20.10f
+#------------------------------------------------------------------------------------------
+#DIST_RESTRAINT      =   %20.10f     SS_RESTRAINT     =   %20.10f
+#AB_ENERGY           =   %20.10f     CONTACT          =   %20.10f
+#R_GYRATION          =   %20.10f     
+#------------------------------------------------------------------------------------------
+#     
+#            ''' %(energy,
+#                  self.energy_components['BOND'      ][0],
+#                  self.energy_components['EEL'       ][0],
+#                  self.energy_components['ANGLE'     ][0],
+#                  self.energy_components['EELEC'     ][0],
+#                  self.energy_components['DIHED'     ][0],
+#                  self.energy_components['EGB'       ][0],
+#                  self.energy_components['ESURF'     ][0],
+#                  self.energy_components['NB'        ][0],
+#                  self.energy_components['VDWAALS'   ][0],
+#                  self.energy_components['DIST_RESTRAINT'][0],
+#                  self.energy_components['SS_RESTRAINT'][0]  ,
+#                  self.energy_components['AB_ENERGY' ][0],
+#                  self.energy_components['CONTACT'   ][0],
+#                  self.energy_components['R_GYRATION'][0],
+#                  )           
+#            print text
+
 
 
 

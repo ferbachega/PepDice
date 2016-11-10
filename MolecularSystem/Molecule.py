@@ -217,77 +217,66 @@ class Molecule(Atom       ,
             self.energy_model  = energy_model
             self.energy_components = {
                                   #         AMBER
-                             'SIZE'          : 0.0           ,
-                             'CONSTANT'      : 0.0           , 
-                             'ANGLE'         : 1.0           ,
-                             'BOND'          : 1.0           ,
-                             'DIHED'         : 1.0           ,
-                             'EEL'           : 1.0           ,
-                             'EELEC'         : 1.0           ,
-                             'EGB'           : 1.0           ,
-                             'EKtot'         : 1.0           ,
-                             'EPtot'         : 1.0           ,
-                             'ESURF'         : 1.0           ,
-                             'Etot'          : 1.0           ,
-                             'NB'            : 1.0           ,
-                             'VDWAALS'       : 1.0           ,
-                                                                                           
-                             'CONTACT'       : 1.0           ,
-                                             
-                             'AB_ENERGY'     : 1.0           ,
-                             
-                             'R_GYRATION'    : 1.0           ,
-                             
-                             'SS_RESTRAINT'  : 1.0           ,
-                             
-                             'DIST_RESTRAINT': 1.0           ,
+                             'SIZE'          : [0.0, 0.0], 
+                             'CONSTANT'      : [0.0, 0.0],  
+                             'ANGLE'         : [0.0, 1.0],
+                             'BOND'          : [0.0, 1.0],
+                             'DIHED'         : [0.0, 1.0],
+                             'EEL'           : [0.0, 1.0],
+                             'EELEC'         : [0.0, 1.0],
+                             'EGB'           : [0.0, 1.0],
+                             'EKtot'         : [0.0, 1.0],
+                             'EPtot'         : [0.0, 1.0],
+                             'ESURF'         : [0.0, 1.0],
+                             'Etot'          : [0.0, 1.0],
+                             'NB'            : [0.0, 1.0],
+                             'VDWAALS'       : [0.0, 1.0],
+                             'CONTACT'       : [0.0, 1.0],
+                             'AB_ENERGY'     : [0.0, 1.0],
+                             'R_GYRATION'    : [0.0, 1.0],
+                             'SS_RESTRAINT'  : [0.0, 1.0],
+                             'DIST_RESTRAINT': [0.0, 1.0],
                              }
         
         
         
         if energy_model == 'LABIO':
             self.energy_model  = energy_model
+            
+            size = len(self.residues)
             self.energy_components = {
-                                  #         AMBER
-                                'SIZE'       :  -0.023854,
-                                'CONTACT'    :   0.002504,
-                                'R_GYRATION' :  -0.002742,
-                                'AB_ENERGY'  :   0.046848,
-                                'DIHED'      :   0.000785,
-                                'EEL'        :  -0.000013,
-                                'EELEC'      :  -0.000096,
-                                'EGB'        :  -0.000108,
-                                'ESURF'      :   0.033108,
-                                'NB'         :  -0.000117,
-                                'VDWAALS'    :   0.000965,
-                                'CONSTANT'   :   1.199985,
-                                'BOND'       :     0.0   ,
-                                'ANGLE'      :     0.0   ,
+                                # component        E        Coef.
+                                'SIZE/size'       :[0.0,    0.209966],
+                                'SIZE'            :[size,  -0.007525],
+                                'CONTACT/size'    :[0.0,    0.817092],
+                                'CONTACT'         :[0.0,   -0.006779],
+                                'R_GYRATION/size' :[0.0,   -0.245991],
+                                'R_GYRATION'      :[0.0,    0.001062],
+                                'AB_ENERGY/size'  :[0.0,   -0.154768],
+                                'AB_ENERGY'       :[0.0,    0.000658],
+                                'ANGLE/size'      :[0.0,   -0.003213],
+                                'ANGLE'           :[0.0,    0.000009],
+                                'BOND/size'       :[0.0,    0.037208],
+                                'BOND'            :[0.0,   -0.000745],
+                                'DIHED/size'      :[0.0,   -0.185228],
+                                'DIHED'           :[0.0,    0.003494],
+                                'EEL/size'        :[0.0,    0.009876],
+                                'EEL'             :[0.0,   -0.000167],
+                                'EELEC/size'      :[0.0,   -0.014285],
+                                'EELEC'           :[0.0,    0.000099],
+                                'EGB/size'        :[0.0,    0.014110],
+                                'EGB'             :[0.0,   -0.000292],
+                                'ESURF/size'      :[0.0,    1.924348],
+                                'ESURF'           :[0.0,    0.005774],
+                                'NB/size'         :[0.0,    0.563688],
+                                'NB'              :[0.0,   -0.007320],
+                                'VDWAALS/size'    :[0.0,   -0.082300],
+                                'VDWAALS'         :[0.0,    0.002057],
+                                'intercept'       :[1.0,    0.209966],
 
 
-
-
-                                #'CONSTANT'      :      1.15   , 
-                                #'SIZE'          :   -0.0076   ,
-                                #'ANGLE'         :        0    ,
-                                #'BOND'          :        0    ,
-                                #'DIHED'         :     4.4E-4  ,
-                                #'EEL'           :    -1.96E-5 ,
-                                #'EELEC'         :     -0.0002 ,
-                                #'EGB'           :     -7.5E-5 ,
-                                #'ESURF'         :     2.66E-5 ,
-                                #'NB'            :    -2.36E-5 ,
-                                #'VDWAALS'       :     1.85E-3 ,
-                                #                                                            
-                                #'CONTACT'       :       0.000 ,
-                                #                
-                                #'AB_ENERGY'     :        0.00 ,
-                                #
-                                #'R_GYRATION'    :        1.0  ,
-                                
-                                'SS_RESTRAINT'  :        0.0  ,
-                                
-                                'DIST_RESTRAINT':        0.0  ,
+                                'SS_RESTRAINT'  : [0.0 ,       0.0],
+                                'DIST_RESTRAINT': [0.0 ,       0.0],
                                 }
             
         
@@ -667,6 +656,13 @@ class Molecule(Atom       ,
                 #print atom.name, atom.pos
                 n_atoms += 1
         
+        
+        
+        
+        
+        
+        
+        
         text = '''
 --------------------------------------------------------------------------------
                         Summary for System "%s"
@@ -683,35 +679,39 @@ Number of Residues     =  %10d   Number of Atoms      =  %10d
 
         #for item in self.energy_model_parameters:
         #    print '%10s = %10.5f' %(item, self.energy_model_parameters[item])
+        #        ANGLE                =       0.0000090      EEL/size             =       0.0098760 
         
         
         
+        text += '\n'
+        text += '----------------------------------------------------------------------------------\n'       
+        text += '                    Summary for Model "%s" Coeficients        \n' %(self.energy_model)
+        text += '----------------------------------------------------------------------------------\n' 
         
-        text += '''
--------------------------------------------------------------------------------       
-                        Summary for Energy Model "%s"
--------------------------------------------------------------------------------       
-w_ANGLE       =  %19.10f    w_ESURF         =  %19.10f
-w_DIHED       =  %19.10f    w_NB            =  %19.10f
-w_EEL         =  %19.10f    w_VDWAALS       =  %19.10f
-w_EELEC       =  %19.10f    w_EGB           =  %19.10f 
--------------------------------------------------------------------------------       
-        ''' % ( self.energy_model, 
-            self.energy_components['ANGLE'  ],
-            self.energy_components['ESURF'  ],
-            self.energy_components['DIHED'  ],
+        n = 1
+        for key in self.energy_components:
+            
+            text += '%-20s = %15.7f      ' %(key, self.energy_components[key][1])#, self.energy_components[key][1])
+            n +=1            
+            
+            if n >= 2:
+            
+                text += '\n'
+            
+                n = 0
 
-            self.energy_components['NB'     ],
+        text += '----------------------------------------------------------------------------------\n'        
+        text += '\n\n'
 
-            self.energy_components['EEL'    ],
-            self.energy_components['VDWAALS'],
 
-            self.energy_components['EELEC'  ],
-            self.energy_components['EGB'    ],
-            #self.energy_components['CONTACT'],
-            #self.energy_components['AB'     ]
-               ) 
-      
+
+
+
+
+
+
+
+
 
         text += '''
 ---------------------- AMBER Single Point Calculations ------------------------
@@ -735,7 +735,7 @@ AB weight                   = %8.5f  Cutoff            = %8.2f
 Hydrofobic type             = %8s  
 ------------------------------------------------------------------------------- 
         '''% (
-               self.energy_components['AB_ENERGY'      ],
+               self.energy_components['AB_ENERGY'      ][1],
                self.AB_model_energy_parameters['R_cutoff'],
                'simple' , )
                
@@ -746,7 +746,7 @@ CONTACT weight              = %8.5f  Cutoff            = %8.2f
 Matrix type                 = %8s  
 ------------------------------------------------------------------------------- 
         '''% (
-               self.energy_components['CONTACT'      ],
+               self.energy_components['CONTACT'      ][1],
                self.contact_energy_parameters['R_cutoff'],
                None , )
 
@@ -761,9 +761,9 @@ DIST_RESTRAINT weight       = %8.5f  Num of restraints  = %8.2f
 SS_RESTRAINT weight         = %8.5f
 ------------------------------------------------------------------------------- 
         '''% (
-               self.energy_components['DIST_RESTRAINT'],
+               self.energy_components['DIST_RESTRAINT'][1],
                len(self.hamonical_potential_restraint_list),
-               self.energy_components['SS_RESTRAINT'])
+               self.energy_components['SS_RESTRAINT'][1])
         print text 
 
 

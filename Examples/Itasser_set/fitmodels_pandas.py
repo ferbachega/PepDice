@@ -20,12 +20,12 @@ for key in train_df:
     if key == 'PDB' or key == 'decoy' or key =='RMSD':
         pass
     else:
-        train_df['W_'+key] = train_df[key]/train_df['SIZE']
-        allkeys.append('W_'+key)
+        train_df[key+'/size'] = train_df[key]/train_df['SIZE']
+        allkeys.append(key+'/size')
         allkeys.append(key)
         
         keys.append(key)
-        wkeys.append('W_'+key)
+        wkeys.append(key+'/size')
 
 
 print(train_df.columns)
