@@ -242,7 +242,11 @@ class RG_GIRATION:
                         'GLU'  :  129.04259,
                         'GLN'  :  128.05858,
                         'GLY'  :  57.02146 ,
+                        
                         'HIS'  :  137.05891,
+                        'HIE'  :  137.05891,
+                        'HID'  :  137.05891,
+                        
                         'ILE'  :  113.08406,
                         'LEU'  :  113.08406,
                         'LYS'  :  128.09496,
@@ -393,56 +397,57 @@ class GEOMETRY_ENERGY:
 
             print text
 
-        total_energy = 0
         
-        energy_list  = []
+        total_energy = 0
+        energy_list  = []        
         
         for i in range (0, len(self.residues)):
             
             phi_final_angle = computePhiPsi (molecule=self, resi=i, bond='PHI')
             psi_final_angle = computePhiPsi (molecule=self, resi=i, bond='PSI')
-            ome_final_angle = computePhiPsi (molecule=self, resi=i, bond='OMEGA')
+            #ome_final_angle = computePhiPsi (molecule=self, resi=i, bond='OMEGA')
 
-            if phi_final_angle == None:
-                phi_final_angle = 0
-
-            if psi_final_angle == None:
-                psi_final_angle = 0
+            
+            
+            phi_energy = 0
+            psi_energy = 0
+            Kd = 1.0
+            
+            if phi_final_angle != None:
+                if self.residues[i].phi_restraint_angle != None:
+                    delta_phi      = phi_final_angle - (self.residues[i].phi_restraint_angle)
+                    K_phi =  Kd * self.residues[i].phi_restraint_weight
+                    phi_energy = K_phi*(1 - math.cos(math.radians(delta_phi)))
+                    #print phi_energy
+                else:
+                    delta_phi = False
+                    self.residues[i].phi_restraint_angle = 0
                 
-            if ome_final_angle == None:
-                ome_final_angle = 0
-            
-
-
-            #self.residues[i].phi_restraint_angle
-            #self.residues[i].psi_restraint_angle
-            
-            
-            if self.residues[i].phi_restraint_angle != None:
-                delta_phi = self.residues[i].phi_restraint_angle - phi_final_angle
-            
-            else:
-                delta_phi = 0
-                self.residues[i].phi_restraint_angle = 0
                 
+            if psi_final_angle != None:
+                if self.residues[i].psi_restraint_angle != None:
+                    delta_psi     =  psi_final_angle - (self.residues[i].psi_restraint_angle) 
+                    K_psi         =  Kd *self.residues[i].psi_restraint_weight
+                    psi_energy    = K_psi*(1 - math.cos(math.radians(delta_psi)))
+                else:
+                    delta_psi = False
+                    self.residues[i].psi_restraint_angle = 0
+            
 
-            if self.residues[i].psi_restraint_angle != None:
-                delta_psi = self.residues[i].psi_restraint_angle - psi_final_angle
-            else:
-                delta_psi = 0
-                self.residues[i].psi_restraint_angle = 0
-            
-            
-            Kb = 0.12184/9 #kcal/mol/deg2
-            phi_energy =  ((delta_phi)**2) * self.residues[i].phi_restraint_weight * Kb
-            psi_energy =  ((delta_psi)**2) * self.residues[i].psi_restraint_weight * Kb
-            energy     =  phi_energy + psi_energy
-            
+
+            energy     =  phi_energy + psi_energy 
             total_energy += energy
+
+            #if i ==1:
+            #    print phi_final_angle, phi_energy, self.residues[i].phi_restraint_weight, psi_final_angle, psi_energy, self.residues[i].psi_restraint_weight,  energy, total_energy
+
+
+            #if i ==1:
+            #    print i, phi_final_angle, energy, psi_energy, psi_energy
+
+            #energy_list.append([self.residues[i].name, phi_energy, psi_energy, energy])
             
-            energy_list.append([self.residues[i].name, phi_energy, psi_energy, energy])
-            
-            
+            '''
             if log:
 
                 text = '%s '    %(self.residues[i].name)
@@ -462,11 +467,12 @@ class GEOMETRY_ENERGY:
                 text+= '%15.5f' %(energy)  
                
                 print text
-            
+            '''
         if log:
             print 'TOTAL ENERGY = ', total_energy
             print energy_list
         
+        #print total_energy
         return total_energy
     
     
@@ -483,7 +489,7 @@ class GEOMETRY_ENERGY:
         for restraint in self.hamonical_potential_restraint_list:
             name_i = self.residues[restraint['resi_i']].name          
             for atom in self.residues[restraint['resi_i']].atoms:
-                if atom.name == restraint['atom_name_j']:
+                if atom.name == restraint['atom_name_i']:
                     atom_i    = atom  
 
             
@@ -554,15 +560,30 @@ class Energy(AB_ENERGY, AMBER_ENERGY, RG_GIRATION, CONTACT_ENERGY, GEOMETRY_ENER
     
 
         
+        #defining SIZE
+        self.energy_components['SIZE'][0] = len(self.residues)
         
         # AMBER energy
         #----------------------------------------------------------------------------------------
-        energy, amber_energy_list = self.compute_AMBER_energy(pn = pn, log= log)
-        if energy == None:
-            return None 
         
-        for key in  amber_energy_list:
-            self.energy_components[key][0] = amber_energy_list[key]
+        sum_of_amber_coefs = 0
+        
+        for key in ['ANGLE'  ,'BOND'   ,'DIHED'  ,'EEL'    ,'EELEC'  ,'EGB'  ,'ESURF','NB','VDWAALS']:
+            sum_of_amber_coefs += self.energy_components[key][0]
+        
+        if sum_of_amber_coefs != 0:       
+            energy, amber_energy_list = self.compute_AMBER_energy(pn = pn, log= log)
+            
+            for key in  amber_energy_list:
+                self.energy_components[key][0] = amber_energy_list[key]
+
+            if energy == None:
+                return None 
+
+        else:
+            energy = 0
+            amber_energy_list = {}
+
             
         #----------------------------------------------------------------------------------------
         # AB energy 
@@ -627,48 +648,18 @@ class Energy(AB_ENERGY, AMBER_ENERGY, RG_GIRATION, CONTACT_ENERGY, GEOMETRY_ENER
                 component2  = key2[1]
                 self.energy_components[key][0] = self.energy_components[component1][0] ** self.energy_components[component2.upper()][0]
         
-        
-        '''
-        if self.energy_model == 'FULL':
-            # energy = self.energy_components['CONSTANT']
-            # sum of the components
-            for component in self.energy_components:
-                #print component,  energy_list[component]
-                energy += self.energy_components[component][0] # *self.energy_components[ component  ]
- 
-
-        
-        
-        
-        
-        if self.energy_model == 'LABIO':
-            #----------------------------------------------------------------------------------------
-            for key in self.energy_components:
-                self.energy_components[key][0] = self.energy_components[key][0] * self.energy_components[key][1] 
-                
-                if log:
-                    print '%-14s  = %15.7f    %15.8f' %(key, self.energy_components[key][0], self.energy_components[key][1])
-        '''
-        
 
         for key in self.energy_components:
             self.energy_components[key][0] = self.energy_components[key][0] * self.energy_components[key][1] 
             
-
-
-
 
         energy = 0      
         for component in self.energy_components:
             energy += self.energy_components[component][0] # *self.energy_components[ component  ]
 
 
-
-
-
         if log:
             #print '%-20s  = %15.7f   ( %15.8f )' %(key, self.energy_components[key][0], self.energy_components[key][1])
-
     
             text = ''
             text += '\n'
@@ -689,61 +680,22 @@ class Energy(AB_ENERGY, AMBER_ENERGY, RG_GIRATION, CONTACT_ENERGY, GEOMETRY_ENER
                     n = 0
 
             text += '----------------------------------------------------------------------------------\n'        
-            text += '\n\n'
+            text += 'Potencial Energy (total) = %18.7f \n'%(energy)
+            text += '----------------------------------------------------------------------------------\n'        
 
+            text += '\n\n'
+            
+            
             print text
 
+        
+        
+        
         
         if return_list:
             return self.energy_components
         else:
             return energy
-        
-
-
-
-
-
-            #energy = energy**(10.0/3)
-            
-
-
-
-
-#        if log:
-#            text = '''
-#--------------------------------- Summary of Energy Terms --------------------------------
-#Potential Energy    =   %20.10f     BOND             =   %20.10f
-#EEL                 =   %20.10f     ANGLE            =   %20.10f
-#EELEC               =   %20.10f     DIHED            =   %20.10f
-#EGB                 =   %20.10f     ESURF            =   %20.10f
-#NB                  =   %20.10f     VDWAALS          =   %20.10f
-#------------------------------------------------------------------------------------------
-#DIST_RESTRAINT      =   %20.10f     SS_RESTRAINT     =   %20.10f
-#AB_ENERGY           =   %20.10f     CONTACT          =   %20.10f
-#R_GYRATION          =   %20.10f     
-#------------------------------------------------------------------------------------------
-#     
-#            ''' %(energy,
-#                  self.energy_components['BOND'      ][0],
-#                  self.energy_components['EEL'       ][0],
-#                  self.energy_components['ANGLE'     ][0],
-#                  self.energy_components['EELEC'     ][0],
-#                  self.energy_components['DIHED'     ][0],
-#                  self.energy_components['EGB'       ][0],
-#                  self.energy_components['ESURF'     ][0],
-#                  self.energy_components['NB'        ][0],
-#                  self.energy_components['VDWAALS'   ][0],
-#                  self.energy_components['DIST_RESTRAINT'][0],
-#                  self.energy_components['SS_RESTRAINT'][0]  ,
-#                  self.energy_components['AB_ENERGY' ][0],
-#                  self.energy_components['CONTACT'   ][0],
-#                  self.energy_components['R_GYRATION'][0],
-#                  )           
-#            print text
-
-
-
 
 
 
@@ -844,13 +796,13 @@ def save_PDB_to_file(molecule, filename):
                                                                                                                                               element,
                                                                                                                                               "")
 
-        #string = "%s%s%s%s%s%s%s%s%s%s%s%s%s%s"% (line1, index, A_name, resn, chain, resi, gap, x, y, z, b, oc, gap2, atom)
-        # text.append(string+'\n')
-        # print text
-        #output_file.write(str(n)+ "\n\n")
+
         output_file.write(text)
         output_file.close()
 
+
+
+'''
 def write_NaMD_input_file(molecule=None, Type='energy', parameters = None, pn = 1):
     """ Function doc """
     text = ''
@@ -924,7 +876,7 @@ def write_NaMD_input_file(molecule=None, Type='energy', parameters = None, pn = 
             output_file = open('Minimize'+str(pn)+'.namd', "w")
             output_file.write(text)
             output_file.close()
-            
+'''
             
             
             

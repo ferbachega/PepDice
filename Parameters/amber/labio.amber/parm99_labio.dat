@@ -184,7 +184,7 @@ LP-SH  600.0    0.700       cys,cyx
 
 HW-OW-HW   100.0       104.5         TIP3P water                                              
 HW-HW-OW   0.0         127.7         (found in crystallographic water with 3 bonds)           
-C -C -O    80000.0     120.0         Junmei et al, 1999 acrolein                              
+C -C -O    80.0        120.0         Junmei et al, 1999 acrolein                              
 C -C -OH   80.0        120.0         Junmei et al, 1999                                       
 CA-C -CA   63.0        120.0         changed from 85.0  bsd on C6H6 nmodes; AA                
 CA-C -OH   70.0        120.0         AA (not used in tyr)                                     
@@ -195,7 +195,7 @@ CM-C -O    80.0        125.3
 CT-C -O    80000.0     120.4                                                                  
 CT-C -O2   70.0        117.0                                                                  
 CT-C -N    70000.0     116.6         AA general                                               
-CT-C -CT   63000.0     117.0         Junmei et al, 1999                                       
+CT-C -CT   63.0        117.0         Junmei et al, 1999                                       
 CT-C -OS   80.0        115.0         Junmei et al, 1999                                       
 CT-C -OH   80.0        110.0         Junmei et al, 1999                                       
 N*-C -NA   70.0        115.4                                                                  
@@ -204,7 +204,7 @@ N*-C -O    80.0        120.9
 NA-C -O    80.0        120.6                                                                  
 NC-C -O    80.0        122.5                                                                  
 N -C -O    80000.0     122.9         AA general                                               
-O -C -O    80000.0     126.0         AA COO- terminal residues                                
+O -C -O    80.0        126.0         AA COO- terminal residues                                
 O -C -OH   80.0        120.0         (check with Junmei for: theta0:120.0?)                   
 O -C -OS   80.0        125.0         Junmei et al, 1999                                       
 O2-C -O2   80.0        126.0         AA GLU            (SCH JPC 79,2379)                      
@@ -280,7 +280,7 @@ HA-CM-CD   50.0        120.0         Junmei et al, 1999
 HA-CM-CT   50.0        120.0         Junmei et al, 1999                                       
 NC-CQ-NC   70.0        129.1                                                                  
 H5-CQ-NC   50.0        115.5                                                                  
-H1-CT-H1   35000.0     109.5                                                                  
+H1-CT-H1   35.0        109.5                                                                  
 H1-CT-N*   50.0        109.5         changed based on NMA nmodes                              
 H1-CT-OH   50.0        109.5         changed based on NMA nmodes                              
 H1-CT-OS   50.0        109.5         changed based on NMA nmodes                              
@@ -306,16 +306,16 @@ C -CT-HP   50.0        109.5         AA zwitterion  changed based on NMA nmodes
 C -CT-HC   50.0        109.5         AA gln      changed based on NMA nmodes                  
 C -CT-N    63000.0     110.1         AA general                                               
 C -CT-N3   80.0        111.2         AA amino terminal residues                               
-C -CT-CT   63000.0     111.1         AA general                                               
+C -CT-CT   63.0        111.1         AA general                                               
 C -CT-OS   60.0        109.5         Junmei et al, 1999                                       
 CA-CT-HC   50.0        109.5         AA tyr     changed based on NMA nmodes                   
 CC-CT-CT   63.0        113.1         AA his                                                   
 CC-CT-HC   50.0        109.5         AA his     changed based on NMA nmodes                   
 CM-CT-CT   63.0        111.0         Junmei et al, 1999 (last change: Mar24,99)               
 CM-CT-OS   50.0        109.5         Junmei et al, 1999                                       
-CT-CT-CT   40000.0     109.5                                                                  
+CT-CT-CT   40.0        109.5                                                                  
 CT-CT-HC   50.0        109.5         changed based on NMA nmodes                              
-CT-CT-H1   50000.0     109.5         changed based on NMA nmodes                              
+CT-CT-H1   50.0        109.5         changed based on NMA nmodes                              
 CT-CT-H2   50.0        109.5         changed based on NMA nmodes                              
 CT-CT-HP   50.0        109.5         changed based on NMA nmodes                              
 CT-CT-N*   50.0        109.5                                                                  
@@ -325,7 +325,7 @@ CT-CT-S    50.0        114.7         AA cyx            (SCHERAGA  JPC 79,1428)
 CT-CT-SH   50.0        108.6         AA cys                                                   
 CT-CT-CA   63.0        114.0         AA phe tyr          (SCH JPC  79,2379)                   
 CT-CT-N2   80.0        111.2         AA arg             (JCP 76, 1439)                        
-CT-CT-N    80000.0     109.7         AA ala, general    (JACS 94, 2657)                       
+CT-CT-N    80.0        109.7         AA ala, general    (JACS 94, 2657)                       
 CT-CT-N3   80.0        111.2         AA lys             (JCP 76, 1439)                        
 CT-CT-NT   80.0        111.2         neutral amines                                           
 CT-CT-CY   63.0        110.0         Junmei et al, 1999                                       
@@ -476,14 +476,14 @@ X -C -NC-X    2    8.00        180.0             2.         JCC,7,(1986),230
 X -C -O -X    4   11.20        180.0             2.         Junmei et al, 1999
 X -C -OH-X    2    4.60        180.0             2.         Junmei et al, 1999
 X -C -OS-X    2    5.40        180.0             2.         Junmei et al, 1999
-X -CA-CA-X    4   14.50        180.0             2.         intrpol.bsd.on C6H6
+X -CA-CA-X    4   1400.50        180.0             2.         intrpol.bsd.on C6H6
 X -CA-CB-X    4   14.00        180.0             2.         intrpol.bsd.on C6H6
 X -CA-CM-X    4   10.20        180.0             2.         intrpol.bsd.on C6H6
 X -CA-CN-X    4   14.50        180.0             2.         reinterpolated 93'
 X -CA-CT-X    6    0.00          0.0             2.         JCC,7,(1986),230
 X -CA-N2-X    4    9.60        180.0             2.         reinterpolated 93'
 X -CA-NA-X    4    6.00        180.0             2.         JCC,7,(1986),230
-X -CA-NC-X    2    9.60        180.0             2.         JCC,7,(1986),230
+X -CA-NC-X    2    900.60        180.0             2.         JCC,7,(1986),230
 X -CA-OH-X    2    1.80        180.0             2.         Junmei et al, 99
 X -CB-CB-X    4   21.80        180.0             2.         intrpol.bsd.on C6H6
 X -CB-CN-X    4   12.00        180.0             2.         reinterpolated 93'
@@ -492,7 +492,7 @@ X -CB-NB-X    2    5.10        180.0             2.         JCC,7,(1986),230
 X -CB-NC-X    2    8.30        180.0             2.         JCC,7,(1986),230
 X -CC-CT-X    6    0.00          0.0             2.         JCC,7,(1986),230
 X -CC-CV-X    4   20.60        180.0             2.         intrpol.bsd.on C6H6
-X -CC-CW-X    4   21.50        180.0             2.         intrpol.bsd.on C6H6
+X -CC-CW-X    4   2100.50        180.0             2.         intrpol.bsd.on C6H6
 X -CC-NA-X    4    5.60        180.0             2.         JCC,7,(1986),230
 X -CC-NB-X    2    4.80        180.0             2.         JCC,7,(1986),230
 X -CD-CD-X    4    4.00        180.0             2.         Junmei et al, 1999
@@ -504,7 +504,7 @@ X -CM-CM-X    4   26.60        180.0             2.         intrpol.bsd.on C6H6
 X -CM-CT-X    6    0.00          0.0             3.         JCC,7,(1986),230
 X -CM-N*-X    4    7.40        180.0             2.         JCC,7,(1986),230
 X -CM-OS-X    2    2.10        180.0             2.         Junmei et al, 1999
-X -CN-NA-X    4    6.10        180.0             2.         reinterpolated 93'
+X -CN-NA-X    4    600.10        180.0             2.         reinterpolated 93'
 X -CQ-NC-X    2   13.60        180.0             2.         JCC,7,(1986),230
 X -CT-CT-X    9    1.40          0.0             3.         JCC,7,(1986),230
 X -CT-CY-X    3    0.00          0.0             1.         Junmei et al, 1999
@@ -520,11 +520,11 @@ X -CT-S -X    3    1.00          0.0             3.         JCC,7,(1986),230
 X -CT-SH-X    3    0.75          0.0             3.         JCC,7,(1986),230
 X -C*-CB-X    4    6.70        180.0             2.         intrpol.bsd.onC6H6aa
 X -C*-CT-X    6    0.00          0.0             2.         JCC,7,(1986),230
-X -C*-CW-X    4   26.10        180.0             2.         intrpol.bsd.on C6H6
+X -C*-CW-X    4   2600.10        180.0             2.         intrpol.bsd.on C6H6
 X -CR-NA-X    4    9.30        180.0             2.         JCC,7,(1986),230
 X -CR-NB-X    2   10.00        180.0             2.         JCC,7,(1986),230
 X -CV-NB-X    2    4.80        180.0             2.         JCC,7,(1986),230
-X -CW-NA-X    4    6.00        180.0             2.         JCC,7,(1986),230
+X -CW-NA-X    4    600.00        180.0             2.         JCC,7,(1986),230
 X -OH-P -X    3    0.75          0.0             3.         JCC,7,(1986),230
 X -OS-P -X    3    0.75          0.0             3.         JCC,7,(1986),230
 N -CT-C -N    1    1.700       180.000          -1.
@@ -633,11 +633,11 @@ X -X -C -O          10.5         180.          2.           JCC,7,(1986),230
 X -O2-C -O2         10.5         180.          2.           JCC,7,(1986),230
 X -X -N -H          1.0          180.          2.           JCC,7,(1986),230
 X -X -N2-H          1.0          180.          2.           JCC,7,(1986),230
-X -X -NA-H          1.0          180.          2.           JCC,7,(1986),230
+X -X -NA-H          100.0          180.          2.           JCC,7,(1986),230
 X -N2-CA-N2         10.5         180.          2.           JCC,7,(1986),230
 X -CT-N -CT         1.0          180.          2.           JCC,7,(1986),230
 X -X -CA-HA         1.1          180.          2.           bsd.on C6H6 nmodes
-X -X -CW-H4         1.1          180.          2.
+X -X -CW-H4         100.1          180.          2.
 X -X -CR-H5         1.1          180.          2.
 X -X -CV-H4         1.1          180.          2.
 X -X -CQ-H5         1.1          180.          2.
@@ -649,9 +649,9 @@ X -X -CA-H5         1.1          180.          2.           bsd.on C6H6 nmodes
 CB-CK-N*-CT         1.0          180.          2.
 C -CM-N*-CT         1.0          180.          2.           dac guess, 9/94
 CT-O -C -OH         10.5         180.          2.
-CT-CV-CC-NA         1.1          180.          2.
+CT-CV-CC-NA         100.1          180.          2.
 CT-CW-CC-NB         1.1          180.          2.
-CT-CW-CC-NA         1.1          180.          2.
+CT-CW-CC-NA         100.1          180.          2.
 CB-CT-C*-CW         1.1          180.          2.
 CA-CA-CA-CT         1.1          180.          2. 
 C -CM-CM-CT         1.1          180.          2.           dac guess, 9/94

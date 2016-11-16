@@ -91,22 +91,20 @@ class Molecule(Atom       ,
 
     def __init__(self, id=0, name = 'protein'):
         
-        self.energy_model  = 'FULL'
-        
-        self.energy_models = {'LABIO'    ,
-                              'FULL'   }
+
         
         self.id       = id
         self.name     = name
         self.residues = []
 
-        self.top     = None
-        self.psf     = None
-        self.param   = None
-        self.ff_type = None
+        self.top      = None
+        self.psf      = None
+        self.param    = None
+        self.ff_type  = None
 
         self.torsions       = None
         self.FIX_atoms_CHI  = None
+        
         
         # Parameters and Restraints
         self.fixed_residues                     = []
@@ -120,45 +118,16 @@ class Molecule(Atom       ,
         # MC important atributes
         self.actual_energy   = None
         self.previous_energy = None 
-        
-        
-        # Energy components
-        #self.pn
-        
-        
-        #self.energy_model_parameters = None
+
         
         self.R_contact = 0.0
         
         
-        self.energy_components = {
-                                      #         AMBER
-                                 'SIZE'          : 0.0           ,
-                                 'CONSTANT'      : 0.0           , 
-                                 'ANGLE'         : 1.0           ,
-                                 'BOND'          : 1.0           ,
-                                 'DIHED'         : 1.0           ,
-                                 'EEL'           : 1.0           ,
-                                 'EELEC'         : 1.0           ,
-                                 'EGB'           : 1.0           ,
-                                 'EKtot'         : 1.0           ,
-                                 'EPtot'         : 1.0           ,
-                                 'ESURF'         : 1.0           ,
-                                 'Etot'          : 1.0           ,
-                                 'NB'            : 1.0           ,
-                                 'VDWAALS'       : 1.0           ,
-                                                                                               
-                                 'CONTACT'       : 1.0           ,
-                                                 
-                                 'AB_ENERGY'     : 1.0           ,
-                                 
-                                 'R_GYRATION'    : 1.0           ,
-                                 
-                                 'SS_RESTRAINT'  : 1.0           ,
-                                 
-                                 'DIST_RESTRAINT': 1.0           ,
-                                 }
-        
+        self.energy_model  = 'LABIO'
+        self.set_energy_model(self.energy_model)
+        self.energy_models = {'LABIO'    ,
+                              'RAW'   }
+               
         self.amber_single_point_parammeters = {
                                                 'cut'           : 999.0         ,
                                                 'igb'           : 1             ,
@@ -180,9 +149,6 @@ class Molecule(Atom       ,
                                             'epsilon' : [10.0,10.0,5.0],
                                             'C'       : [1.0, 0.5], 
                                             }
-        
-        
-        
 
         self.aa_dic = { 
                  'A' : 'ALA',
@@ -207,13 +173,13 @@ class Molecule(Atom       ,
                  'V' : 'VAL'
                  }
     
-    def set_energy_model (self, energy_model = 'FULL'):
+    def set_energy_model (self, energy_model = 'RAW'):
         """ Function doc """
 
 
         
         
-        if energy_model == 'FULL':
+        if energy_model == 'RAW':
             self.energy_model  = energy_model
             self.energy_components = {
                                   #         AMBER
@@ -225,10 +191,10 @@ class Molecule(Atom       ,
                              'EEL'           : [0.0, 1.0],
                              'EELEC'         : [0.0, 1.0],
                              'EGB'           : [0.0, 1.0],
-                             'EKtot'         : [0.0, 1.0],
-                             'EPtot'         : [0.0, 1.0],
+                             #'EKtot'         : [0.0, 1.0],
+                             #'EPtot'         : [0.0, 1.0],
                              'ESURF'         : [0.0, 1.0],
-                             'Etot'          : [0.0, 1.0],
+                             #'Etot'          : [0.0, 1.0],
                              'NB'            : [0.0, 1.0],
                              'VDWAALS'       : [0.0, 1.0],
                              'CONTACT'       : [0.0, 1.0],
@@ -240,14 +206,14 @@ class Molecule(Atom       ,
         
         
         
-        if energy_model == 'LABIO':
+        if energy_model == 'LABIOcmap':
             self.energy_model  = energy_model
             
-            size = len(self.residues)
+            #size = len(self.residues)
             self.energy_components = {
                                 # component        E        Coef.
                                 'SIZE/size'       :[0.0,    0.209966],
-                                'SIZE'            :[size,  -0.007525],
+                                'SIZE'            :[0.0,   -0.007525],
                                 'CONTACT/size'    :[0.0,    0.817092],
                                 'CONTACT'         :[0.0,   -0.006779],
                                 'R_GYRATION/size' :[0.0,   -0.245991],
@@ -280,6 +246,85 @@ class Molecule(Atom       ,
                                 }
             
         
+        if energy_model == 'LABIO':
+            self.energy_model  = energy_model
+            
+            #size = len(self.residues)
+            self.energy_components = {
+                                # component        E        Coef.
+                                'SIZE/size'       :[0.0,    0.662096],
+                                'SIZE'            :[0.0,   -0.026036],
+                                'CONTACT/size'    :[0.0,         0.0],
+                                'CONTACT'         :[0.0,         0.0],
+                                'R_GYRATION/size' :[0.0,   -0.180772],
+                                'R_GYRATION'      :[0.0,   -0.000225],
+                                'AB_ENERGY/size'  :[0.0,   -0.127356],
+                                'AB_ENERGY'       :[0.0,    0.000816],
+                                'ANGLE/size'      :[0.0,    0.002653],
+                                'ANGLE'           :[0.0,   -0.000094],
+                                'BOND/size'       :[0.0,   -0.097034],
+                                'BOND'            :[0.0,    0.000776],
+                                'DIHED/size'      :[0.0,    0.007575],
+                                'DIHED'           :[0.0,    0.002181],
+                                'EEL/size'        :[0.0,    0.025629],
+                                'EEL'             :[0.0,   -0.000235],
+                                'EELEC/size'      :[0.0,    0.034025],
+                                'EELEC'           :[0.0,   -0.000318],
+                                'EGB/size'        :[0.0,    0.021239],
+                                'EGB'             :[0.0,   -0.000213],
+                                'ESURF/size'      :[0.0,    1.136414],
+                                'ESURF'           :[0.0,    0.018890],
+                                'NB/size'         :[0.0,    0.288305],
+                                'NB'              :[0.0,   -0.003496],
+                                'VDWAALS/size'    :[0.0,    0.110858],
+                                'VDWAALS'         :[0.0,   -0.000011],
+                                'intercept'       :[1.0,    0.662096],
+
+
+                                'SS_RESTRAINT'  : [0.0 ,       0.0],
+                                'DIST_RESTRAINT': [0.0 ,       0.0],
+                                }
+
+
+        if energy_model == 'AMBER':
+            self.energy_model  = energy_model
+            
+            #size = len(self.residues)
+            self.energy_components = {
+                                # component        E        Coef.
+                                'SIZE/size'       :[0.0,    0.638850],
+                                'SIZE'            :[0.0,   -0.024920],
+                                'CONTACT/size'    :[0.0,         0.0],
+                                'CONTACT'         :[0.0,         0.0],
+                                'R_GYRATION/size' :[0.0,    0.000000],
+                                'R_GYRATION'      :[0.0,    0.000000],
+                                'AB_ENERGY/size'  :[0.0,    0.000000],
+                                'AB_ENERGY'       :[0.0,    0.000000],
+                                'ANGLE/size'      :[0.0,   -0.001210],
+                                'ANGLE'           :[0.0,   -0.000045],
+                                'BOND/size'       :[0.0,   -0.065855],
+                                'BOND'            :[0.0,    0.000326],
+                                'DIHED/size'      :[0.0,   -0.009268],
+                                'DIHED'           :[0.0,    0.002351],
+                                'EEL/size'        :[0.0,    0.031756],
+                                'EEL'             :[0.0,   -0.000311],
+                                'EELEC/size'      :[0.0,    0.041241],
+                                'EELEC'           :[0.0,   -0.000413],
+                                'EGB/size'        :[0.0,    0.025057],
+                                'EGB'             :[0.0,   -0.000266],
+                                'ESURF/size'      :[0.0,    1.522220],
+                                'ESURF'           :[0.0,    0.014135],
+                                'NB/size'         :[0.0,    0.361428],
+                                'NB'              :[0.0,   -0.004978],
+                                'VDWAALS/size'    :[0.0,    0.045646],
+                                'VDWAALS'         :[0.0,    0.000721],
+                                'intercept'       :[1.0,    0.638850],
+
+
+                                'SS_RESTRAINT'  : [0.0 ,       0.0],
+                                'DIST_RESTRAINT': [0.0 ,       0.0],
+                                }
+
         #if energy_model in self.energy_models:
         #    self.energy_model  = energy_model
         #    #self.energy_model_parameters = self.default_energy_model_setup[energy_model]
@@ -641,26 +686,10 @@ class Molecule(Atom       ,
 
     def Status (self, parameters = True, coordinates = True ):
         """ Function doc """
-        #print 'Bond_Stretching  = ', self.Bond_Stretching
-        #print 'Angle_Bending    = ', self.Angle_Bending
-        #print 'Improper_Torsion = ', self.Improper_Torsion
-        #print 'Torsional_Angle  = ', self.Torsional_Angle
-        #print 'Van_der_Waals    = ', self.Van_der_Waals
-        #print 'Charge_Charge    = ', self.Charge_Charge
-        #print 'Total_Energy     = ', self.Total_Energy
-
-        #print 'Fixed_residues   = ', self.fixed_residues
         n_atoms = 0
         for res in self.residues:
             for atom in res.atoms:
-                #print atom.name, atom.pos
                 n_atoms += 1
-        
-        
-        
-        
-        
-        
         
         
         text = '''
@@ -673,16 +702,11 @@ Number of Residues     =  %10d   Number of Atoms      =  %10d
 --------------------------------------------------------------------------------
 
         '''%(self.name, len(self.residues), n_atoms)
-        
-        
-
 
         #for item in self.energy_model_parameters:
         #    print '%10s = %10.5f' %(item, self.energy_model_parameters[item])
         #        ANGLE                =       0.0000090      EEL/size             =       0.0098760 
-        
-        
-        
+
         text += '\n'
         text += '----------------------------------------------------------------------------------\n'       
         text += '                    Summary for Model "%s" Coeficients        \n' %(self.energy_model)
@@ -702,13 +726,6 @@ Number of Residues     =  %10d   Number of Atoms      =  %10d
 
         text += '----------------------------------------------------------------------------------\n'        
         text += '\n\n'
-
-
-
-
-
-
-
 
 
 
@@ -844,412 +861,4 @@ SS_RESTRAINT weight         = %8.5f
                 pass
         print len(self.fixed_residues), self.fixed_residues
 
-
-
-
-        
-        
-        
-        
-        
-        
-#        self.default_energy_model_setup ={'amber':{
-#                                                  #         AMBER
-#                                                  'ANGLE'      : 1.0       ,
-#                                                  'BOND'       : 1.0       ,
-#                                                  'DIHED'      : 1.0       ,
-#                                                  'EEL'        : 1.0       ,
-#                                                  'EELEC'      : 1.0       ,
-#                                                  'EGB'        : 1.0       ,
-#                                                  'EKtot'      : 1.0       ,
-#                                                  'EPtot'      : 1.0       ,
-#                                                  'ESURF'      : 1.0       ,
-#                                                  'Etot'       : 1.0       ,
-#                                                  'NB'         : 1.0       ,
-#                                                  'VDWAALS'    : 1.0       ,
-#                                                  
-#                                                  'cut'        : 999.0     ,
-#                                                  'igb'        : 1         ,
-#                                                  'saltcon'    : 0.2       ,
-#                                                  'gbsa'       : 1         ,
-#                                                  'rgbmax'     : 999.00000 ,
-#                                                  'surften'    : 0.010     ,
-#                                                  
-#                                                  'CONTACT'    : 0.0       ,
-#                                                  'R_contact'  : self.R_contact       ,
-#                                                  
-#                                                  'AB'  : 0.0       ,
-#                                                  'R_cutoff'   : 999.0     ,
-#                                                  
-#                                                  },
-#
-#                                         'FULL':{
-#                                                  #         AMBER
-#                                                  'CONSTANT'      : 0.0           , 
-#                                                  'ANGLE'         : 1.0           ,
-#                                                  'BOND'          : 1.0           ,
-#                                                  'DIHED'         : 1.0           ,
-#                                                  'EEL'           : 1.0           ,
-#                                                  'EELEC'         : 1.0           ,
-#                                                  'EGB'           : 1.0           ,
-#                                                  'EKtot'         : 1.0           ,
-#                                                  'EPtot'         : 1.0           ,
-#                                                  'ESURF'         : 1.0           ,
-#                                                  'Etot'          : 1.0           ,
-#                                                  'NB'            : 1.0           ,
-#                                                  'VDWAALS'       : 1.0           ,
-#                                                                                  
-#                                                  'cut'           : 999.0         ,
-#                                                  'igb'           : 1             ,
-#                                                  'saltcon'       : 0.2           ,
-#                                                  'gbsa'          : 1             ,
-#                                                  'rgbmax'        : 999.00000     ,
-#                                                  'surften'       : 0.010         ,
-#                                                                                  
-#                                                  'CONTACT'       : 1.0           ,
-#                                                  'R_contact'     : self.R_contact,
-#                                                                  
-#                                                  'AB'            : 1.0           ,
-#                                                  'R_cutoff'      : 999.0         ,
-#                                                  'R_GYRATION'    : 1.0           ,
-#                                                  'SS_RESTRAINT'  : 1.0           ,
-#                                                  'DIST_RESTRAINT': 1.0           ,
-#                                                  },
-#
-#                                          
-#                                          'Calpha' : {
-#                                                      'ANGLE'      : 0.0       ,
-#                                                      'BOND'       : 0.0       ,
-#                                                      'DIHED'      : 1.0       ,
-#                                                      'EEL'        : 0.0       ,
-#                                                      'EELEC'      : 0.0       ,
-#                                                      'EGB'        : 0.0       ,
-#                                                      'EKtot'      : 0.0       ,
-#                                                      'EPtot'      : 0.0       ,
-#                                                      'ESURF'      : 0.0       ,
-#                                                      'Etot'       : 0.0       ,
-#                                                      'NB'         : 0.0       ,
-#                                                      'VDWAALS'    : 1.0       ,
-#                                                      
-#                                                      'cut'        : 999.0     ,
-#                                                      'igb'        : 1         ,
-#                                                      'saltcon'    : 0.2       ,
-#                                                      'gbsa'       : 1         ,
-#                                                      'rgbmax'     : 999.00000 ,
-#                                                      'surften'    : 0.010     ,
-#                                                      
-#                                                      'CONTACT'    : 0.0       ,
-#                                                      'R_contact'  : self.R_contact       ,
-#                                                      
-#                                                      'AB'         : 1.0       ,
-#                                                      'R_cutoff'   : 999.0     ,
-#                                                        'R_GYRATION' : 1.0     ,
-#        
-#                                                      },
-#                                          
-#                                          
-#                                          'Contact': {
-#                                                      'ANGLE'    : 0.0       ,
-#                                                      'BOND'     : 0.0       ,
-#                                                      'DIHED'    : 0.001     ,
-#                                                      'EEL'      : 0.0       ,
-#                                                      'EELEC'    : 0.0       ,
-#                                                      'EGB'      : 0.0       ,
-#                                                      'EKtot'    : 0.0       ,
-#                                                      'EPtot'    : 0.0       ,
-#                                                      'ESURF'    : 0.0       ,
-#                                                      'Etot'     : 0.0       ,
-#                                                      'NB'       : 0.0       ,
-#                                                      'VDWAALS'  : 0.001     ,
-#                                                      
-#                                                      'cut'        : 999.0     ,
-#                                                      'igb'        : 1         ,
-#                                                      'saltcon'    : 0.2       ,
-#                                                      'gbsa'       : 1         ,
-#                                                      'rgbmax'     : 999.00000 ,
-#                                                      'surften'    : 0.010     ,
-#                                                      
-#                                                      'CONTACT'    : 1.0       ,
-#                                                      'R_contact'  : self.R_contact       ,
-#                                                      
-#                                                      'AB'         : 0.0      ,
-#                                                      'R_cutoff'   : 0.0      ,
-#                                                      'R_GYRATION' : 1.0      ,
-#
-#                                                      },
-#                                          
-#                                          # energy = 1.15 -1.96E-5*energy_list['EEL'] -2.36E-5*energy_list['NB'] - 4.4E-4 *energy_list['DIHED'] + 1.85E-3*energy_list['VDWAALS'] - 7.5E-5*energy_list['EGB'] + 2.66E-5*energy_list['ESURF']
-#
-#                                          'LABIO'    :  {
-#                                                      
-#                                                      'info'       : ''' 
-#==============================================================================
-#Dep. Variable:                      y   R-squared:                       0.483
-#Model:                            OLS   Adj. R-squared:                  0.483
-#Method:                 Least Squares   F-statistic:                     1371.
-#Date:                Mon, 07 Nov 2016   Prob (F-statistic):               0.00
-#Time:                        19:32:29   Log-Likelihood:                -267.19
-#No. Observations:               13209   AIC:                             554.4
-#Df Residuals:                   13199   BIC:                             629.3
-#Df Model:                           9                                         
-#Covariance Type:            nonrobust                                         
-#==============================================================================
-#                 coef    std err          t      P>|t|      [95.0% Conf. Int.]
-#------------------------------------------------------------------------------
-#const          1.3119      0.017     75.956      0.000         1.278     1.346
-#SIZE          -0.0125      0.001    -13.212      0.000        -0.014    -0.011
-#CONTACT        0.0070      0.000     56.197      0.000         0.007     0.007
-#AB_ENERGY      0.3745      0.033     11.182      0.000         0.309     0.440
-#DIHED         -0.0003   5.22e-05     -6.478      0.000        -0.000    -0.000
-#EEL        -6.804e-05   7.37e-06     -9.236      0.000     -8.25e-05 -5.36e-05         
-#EELEC         -0.0002   1.04e-05    -15.772      0.000        -0.000    -0.000
-#EGB           -0.0001   1.01e-05    -13.817      0.000        -0.000    -0.000
-#ESURF          0.0317      0.001     60.724      0.000         0.031     0.033
-#VDWAALS        0.0479      0.003     15.507      0.000         0.042     0.054
-#==============================================================================
-#Omnibus:                      318.266   Durbin-Watson:                   1.694
-#Prob(Omnibus):                  0.000   Jarque-Bera (JB):              581.881
-#Skew:                          -0.189   Prob(JB):                    4.43e-127
-#Kurtosis:                       3.957   Cond. No.                     9.68e+04
-#==============================================================================
-#                                                                           
-#                                                                           
-#                                                                           
-#Number of Observations:         11210
-#Number of Degrees of Freedom:   13
-#
-#R-squared:         0.5545
-#Adj R-squared:     0.5540
-#
-#Rmse:             22.9843
-#
-#F-stat (12, 11197):  1161.3723, p-value:     0.0000
-#
-#Degrees of Freedom: model 12, resid 11197
-#
-#-----------------------Summary of Estimated Coefficients------------------------
-#      Variable       Coef    Std Err     t-stat    p-value    CI 2.5%   CI 97.5%
-#--------------------------------------------------------------------------------
-#          SIZE    -0.5740     0.1207      -4.75     0.0000    -0.8106    -0.3374
-#     contacts0     0.7282     0.0137      53.31     0.0000     0.7015     0.7550
-#     AB_ENERGY    32.4391     3.5122       9.24     0.0000    25.5552    39.3230
-#         ANGLE    -0.0027     0.0002     -12.28     0.0000    -0.0031    -0.0023
-#          BOND     0.0207     0.0051       4.03     0.0001     0.0106     0.0308
-#--------------------------------------------------------------------------------
-#         DIHED     0.0088     0.0057       1.55     0.1222    -0.0024     0.0199
-#           EEL    -0.0131     0.0009     -14.27     0.0000    -0.0149    -0.0113
-#         EELEC    -0.0214     0.0012     -17.71     0.0000    -0.0238    -0.0190
-#           EGB    -0.0204     0.0012     -16.34     0.0000    -0.0228    -0.0179
-#         ESURF     2.6773     0.0574      46.68     0.0000     2.5649     2.7897
-#--------------------------------------------------------------------------------
-#            NB    -0.1583     0.0129     -12.27     0.0000    -0.1836    -0.1330
-#       VDWAALS     0.0708     0.0052      13.63     0.0000     0.0606     0.0809
-#     intercept   133.7090     1.7973      74.40     0.0000   130.1863   137.2316
-#---------------------------------End of Summary---------------------------------
-#
-#
-#
-#
-#
-#
-#
-#Number of Observations:         11210
-#Number of Degrees of Freedom:   13
-#
-#R-squared:         0.4934
-#Adj R-squared:     0.4928
-#
-#Rmse:              2.3882
-#
-#F-stat (12, 11197):   908.7187, p-value:     0.0000
-#
-#Degrees of Freedom: model 12, resid 11197
-#
-#-----------------------Summary of Estimated Coefficients------------------------
-#      Variable       Coef    Std Err     t-stat    p-value    CI 2.5%   CI 97.5%
-#--------------------------------------------------------------------------------
-#          SIZE    -0.0610     0.0125      -4.86     0.0000    -0.0856    -0.0364
-#     contacts0     0.0683     0.0014      48.13     0.0000     0.0655     0.0711
-#     AB_ENERGY     3.2782     0.3649       8.98     0.0000     2.5629     3.9934
-#         ANGLE    -0.0003     0.0000     -11.83     0.0000    -0.0003    -0.0002
-#          BOND     0.0032     0.0005       5.89     0.0000     0.0021     0.0042
-#         DIHED     0.0008     0.0006       1.28     0.2018    -0.0004     0.0019
-#           EEL    -0.0009     0.0001      -9.84     0.0000    -0.0011    -0.0008
-#         EELEC    -0.0017     0.0001     -13.16     0.0000    -0.0019    -0.0014
-#           EGB    -0.0016     0.0001     -12.39     0.0000    -0.0019    -0.0014
-#         ESURF     0.2572     0.0060      43.15     0.0000     0.2455     0.2688
-#            NB    -0.0132     0.0013      -9.85     0.0000    -0.0158    -0.0106
-#       VDWAALS     0.0038     0.0005       7.06     0.0000     0.0028     0.0049
-#     intercept     3.4256     0.1867      18.34     0.0000     3.0595     3.7916
-#---------------------------------End of Summary---------------------------------
-#
-#                                                                           
-#-------------------------Summary of Regression Analysis-------------------------
-#
-#Formula: Y ~ <contacts0> + <AB_ENERGY> + <ANGLE> + <BOND> + <DIHED> + <EEL>
-#             + <EELEC> + <EGB> + <ESURF> + <NB> + <VDWAALS> + <intercept>
-#
-#Number of Observations:         11210
-#Number of Degrees of Freedom:   12
-#
-#R-squared:         0.4923
-#Adj R-squared:     0.4918
-#
-#Rmse:              2.3906
-#
-#F-stat (11, 11198):   987.1860, p-value:     0.0000
-#
-#Degrees of Freedom: model 11, resid 11198
-#
-#-----------------------Summary of Estimated Coefficients------------------------
-#      Variable       Coef    Std Err     t-stat    p-value    CI 2.5%   CI 97.5%
-#--------------------------------------------------------------------------------
-#     contacts0     0.0694     0.0014      49.45     0.0000     0.0666     0.0721
-#     AB_ENERGY     3.9580     0.3374      11.73     0.0000     3.2967     4.6193
-#         ANGLE    -0.0003     0.0000     -12.35     0.0000    -0.0003    -0.0002
-#          BOND     0.0030     0.0005       5.69     0.0000     0.0020     0.0041
-#         DIHED    -0.0010     0.0005      -2.08     0.0378    -0.0019    -0.0001
-#           EEL    -0.0010     0.0001     -10.06     0.0000    -0.0011    -0.0008
-#         EELEC    -0.0015     0.0001     -12.44     0.0000    -0.0018    -0.0013
-#           EGB    -0.0016     0.0001     -12.04     0.0000    -0.0018    -0.0013
-#         ESURF     0.2464     0.0055      44.50     0.0000     0.2355     0.2572
-#            NB    -0.0170     0.0011     -15.62     0.0000    -0.0192    -0.0149
-#       VDWAALS     0.0046     0.0005       8.99     0.0000     0.0036     0.0056
-#     intercept     3.4966     0.1864      18.76     0.0000     3.1314     3.8619
-#---------------------------------End of Summary---------------------------------
-#
-#
-#
-#
-#-------------------------Summary of Regression Analysis-------------------------
-#
-#Formula: Y ~ <contacts0> + <AB_ENERGY> + <ANGLE> + <BOND> + <DIHED> + <EEL>
-#             + <EELEC> + <EGB> + <ESURF> + <NB> + <VDWAALS> + <intercept>
-#
-#Number of Observations:         11210
-#Number of Degrees of Freedom:   12
-#
-#R-squared:         0.5536
-#Adj R-squared:     0.5532
-#
-#Rmse:              0.2301
-#
-#F-stat (11, 11198):  1262.4604, p-value:     0.0000
-#
-#Degrees of Freedom: model 11, resid 11198
-#
-#-----------------------Summary of Estimated Coefficients------------------------
-#      Variable       Coef    Std Err     t-stat    p-value    CI 2.5%   CI 97.5%
-#--------------------------------------------------------------------------------
-#     contacts0     0.0074     0.0001      54.68     0.0000     0.0071     0.0076
-#     AB_ENERGY     0.3884     0.0325      11.96     0.0000     0.3247     0.4520
-#         ANGLE    -0.0000     0.0000     -12.80     0.0000    -0.0000    -0.0000
-#          BOND     0.0002     0.0001       3.83     0.0001     0.0001     0.0003
-#         DIHED    -0.0001     0.0000      -1.66     0.0969    -0.0002     0.0000
-#           EEL    -0.0001     0.0000     -14.49     0.0000    -0.0002    -0.0001
-#         EELEC    -0.0002     0.0000     -17.10     0.0000    -0.0002    -0.0002
-#           EGB    -0.0002     0.0000     -16.00     0.0000    -0.0002    -0.0002
-#         ESURF     0.0258     0.0005      48.34     0.0000     0.0247     0.0268
-#            NB    -0.0019     0.0001     -18.51     0.0000    -0.0021    -0.0017
-#       VDWAALS     0.0008     0.0000      15.85     0.0000     0.0007     0.0009
-#     intercept     1.3438     0.0179      74.93     0.0000     1.3086     1.3789
-#---------------------------------End of Summary---------------------------------
-#
-#                                                                           ''' , 
-#                                                           'SIZE'  :     0.0,
-#                                                        'CONTACT'  :  0.0074,
-#                                                             'AB'  :  0.3884,
-#                                                          'ANGLE'  : -0.0000,
-#                                                           'BOND'  :  0.0002,
-#                                                          'DIHED'  : -0.0001,
-#                                                            'EEL'  : -0.0001,
-#                                                          'EELEC'  : -0.0002,
-#                                                            'EGB'  : -0.0002,
-#                                                          'ESURF'  :  0.0258,
-#                                                             'NB'  : -0.0019,
-#                                                        'VDWAALS'  :  0.0008,
-#                                                       'CONSTANT'  :  1.3438,
-#
-#                                                      #'CONSTANT'   :     1.3119,
-#                                                      #'DIHED'      :    -0.0003,
-#                                                      #'EEL'        : -6.804E-05,
-#                                                      #'EELEC'      :    -0.0002,
-#                                                      #'EGB'        :    -0.0001,
-#                                                      'EKtot'      :          0,
-#                                                      'EPtot'      :          0,
-#                                                      #'ESURF'      :     0.0317,
-#                                                      'Etot'       :          0,
-#                                                      #'NB'         :          0,
-#                                                      #'VDWAALS'    :     0.0479,
-#                                                      #'SIZE'       :    -0.0125,
-#                                                      
-#                                                      
-#                                                      
-#                                                      'cut'        : 999.0     ,
-#                                                      'igb'        : 1         ,
-#                                                      'saltcon'    : 0.2       ,
-#                                                      'gbsa'       : 1         ,
-#                                                      'rgbmax'     : 999.00000 ,
-#                                                      'surften'    : 0.010     ,
-#                                                      
-#                                                      'R_contact'  : self.R_contact,
-#                                                      'R_cutoff'   :      999.0,
-#                                                      'R_GYRATION' : 1.0       ,
-#
-#                                                      },
-#                                          
-#                                          
-#                                          'iLABIO'    :  {
-#                                                      
-#                                                      'info'       : ''' 
-#RMSD^0.3 = 1.15-1.96E-5 EEL-2.36 E-5 NB+4.4E-4  DIEH+1.85E-3 VDWAALS-7.5E⁻5  EGB +2.66  E-5  ESURF
-#                                                          
-#                                                          ''' , 
-#                                                      
-#                                                      'CONSTANT' :     1.15  ,
-#                                                      'SIZE'     :    -0.0076,
-#                                                      'DIHED'    :    +4.4E-4,
-#                                                      'EEL'      :   -1.96E-5,
-#                                                      'EELEC'    :    -0.0002,
-#                                                      'EGB'      :    -7.5E-5,
-#                                                      'ESURF'    :    2.66E-5,
-#                                                      'NB'       :   -2.36E-5,
-#                                                      'VDWAALS'  :    1.85E-3,
-#
-#
-#                                                      #'CONSTANT'   :     1.3119,
-#                                                      'ANGLE'      :          0,
-#                                                      'BOND'       :          0,
-#                                                      #'DIHED'      :    -0.0003,
-#                                                      #'EEL'        : -6.804E-05,
-#                                                      #'EELEC'      :    -0.0002,
-#                                                      #'EGB'        :    -0.0001,
-#                                                      'EKtot'      :          0,
-#                                                      'EPtot'      :          0,
-#                                                      #'ESURF'      :     0.0317,
-#                                                      'Etot'       :          0,
-#                                                      #'NB'         :          0,
-#                                                      #'VDWAALS'    :     0.0479,
-#                                                      #'SIZE'       :    -0.0125,
-#                                                      
-#                                                      
-#                                                      
-#                                                      'cut'        : 999.0     ,
-#                                                      'igb'        : 1         ,
-#                                                      'saltcon'    : 0.2       ,
-#                                                      'gbsa'       : 1         ,
-#                                                      'rgbmax'     : 999.00000 ,
-#                                                      'surften'    : 0.010     ,
-#                                                      
-#                                                      'CONTACT'  :       0.000,
-#                                                      'R_contact'  : self.R_contact,
-#                                                      
-#                                                      'AB'         :     0.0   ,
-#                                                      'R_cutoff'   :      999.0,
-#                                                  
-#                                                      }
-#                                         }
-#                                                      
-#                           
-#        self.energy_model_parameters = self.default_energy_model_setup['amber']
 #        

@@ -180,7 +180,6 @@ def computeCHI (molecule=None, resi=1, bond='CHI1'):
         raise KeyError("{} {} does not have a {}.".format(
             residue.name, resi, error.message))
 
-
 def rotate_side_chain (molecule=None, resi=1, bond='CHI1', theta=math.radians(1), steps=1):
     """
     This function rotates the side chain of a given amino acid
@@ -446,8 +445,8 @@ def set_phi_psi_dihedral (molecule=None, resi=1, bond='PSI', angle = 0.0 ):
     initial_angle =  computePhiPsi(molecule = molecule,
                                    resi     = resi,
                                    bond      = bond)
-    if initial_angle == 0.0:
-        initial_angle = 180.0
+    #if initial_angle == 0.0:
+    #    initial_angle = 180.0
 
     if initial_angle == None:
         #print bond, 'False'
@@ -565,6 +564,7 @@ def computePhiPsi (molecule=None, resi=1, bond='PSI'):
                              CA2.pos ,
                              C2.pos  ,
                              N3.pos)
+            
             return math.degrees(angle)
 
     if ome:

@@ -17,7 +17,7 @@ wkeys   = []
 
 for key in train_df:
     print key 
-    if key == 'PDB' or key == 'decoy' or key =='RMSD':
+    if key == 'PDB' or key == 'decoy' or key =='RMSD' or key == 'CONTACT' or key =='R_GYRATION' or key == 'AB_ENERGY' :
         pass
     else:
         train_df[key+'/size'] = train_df[key]/train_df['SIZE']
@@ -125,7 +125,7 @@ logfile = open('panda_fit.log', 'w')
 text = ''
 
 for i in range(0, len(y)):
-    text +='%15.7f  %15.7f \n' % (y[i], yf[i])
+    text +='%15.7f  %15.7f \n' % ( y[i], yf[i])
     #print text
 logfile.write(text)
 

@@ -5,10 +5,10 @@ H0     1.008     0.135               H aliph. bond. to C with 1 electrwd. group 
 BOND
 CT-H0  340.0    1.090       changed from 331 bsd on NMA nmodes; AA, RIBOSE (GLY only)
 
-ANGL
-H0-CT-H0    35000.0      109.50
-H0-CT-N     50000.0      109.50    AA general  changed based on NMA nmodes
-C -CT-H0    50000.0      109.50    AA general  changed based on NMA nmodes
+ANGLE
+H0-CT-H0    35.0      109.50
+H0-CT-N     50.0      109.50    AA general  changed based on NMA nmodes
+C -CT-H0    50.0      109.50    AA general  changed based on NMA nmodes
 
 DIHEDRAL
 N -CT-C -N    1    0.4615      180.00           -3.

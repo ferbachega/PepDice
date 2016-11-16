@@ -41,6 +41,23 @@ import pprint
 import random
 
 
+'''
+
+class Fragment:
+    """ Class doc """
+    
+    def __init__ (self):
+        """ Class initialiser """
+        self.phi   = None
+        self.psi   = None
+        self.omega =  None
+        
+        pass
+
+'''
+
+
+
 def import_fragments_from_pdb (molecule = None, residues = [], mainchain =True, sidechain = True):
     """ Function doc """
     fragment = {}
@@ -58,11 +75,13 @@ def import_fragments_from_pdb (molecule = None, residues = [], mainchain =True, 
             for chi in ["CHI1","CHI2","CHI3","CHI4","CHI5"]:
                 residue   = molecule.residues[i]
                 if chi in molecule.torsions[residue.name]:
-                    #print chi
+                    #print i, residue.name, chi,  molecule.torsions[residue.name]
                     try:
                         fragment[i][chi] = computeCHI (molecule= molecule, resi=i, bond=chi)
+                        print i, residue.name, chi,  fragment[i][chi] 
                     except:
-                        print i , 'and', chi ,  ' failed'
+                        fragment[i][chi] = None
+                        print i, residue.name, chi,  fragment[i][chi] 
                 
                 #print i, system.residues[i].name, chi,computeCHI (molecule=system, resi=i, bond=chi)
     return fragment 
@@ -123,9 +142,10 @@ def build_fragment_library_from_pdbs (
             fragments[resi].append(fragment)
             molecule.fragments = fragments
     
-    print len(fragments)
-    print len(fragments[0])
+    #print len(fragments)
+    #print len(fragments[0])
     n = 0 
+    
     for resi in fragments:
         k = 0
         for frag in resi: 

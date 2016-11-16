@@ -342,7 +342,7 @@ parameters_99 = [
 ]
 
 
-lista = ['CT', 'N', 'H' , 'H1', 'C3', 'C2', 'C1', 'C' , 'O']
+lista = ['CT', 'N', 'H' ,'H1','C', 'O' ]#, 'C3', 'C2', 'C1', 'C' , 'O']
 
 def alterar_parm(parmlista, lista):
     for i, parm in enumerate(parmlista):
