@@ -173,6 +173,36 @@ class Molecule(Atom       ,
                  'V' : 'VAL'
                  }
     
+        
+        self.AminoAcid_dic = { 
+                  'ALA': 'A',
+                  'ARG': 'R',
+                  'ASN': 'N',
+                  'ASP': 'D',
+                  'CYS': 'C',
+                  'GLU': 'E',
+                  'GLN': 'Q',
+                  'GLY': 'G',
+                  'HIS': 'H',
+                  'HIE': 'H',
+                  'HID': 'H',
+                  'ILE': 'I',
+                  'LEU': 'L',
+                  'LYS': 'K',
+                  'MET': 'M',
+                  'PHE': 'F',
+                  'PRO': 'P',
+                  'SER': 'S',
+                  'THR': 'T',
+                  'TRP': 'W',
+                  'TYR': 'Y',
+                  'VAL': 'V'
+                 }
+    
+    
+    
+    
+    
     def set_energy_model (self, energy_model = 'RAW'):
         """ Function doc """
 

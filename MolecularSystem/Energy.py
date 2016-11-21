@@ -569,11 +569,11 @@ class Energy(AB_ENERGY, AMBER_ENERGY, RG_GIRATION, CONTACT_ENERGY, GEOMETRY_ENER
         sum_of_amber_coefs = 0
         
         for key in ['ANGLE'  ,'BOND'   ,'DIHED'  ,'EEL'    ,'EELEC'  ,'EGB'  ,'ESURF','NB','VDWAALS']:
-            sum_of_amber_coefs += self.energy_components[key][0]
+            sum_of_amber_coefs += self.energy_components[key][1]
         
         if sum_of_amber_coefs != 0:       
             energy, amber_energy_list = self.compute_AMBER_energy(pn = pn, log= log)
-            
+            #print 'aqui oh'
             for key in  amber_energy_list:
                 self.energy_components[key][0] = amber_energy_list[key]
 
