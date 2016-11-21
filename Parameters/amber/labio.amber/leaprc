@@ -1,3 +1,6 @@
-source leaprc.ff03ua.labio
-sys = loadpdb obj01.pdb
-saveamberparm sys sys.top sys.crd
+#source leaprc.ff03ua.labio
+#sys = loadpdb obj01.pdb
+#saveamberparm sys sys.top sys.crd
+
+#loadamberparams frcmod.ff03.in
+loadamberprep frcmod.ff03.in
