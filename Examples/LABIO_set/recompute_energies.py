@@ -108,18 +108,37 @@ folders = [
 ]
 
 
-text = '%-20s %-10s %6s  %6s  %6s %14s %14s' %('DECOY',
+text = '%-20s %-10s %6s  %6s  %6s %14s %14s %14s %14s' %('DECOY',
                                       'PDB',
                                       'SIZE',
                                       'RMSD',
                                       'RMSD**0.3',
-                                      'E_LABIO',
-                                      'E_FULL',)  
+                                      'E_RAW',
+                                      'E_AMBER',
+                                      'E_LSF',
+                                      'E_LSFcmap',)  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 textlines = []
 textlines.append(text)
-logfile =  open('logfile.txt', 'w')
+logfile =  open('logfile_novo.txt', 'w')
 logfile.writelines(text)
 logfile.write('\n')
 
@@ -127,84 +146,82 @@ print text
 
 
 for folder in folders:
-    path = os.path.join(cwd, folder)
-    
-    os.chdir(os.path.join(cwd, folder))
-    #/home/fernando/programs/pepdice/Examples/LABIO_set/1I6C/1I6C_A_AMBER.top
-    RMSD_list = import_rmsd_from_file ( filein = 'list.txt')
-    system = Molecule()
-    system.set_energy_model('FULL')
-    system.import_AMBER_parameters (top      = folder+'_A_AMBER.top'                ,   
-                                    torsions = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )       
-    
-    
-    
-    
-    
-    
-    for pdb in RMSD_list:
-        if pdb == 'NAME':
-            pass
+    try:
+        path = os.path.join(cwd, folder)
         
-        else:
-            filename =  pdb.replace('.', '_A_AMBER_minimized.')
-            system.load_PDB_to_system      (filename = filename)   
-            #print pdb , filename
-
-            #pprint(RMSD_list)
-            
-
-            
-            try:    
-                cutoff   = 6.0
-                contacts = []
-                
-                
-                #saltcon = 0.00
-                #EGBs = []
-                #
-                #for i in range(0, 6):
-                #    
-                #    system.energy_model_parameters['saltcon'] = saltcon
-                #    energies = system.energy(return_list = True)
-                #    saltcon += 0.1
-                #    EGBs.append(energies['EGB'])
-                
-                #energies = system.energy(return_list = True)
-                system.set_energy_model('LABIO')
-                energy = system.energy()
-                
-                system.set_energy_model('FULL')
-                energy2 = system.energy()
-
-                #for i in range (0, 6):  
-                #    cmap = CMAP(pdb = 'native_A_AMBER_minimized.pdb', cutoff = cutoff, log = False)
-                #    system.import_CMAP(cmap = cmap)
-                #    contact =  system.compute_CONTACT_energy()
-                #    contacts.append(contact)
-                #    cutoff += 0.5
-                
-                #print folder
-                #print contacts
-                
-
-                text = '%-20s %-10s %6d %6s %15.7f %15.7f %15.7f ' %( pdb          ,
-                                                        folder                     ,
-                                                        len(system.residues)       ,
-                                                        RMSD_list[pdb]             ,
-                                                        float(RMSD_list[pdb])**0.3 ,
-                                                        energy                     ,
-                                                        energy2                    ,
-                                                        )
-
-    
-                textlines.append(text)
-                
-                logfile.writelines(text)
-                logfile.write('\n')    
-                
-                print text                                                                                           
-            except:
+        os.chdir(os.path.join(cwd, folder))
+        #/home/fernando/programs/pepdice/Examples/LABIO_set/1I6C/1I6C_A_AMBER.top
+        RMSD_list = import_rmsd_from_file ( filein = 'list.txt')
+        system = Molecule()
+        system.import_AMBER_parameters (top      = folder+'_A_AMBER.top'                ,   
+                                        torsions = os.path.join(PEPDICE_PARAMETER, 'amber/AMBER_rotamers.dat') )       
+        cmap = CMAP(pdb = folder+'_A_AMBER_minimized.pdb', cutoff = 6.5, log = False)
+        
+        
+        
+        
+        for pdb in RMSD_list:
+            if pdb == 'NAME':
                 pass
+            else:
+                filename =  pdb.replace('.', '_A_AMBER_minimized.')
+                system.load_PDB_to_system      (filename = filename)   
+               
+                try:    
+                    cutoff   = 6.0
+                    contacts = []
+                    
+                    
+                    #saltcon = 0.00
+                    #EGBs = []
+                    #
+                    #for i in range(0, 6):
+                    #    
+                    #    system.energy_model_parameters['saltcon'] = saltcon
+                    #    energies = system.energy(return_list = True)
+                    #    saltcon += 0.1
+                    #    EGBs.append(energies['EGB'])
+                    
+                    #energies = system.energy(return_list = True)
+                    
+                    
+                    system.set_energy_model('RAW')
+                    energy_raw = system.energy(log =False ) 
+                    
+                    system.set_energy_model('AMBER')
+                    energy_amber = system.energy()                
+                    
+                    system.set_energy_model('LABIO')
+                    energy_LSF = system.energy()
+                    
+                    
+                    system.import_CMAP(cmap = cmap)
 
- 
+                    system.set_energy_model('LABIOcmap')
+                    energy_LSFcmap = system.energy()                #print folder
+                    #print contacts
+                    
+
+                    text = '%-20s %-10s %6d %6s %15.7f %15.7f %15.7f %15.7f %15.7f ' %( pdb                        ,
+                                                                                        folder                     ,
+                                                                                        len(system.residues)       ,
+                                                                                        RMSD_list[pdb]             ,
+                                                                                        float(RMSD_list[pdb])**0.3 ,
+                                                                                        energy_raw                 ,
+                                                                                        energy_amber               ,
+                                                                                        energy_LSF                 ,
+                                                                                        energy_LSFcmap             ,
+                                                                                        )
+
+        
+                    textlines.append(text)
+                    
+                    logfile.writelines(text)
+                    logfile.write('\n')    
+                    
+                    print text                                                                                           
+                except:
+                    pass
+
+    except:
+        pass

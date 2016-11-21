@@ -63,13 +63,16 @@ def import_fragments_from_pdb (molecule = None, residues = [], mainchain =True, 
     fragment = {}
     
     for i in residues:
+        
         if mainchain:
             fragment[i] = {}
-            fragment[i]['PHI']   = computePhiPsi (molecule=molecule, resi=i, bond='PHI')
-            fragment[i]['PSI']   = computePhiPsi (molecule=molecule, resi=i, bond='PSI')
-            fragment[i]['OMEGA'] = computePhiPsi (molecule=molecule, resi=i, bond='OMEGA')
-            fragment[i]['NAME']  = molecule.residues[i].name
-        
+            fragment[i]['PHI']       = computePhiPsi (molecule=molecule, resi=i, bond='PHI')
+            fragment[i]['PSI']       = computePhiPsi (molecule=molecule, resi=i, bond='PSI')
+            fragment[i]['OMEGA']     = computePhiPsi (molecule=molecule, resi=i, bond='OMEGA')
+            fragment[i]['NAME']      = molecule.residues[i].name
+            #fragment[i]['position']  = None
+            
+            
         if sidechain:
         
             for chi in ["CHI1","CHI2","CHI3","CHI4","CHI5"]:
@@ -78,10 +81,10 @@ def import_fragments_from_pdb (molecule = None, residues = [], mainchain =True, 
                     #print i, residue.name, chi,  molecule.torsions[residue.name]
                     try:
                         fragment[i][chi] = computeCHI (molecule= molecule, resi=i, bond=chi)
-                        print i, residue.name, chi,  fragment[i][chi] 
+                        #print i, residue.name, chi,  fragment[i][chi] 
                     except:
                         fragment[i][chi] = None
-                        print i, residue.name, chi,  fragment[i][chi] 
+                        #print i, residue.name, chi,  fragment[i][chi] 
                 
                 #print i, system.residues[i].name, chi,computeCHI (molecule=system, resi=i, bond=chi)
     return fragment 
@@ -92,6 +95,7 @@ def build_fragment_library_from_pdbs (
                                      frag_size            = 3    ,
                                      number_of_fragments  = 100  ,
                                      pdblist              = []   ,
+                                     log                  = True ,
                                      ):
     """ Function doc """
     
@@ -113,13 +117,27 @@ def build_fragment_library_from_pdbs (
                  ]
     '''
 
+    
+    
+
+    fileout = open ('fragment_list.log', 'w')
+    text    = 'seq:   '
+    
+    #print len(molecule.residues*'X')
     #print 1, len(molecule.residues)
     # lista  (posicoes  =  index do residuo), 
     # cade elemento eh uma lista com N fragmentos 
     # possiveis.
+    
     for resi in range(len(molecule.residues)-frag_size): 
         fragments.append([])
     
+    for resi in range(len(molecule.residues)): 
+        #fragments.append([])
+        #text += ('X')
+        text += molecule.AminoAcid_dic[molecule.residues[resi].name]
+    
+    text+='\n'
     
     
 
@@ -129,18 +147,55 @@ def build_fragment_library_from_pdbs (
         #print 2, len(molecule.residues), pdb
         
         for i in range(0, number_of_fragments):
-            
+            text += '%-7s' %(i)
             # sortear uma posicao na sequencia target
             resi     = random.randint(0, len(molecule.residues)-frag_size -1)
             
-            # importar o fragment  resi+frag_size - normalmente entre 3-9
+            # importar o fragment  resi+frag1_size - normalmente entre 3-9
             fragment = import_fragments_from_pdb (molecule = molecule, 
                                                   residues = range(resi, resi+frag_size), 
                                                  sidechain = True)
             
+            
+            text_fragment = '  '
+            
+            position  = ''
+            for k in range(len(molecule.residues)):
+                if k in fragment:
+                    text    += 'X' 
+                    position+= 'X'
+                    
+                    if fragment[k]['PHI'] == None:
+                        print     'failed (phi):',k, fragment[k]['PHI']
+                        fragment[k]['PHI'] = 0.0
+
+                    if fragment[k]['PSI'] == None:
+                        print     'failed (psi):',k, fragment[k]['PSI']
+                    
+                        fragment[k]['PSI'] = 0.0
+                    #text_fragment += 'k %5d phi:%8.5f   psi:%8.5f  omega:' %(k, fragment[k]['PHI'],fragment[k]['PSI'])
+                    text_fragment += 'position: %-5d  phi:%14.5f psi:%14.5f omega:%14.5f  |  ' %(k, fragment[k]['PHI'],fragment[k]['PSI'],fragment[k]['OMEGA'] )
+
+                else:
+                    text    += '-'
+                    position+= '-'
+           
+            
+            #fragment['position'] = position
+            #print fragment['position']
+            
+
+            text += text_fragment
+            text += '\n'
+            
             # adicionar o fragment na lista (resi = posicao do alinhamento) 
             fragments[resi].append(fragment)
             molecule.fragments = fragments
+        
+        text += '\n'
+        fileout.write(text)
+
+    
     
     #print len(fragments)
     #print len(fragments[0])

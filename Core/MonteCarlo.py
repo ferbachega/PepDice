@@ -7,6 +7,7 @@ def fragment_selection (molecule           = None  ,
                         fragment_rate      = None  , 
                         random             = None  ):
     
+    #print random
     
     fragment_acceptance = random.uniform(0, 1)
     FRAGMENTS = False
@@ -249,9 +250,26 @@ def monte_carlo(molecule            = None                   ,
     trajectory     = trajectory+'.xyz'
     waste          = trajectory+'.waste.xyz'  
 
-    rejected_frags = trajectory+'.fragment_waste'
+   
+    # LOGFILES - FRAGMENTS
+    fragments_failed        = trajectory+'.fragments_failed'
+    fragments_failed_text   = ''
+    fragments_failed        = open(fragments_failed, 'a')
+    
+    fragments_selected      = trajectory+'.fragments_selected'
+    fragments_selected_text = ''
+    fragments_selected      = open(fragments_selected, 'a')
+    
+    fragments_rejected      = trajectory+'.fragments_rejected'
+    fragments_rejected_text = ''
+    fragments_rejected      = open(fragments_rejected, 'a')
+    
+    fragments_accepted      = trajectory+'.fragments_accepted'
+    fragments_accepted_text = ''
+    fragments_accepted      = open(fragments_accepted, 'a')
 
 
+    
     #            energy
     previous_energy      = molecule.energy(pn = pn)
     previous_coordinates = molecule.get_coordinates_from_system()
@@ -324,24 +342,60 @@ def monte_carlo(molecule            = None                   ,
             #                 FRAGMENTS                    #
             #----------------------------------------------#
             if fragment_rate != 0.0:
-                #try:
-                try:
-                    #print 'random:', random
+                fragment =  False
+                
+                fragment_acceptance = random.uniform(0, 1)
+                #----------------------------------------------#
+                #                  FRAGMENTS                   #
+                #----------------------------------------------#
+                # (1) se o numero for menor ou igual a chance, entao um novo fragmento eh atribuido a estrutura
+                if fragment_acceptance <= fragment_rate:
+                         
+                    # (2) sorteia uma posicao do alinhamento
+                    resi = random.randint(0, len(molecule.fragments)-1)
                     
-                    fragment, fragment_index  = fragment_selection (molecule          = molecule         ,
-                                                                    previous_fragment = previous_fragment,
-                                                                    fragment_rate     = fragment_rate    ,
-                                                                    random            = random           )
-                except:
-                    pass
-                    #print 'failed: random=', random
-                #except:
-                #    pass
-                #    print ' - - - fragment_selection failed - - - '
-                #    print 'fragment:', fragment
-                
-                
-            
+                    # (3) enquando nao houver fragmentos para esta posicao (ou seja, lista vazia) sortear novas posicoes
+                    while molecule.fragments[resi] == []:
+                        resi = random.randint(0, len(molecule.fragments)-1) #(-1) -> nao pegar a ultima posicao
+                        
+                    # (4) sorteia um fragmento para a posicao selecionada 
+                    fragment_index = random.randint(0, len(molecule.fragments[resi])-1)
+                    fragment       = molecule.fragments[resi][fragment_index]
+
+
+                    #---------------------------------------------------
+                    if fragment != previous_fragment:
+                        pass
+                        #return fragment, fragment_index
+                    else:
+                        fragment =  False
+                    #---------------------------------------------------
+                    
+                    
+                    
+                    
+                    '''----------------------------------------------------'''
+                    if fragment:
+                        fragtext  = ''
+                        for k in range(len(molecule.residues)):
+                            if k in fragment:
+                                fragtext    += 'X'                    
+                            else:
+                                fragtext    += '-'
+                        
+                        #print '%4d %3d %s'%(resi, fragment_index,  fragtext) #print resi, fragment_index#, fragment 
+                        
+                        fragments_selected_text = '%4d %3d %s\n'%(resi, fragment_index,  fragtext)
+                        fragments_selected.write(fragments_selected_text)
+                    else:
+                        fragments_failed_text = '%4d %3d \n'%(resi, fragment_index)
+                        fragments_failed.write(fragments_failed_text)
+                        
+                        #print resi,fragment_index,  'failed'
+                    '''----------------------------------------------------'''
+
+                    
+                    
             if fragment: 
                 
                 attempted_fragment += 1.0
@@ -360,7 +414,7 @@ def monte_carlo(molecule            = None                   ,
                 #    energy = False
                 #print energy
                 
-                if energy:
+                if energy  or energy != None:
 
                     if metropolis_acceptance_test (energy          = energy         ,
                                                    previous_energy = previous_energy,
@@ -377,14 +431,62 @@ def monte_carlo(molecule            = None                   ,
                         FRAGMENTS = True
                         #text.append("pn: {:<3d} step: {:5d} energy: {:<20.7f}fragment: {:<3d}\n".format(pn, i, energy , fragment_index))
                         #print "pn: {:<3d} step: {:5d} energy: {:<20.7f}fragment: {:<3d}".format(pn, i, energy , fragment_index)
+                    
+                    
+                    
+                    
+                        '''----------------------------------------------------'''
+                        fragtext = ''
+                        for k in range(len(molecule.residues)):
+                            if k in fragment:
+                                fragtext    += 'X'                    
+                            else:
+                                fragtext    += '-'
+                        
+                        print '%4d %3d %s'%(resi, fragment_index,  fragtext) #print resi, fragment_index#, fragment 
+                        fragments_accepted_text = '%4d %3d %s\n'%(resi, fragment_index,  fragtext)
+                        fragments_accepted.write(fragments_accepted_text)
+                        '''----------------------------------------------------'''
+
+
+                    
+                    
+                    
                     else:
                         save_XYZ_to_file (molecule, waste)                            # salva as coordenadas no descarte
                         molecule.import_coordinates_to_system (previous_coordinates)  # Restaura as coordenadas entriores 
                         #print 'fragment: ',fragment_index, energy, len(fragment), 'failed'
+                        
+                        
+                        '''----------------------------------------------------'''
+                        fragtext = ''
+
+                        for k in range(len(molecule.residues)):
+                            if k in fragment:
+                                fragtext    += 'X'                    
+                            else:
+                                fragtext    += '-'
+
+                        print '%4d %3d %s  - REJECTED'%(resi, fragment_index,  fragtext) #print resi, fragment_index#, fragment
+                        fragments_rejected_text = '%4d %3d %s\n'%(resi, fragment_index,  fragtext)
+                        fragments_rejected.write(fragments_rejected_text)
+                        '''----------------------------------------------------'''
+
                 else:
                     save_XYZ_to_file (molecule, waste)                                # salva as coordenadas no descarte
                     molecule.import_coordinates_to_system (previous_coordinates)      # Restaura as coordenadas entriores 
 
+                    '''----------------------------------------------------'''
+                    fragtext = ''
+                    for k in range(len(molecule.residues)):
+                        if k in fragment:
+                            fragtext    += 'X'                    
+                        else:
+                            fragtext    += '-'
+                    print '%4d %3d %s  - REJECTED'%(resi, fragment_index,  fragtext) #print resi, fragment_index#, fragment
+                    fragments_rejected_text = '%4d %3d %s\n'%(resi, fragment_index,  fragtext)
+                    fragments_rejected.write(fragments_rejected_text)
+                    '''----------------------------------------------------'''
 
 
             #----------------------------------------------#
