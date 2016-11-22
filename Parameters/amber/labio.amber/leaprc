@@ -1,6 +1,18 @@
-#source leaprc.ff03ua.labio
+source leaprc.ff03ua.labio2
 #sys = loadpdb obj01.pdb
 #saveamberparm sys sys.top sys.crd
 
 #loadamberparams frcmod.ff03.in
-loadamberprep frcmod.ff03.in
+
+#parm99 = loadamberparams parm99_labio.dat
+#frcmod03 = loadamberparams frcmod.ff03.labio
+#frcmod03ua = loadamberparams frcmod.ff03ua.labio
+
+#loadamberprep frcmod.ff03.in
+
+
+check SER
+foo =  sequence {GLY ALA SER THR LEU ALA GLY}
+
+saveamberparm foo foo.top foo.crd
+

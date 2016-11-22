@@ -3,6 +3,9 @@ MASS
 C1 13.018        0.878               sp3 aliphatic C(UA model CH )
 C2 14.026        0.878               sp3 aliphatic C(UA model CH2)
 C3 15.034        0.878               sp3 aliphatic C(UA model CH3)
+C4 15.034        0.878               sp3 aliphatic C(UA model CH3)
+SS 17.000        0.878               BACH(2016)
+LS 17.000        0.878               BACH(2016)
 
 BOND
 C1-CT  310.0    1.526       JCC,7,(1986),230; AA, SUGARS
@@ -26,6 +29,9 @@ CC-C2  317.0    1.504       JCC,7,(1986),230; HIS
 C2-N   337.0    1.449       JCC,7,(1986),230; AA
 C3-N   337.0    1.449       JCC,7,(1986),230; AA
 C -C3  317.0    1.522       JCC,7,(1986),230; AA
+CT-C4  600.0    2.500       BACH,(2016),230; AA
+C2-SS  600.0    1.800       BACH (2016)
+C2-LS  600.0    2.800       BACH (2016)
 
 ANGLE
 CT-C1-C3   40.0     109.5                                                       
@@ -84,6 +90,11 @@ C3-C -O    80.0     120.4
 C3-C -N    70.0     116.6         AA general                                    
 C2-S -S    68.0        103.7         AA cyx                                        
 CT-C2-S    50.0        114.7         AA cyx            (SCHERAGA  JPC 79,1428) 
+N-CT-C4    60.0     109.3         BACH(2016)
+H1-CT-C4   60.0     109.3         BACH(2016)
+C4-CT-C    60.0     109.3         BACH(2016)
+CT-C2-SS   60.0     109.3         BACH(2016)
+CT-C2-LS   60.0     109.3         BACH(2016)
 
 DIHE
 X -CT-C1-X    6    1.40          0.0             3.         Yang et al, 2005
@@ -149,4 +160,6 @@ NONBON
   C1          1.9580  0.0994             sp3 aliphetic carbon (UA model CH )
   C2          2.0580  0.1094             sp3 aliphetic carbon (UA model CH2)
   C3          2.0580  0.1494             sp3 aliphetic carbon (UA model CH3)
-
+  C4          3.0000  0.1494             BACH(2016)  (UA model CH3)
+  SS          2.0580  0.1494             BACH(2016)
+  LS          2.0580  0.1494             BACH(2016) 
