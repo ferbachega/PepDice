@@ -12,7 +12,7 @@ source leaprc.ff03ua.labio2
 
 
 check SER
-foo =  sequence {GLY ALA SER THR LEU ALA GLY}
+foo =  sequence {GLY ALA SER THR LEU ASN PRO PHE ASP TRP GLY}
 
-saveamberparm foo foo.top foo.crd
+saveamberparm foo foo.prmtop foo.inpcrd
 

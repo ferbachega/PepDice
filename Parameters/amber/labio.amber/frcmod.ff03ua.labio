@@ -6,6 +6,9 @@ C3 15.034        0.878               sp3 aliphatic C(UA model CH3)
 C4 15.034        0.878               sp3 aliphatic C(UA model CH3)
 SS 17.000        0.878               BACH(2016)
 LS 17.000        0.878               BACH(2016)
+VS 43.034        0.878               BACH(2016)
+WS 50.000        0.878               BACH(2016)
+PS 50.000        0.870               BACH(2016)
 
 BOND
 C1-CT  310.0    1.526       JCC,7,(1986),230; AA, SUGARS
@@ -32,6 +35,10 @@ C -C3  317.0    1.522       JCC,7,(1986),230; AA
 CT-C4  600.0    2.500       BACH,(2016),230; AA
 C2-SS  600.0    1.800       BACH (2016)
 C2-LS  600.0    2.800       BACH (2016)
+CT-VS  600.0    2.800       BACH (2016)
+C2-WS  600.0    2.700       BACH (2016)
+WS-WS  600.0    2.100       BACH (2016)
+C2-PS  600.0    2.900       BACH (2016)
 
 ANGLE
 CT-C1-C3   40.0     109.5                                                       
@@ -95,6 +102,9 @@ H1-CT-C4   60.0     109.3         BACH(2016)
 C4-CT-C    60.0     109.3         BACH(2016)
 CT-C2-SS   60.0     109.3         BACH(2016)
 CT-C2-LS   60.0     109.3         BACH(2016)
+CT-C2-WS   60.0     112.6         BACH(2016)*
+C2-WS-WS   60.0     109.6         BACH(2016)*
+CT-C2-PS   60.0     116.2         BACH(2016)*
 
 DIHE
 X -CT-C1-X    6    1.40          0.0             3.         Yang et al, 2005
@@ -147,7 +157,7 @@ HO-OH-C1-CT   1    0.25          0.0             1.         Yang et al, 2005
 X -C2-N -X    6    0.00          0.0             2.         Yang et al, 2005
 C2-S -S -C2   1    3.50          0.0            -2.         JCC,7,(1986),230
 C2-S -S -C2   1    0.60          0.0             3.         JCC,7,(1986),230
-
+CT-C2-WS-WS   3    1.40          0.0             3.         BACH(2016)
 
 IMPROPER
 CA-CA-CA-C2         1.1          180.          2. 
@@ -163,3 +173,5 @@ NONBON
   C4          3.0000  0.1494             BACH(2016)  (UA model CH3)
   SS          2.0580  0.1494             BACH(2016)
   LS          2.0580  0.1494             BACH(2016) 
+  WS          2.1000  0.1498             BACH(2016) 
+  PS          2.1000  0.1498             BACH(2016)
